@@ -1,5 +1,9 @@
 ---
 deployment:
   tasks:
-    - >-
-      bash -lc 'set -e; cp /home/levanpms/elite-message.env .env; trap "rm -f .env" EXIT; corepack enable; corepack prepare pnpm@10.33.0 --activate; pnpm install --frozen-lockfile; pnpm build'
+    - cp /home/levanpms/elite-message.env /home/levanpms/repositories/EliteMessage/.env
+    - corepack enable
+    - corepack prepare pnpm@10.33.0 --activate
+    - pnpm install --frozen-lockfile
+    - pnpm build
+    - rm -f /home/levanpms/repositories/EliteMessage/.env
