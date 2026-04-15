@@ -1,32 +1,43 @@
-/* global __dirname, process, require */
+/* global __dirname, console, process, require */
 /* eslint-disable @typescript-eslint/no-require-imports */
 
-const fs = require('node:fs');
-const path = require('node:path');
+const { spawn } = require('node:child_process');
+
+const { loadWorkspaceEnv, parseAdminWebEnv } = require('@elite-message/config');
 
 const port = Number(process.env.PORT || process.env.ADMIN_WEB_PORT || 3001);
 process.env.PORT = String(port);
 process.env.ADMIN_WEB_PORT = String(port);
-process.env.HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
-const runtimeRoot =
-  process.env.ELITEMESSAGE_RUNTIME_ROOT ||
-  '/home/levanpms/elite-message-runtime/admin-web';
+process.env.HOSTNAME = '0.0.0.0';
+process.env.ELITEMESSAGE_SKIP_DOTENV_EXAMPLE =
+  process.env.ELITEMESSAGE_SKIP_DOTENV_EXAMPLE || 'true';
 
-const runtimeCandidates = [
-  path.join(runtimeRoot, 'server.js'),
-  path.join(runtimeRoot, 'apps', 'admin-web', 'server.js'),
-  path.join(__dirname, '.next', 'standalone', 'server.js'),
-  path.join(__dirname, '.next', 'standalone', 'apps', 'admin-web', 'server.js'),
-];
+loadWorkspaceEnv();
+const env = parseAdminWebEnv(process.env);
+const nextCli = require.resolve('next/dist/bin/next');
 
-const serverEntry = runtimeCandidates.find((candidate) =>
-  fs.existsSync(candidate),
+const child = spawn(
+  process.execPath,
+  [
+    nextCli,
+    'start',
+    '--hostname',
+    process.env.HOSTNAME,
+    '--port',
+    String(env.ADMIN_WEB_PORT),
+  ],
+  {
+    stdio: 'inherit',
+    env: process.env,
+    cwd: __dirname,
+  },
 );
 
-if (!serverEntry) {
-  throw new Error(
-    'Unable to find the admin-web standalone server. Run the cPanel deployment again.',
-  );
-}
+child.on('exit', (code) => {
+  process.exit(code ?? 0);
+});
 
-require(serverEntry);
+child.on('error', (error) => {
+  console.error(error);
+  process.exit(1);
+});
