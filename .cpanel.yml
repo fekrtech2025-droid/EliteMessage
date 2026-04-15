@@ -1,6 +1,6 @@
 ---
 deployment:
   tasks:
-    - HUSKY=0 npx pnpm@10.33.0 install --frozen-lockfile
-    - NODE_ENV=production ELITEMESSAGE_SKIP_DOTENV_EXAMPLE=true npx pnpm@10.33.0 --filter @elite-message/admin-web build
-    - node -e "require('node:fs').writeFileSync('/home/levanpms/repositories/EliteMessage/.cpanel-last-deploy.txt', new Date().toISOString() + ' admin-web build ok\\n')"
+    - HUSKY=0 /home/levanpms/nodevenv/repositories/EliteMessage/apps/admin-web/22/bin/npm exec --yes --package=pnpm@10.33.0 pnpm -- install --frozen-lockfile
+    - NODE_ENV=production ELITEMESSAGE_SKIP_DOTENV_EXAMPLE=true /home/levanpms/nodevenv/repositories/EliteMessage/apps/admin-web/22/bin/npm exec --yes --package=pnpm@10.33.0 pnpm -- --filter @elite-message/admin-web build
+    - /home/levanpms/nodevenv/repositories/EliteMessage/apps/admin-web/22/bin/node -e "require('node:fs').writeFileSync('/home/levanpms/repositories/EliteMessage/.cpanel-last-deploy.txt', new Date().toISOString() + ' admin-web build ok\\n')"
