@@ -1,0 +1,15 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/health/route": "/api/health",
+  "/api/ready/route": "/api/ready",
+  "/audit/page": "/audit",
+  "/instances/[id]/page": "/instances/[id]",
+  "/messages/page": "/messages",
+  "/page": "/",
+  "/support/page": "/support",
+  "/users/page": "/users",
+  "/workers/[id]/page": "/workers/[id]",
+  "/workers/page": "/workers",
+  "/workspaces/page": "/workspaces"
+}

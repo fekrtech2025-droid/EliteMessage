@@ -1,0 +1,13 @@
+var R=require("../../../chunks/ssr/[turbopack]_runtime.js")("server/app/auth/google/page.js")
+R.c("server/chunks/ssr/[root-of-the-server]__0-8-5yr._.js")
+R.c("server/chunks/ssr/0whz_next_dist_esm_build_templates_app-page_0qg6y7z.js")
+R.c("server/chunks/ssr/[root-of-the-server]__13j-4gd._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__0t5codn._.js")
+R.c("server/chunks/ssr/_05.h4p0._.js")
+R.c("server/chunks/ssr/0whz_next_dist_client_components_0lr3pr8._.js")
+R.c("server/chunks/ssr/0whz_next_dist_client_components_builtin_forbidden_0n9j91r.js")
+R.c("server/chunks/ssr/0whz_next_dist_client_components_builtin_unauthorized_09wnegl.js")
+R.c("server/chunks/ssr/0whz_next_dist_client_components_builtin_global-error_0.1.4rf.js")
+R.c("server/chunks/ssr/apps_customer-web__next-internal_server_app_auth_google_page_actions_0wygleq.js")
+R.m(4930)
+module.exports=R.m(4930).exports

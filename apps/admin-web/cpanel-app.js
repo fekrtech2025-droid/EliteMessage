@@ -1,43 +1,29 @@
-/* global __dirname, console, process, require */
+/* global __dirname, process, require */
 /* eslint-disable @typescript-eslint/no-require-imports */
 
-const { spawn } = require('node:child_process');
-
-const { loadWorkspaceEnv, parseAdminWebEnv } = require('@elite-message/config');
+const fs = require('node:fs');
+const path = require('node:path');
+const Module = require('node:module');
 
 const port = Number(process.env.PORT || process.env.ADMIN_WEB_PORT || 3001);
 process.env.PORT = String(port);
 process.env.ADMIN_WEB_PORT = String(port);
 process.env.HOSTNAME = '0.0.0.0';
-process.env.ELITEMESSAGE_SKIP_DOTENV_EXAMPLE =
-  process.env.ELITEMESSAGE_SKIP_DOTENV_EXAMPLE || 'true';
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
-loadWorkspaceEnv();
-const env = parseAdminWebEnv(process.env);
-const nextCli = require.resolve('next/dist/bin/next');
+const bundleRoot = path.join(__dirname, 'cpanel-bundle');
+const serverEntry = path.join(bundleRoot, 'apps', 'admin-web', 'server.js');
+const bundleNodeModules = path.join(bundleRoot, 'node_modules');
 
-const child = spawn(
-  process.execPath,
-  [
-    nextCli,
-    'start',
-    '--hostname',
-    process.env.HOSTNAME,
-    '--port',
-    String(env.ADMIN_WEB_PORT),
-  ],
-  {
-    stdio: 'inherit',
-    env: process.env,
-    cwd: __dirname,
-  },
-);
+if (!fs.existsSync(serverEntry)) {
+  throw new Error(
+    'Unable to find the admin-web cPanel bundle. Pull the latest repo and redeploy it.',
+  );
+}
 
-child.on('exit', (code) => {
-  process.exit(code ?? 0);
-});
+process.env.NODE_PATH = process.env.NODE_PATH
+  ? `${bundleNodeModules}${path.delimiter}${process.env.NODE_PATH}`
+  : bundleNodeModules;
+Module._initPaths();
 
-child.on('error', (error) => {
-  console.error(error);
-  process.exit(1);
-});
+require(serverEntry);

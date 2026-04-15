@@ -1,0 +1,3 @@
+module.exports=[17836,a=>{"use strict";a.s(["formatDate",0,function(a){return a?new Date(a).toLocaleString():"Never"},"formatText",0,function(a,b="None"){return a?a.replaceAll("_"," "):b},"statusTone",0,function(a){switch(a){case"authenticated":case"active":case"online":case"resolved":case"closed":case"delivered":return"success";case"qr":case"loading":case"initialize":case"booting":case"retrying":case"warning":case"high":case"urgent":case"in_progress":case"waiting_on_customer":return"warning";case"suspended":case"disconnected":case"stopped":case"failed":case"offline":return"danger";default:return"neutral"}}])}];
+
+//# sourceMappingURL=apps_admin-web_app_lib_admin-format_ts_0q3svtp._.js.map

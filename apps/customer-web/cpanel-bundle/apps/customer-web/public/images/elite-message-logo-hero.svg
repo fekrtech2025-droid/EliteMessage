@@ -1,0 +1,49 @@
+<svg width="1200" height="1200" viewBox="0 0 1200 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="crownGold" x1="380" y1="146" x2="808" y2="286" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8A5A00"/>
+      <stop offset="0.26" stop-color="#D6A219"/>
+      <stop offset="0.5" stop-color="#FFF0A4"/>
+      <stop offset="0.75" stop-color="#CF9811"/>
+      <stop offset="1" stop-color="#8B5E00"/>
+    </linearGradient>
+    <linearGradient id="bubbleGreen" x1="302" y1="382" x2="900" y2="860" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0EBF9A"/>
+      <stop offset="0.18" stop-color="#03886C"/>
+      <stop offset="0.56" stop-color="#01533F"/>
+      <stop offset="1" stop-color="#033725"/>
+    </linearGradient>
+    <linearGradient id="bubbleEdge" x1="320" y1="420" x2="872" y2="770" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7AF1DA" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#0D5F50" stop-opacity="0.15"/>
+    </linearGradient>
+    <linearGradient id="wordElite" x1="270" y1="942" x2="495" y2="942" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#9B6A00"/>
+      <stop offset="0.45" stop-color="#E2B12A"/>
+      <stop offset="1" stop-color="#B37A00"/>
+    </linearGradient>
+    <linearGradient id="wordMessage" x1="494" y1="942" x2="905" y2="942" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0D8B68"/>
+      <stop offset="1" stop-color="#014C3A"/>
+    </linearGradient>
+  </defs>
+
+  <g>
+    <circle cx="600" cy="164" r="24" fill="url(#crownGold)"/>
+    <circle cx="446" cy="215" r="20" fill="url(#crownGold)"/>
+    <circle cx="756" cy="215" r="20" fill="url(#crownGold)"/>
+    <path d="M418 308L425 240L542 292L600 197L658 292L776 240L782 308L600 292L418 308Z" fill="url(#crownGold)"/>
+
+    <path d="M400 360H816C890.006 360 950 419.994 950 494V660C950 734.006 890.006 794 816 794H665L416 964L468 794H400C325.994 794 266 734.006 266 660V494C266 419.994 325.994 360 400 360Z" fill="#012D22"/>
+    <path d="M414 376H815C878.513 376 930 427.487 930 491V647C930 710.513 878.513 762 815 762H655L443 907L488 762H414C350.487 762 299 710.513 299 647V491C299 427.487 350.487 376 414 376Z" fill="url(#bubbleGreen)"/>
+    <path d="M328 410C352 386 382 376 426 376H815C878.513 376 930 427.487 930 491V647C930 708 894 759 824 759C682 760 563 784 459 856L488 762H414C350.487 762 299 710.513 299 647V491C299 459 308 432 328 410Z" fill="url(#bubbleEdge)" fill-opacity="0.38"/>
+    <path d="M320 431C350 396 392 380 457 380H814" stroke="#A7FFF0" stroke-opacity="0.7" stroke-width="10" stroke-linecap="round"/>
+    <path d="M646 763C757 763 840 731 901 639" stroke="#8EF3E0" stroke-width="13" stroke-linecap="round"/>
+
+    <path d="M516 494H815L814 579C814 611 788 637 756 637H491L537 560H715V546H469L516 494Z" fill="white"/>
+    <path d="M452 635H728C758 635 782 660 782 690C782 720 758 744 728 744H406L452 635Z" fill="white"/>
+  </g>
+
+  <text x="246" y="1080" font-family="'Arial Black', 'Segoe UI', sans-serif" font-size="118" font-weight="900" letter-spacing="-3" fill="url(#wordElite)">Elite</text>
+  <text x="492" y="1080" font-family="'Arial Black', 'Segoe UI', sans-serif" font-size="118" font-weight="900" letter-spacing="-5" fill="url(#wordMessage)">Message</text>
+</svg>

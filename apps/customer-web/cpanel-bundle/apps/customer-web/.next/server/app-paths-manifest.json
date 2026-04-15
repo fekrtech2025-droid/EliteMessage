@@ -1,0 +1,16 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api-documents/page": "app/api-documents/page.js",
+  "/api/health/route": "app/api/health/route.js",
+  "/api/ready/route": "app/api/ready/route.js",
+  "/auth/google/page": "app/auth/google/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/instances/[id]/page": "app/instances/[id]/page.js",
+  "/messages/page": "app/messages/page.js",
+  "/page": "app/page.js",
+  "/settings/page": "app/settings/page.js",
+  "/signin/page": "app/signin/page.js",
+  "/signup/page": "app/signup/page.js",
+  "/subscription/page": "app/subscription/page.js"
+}

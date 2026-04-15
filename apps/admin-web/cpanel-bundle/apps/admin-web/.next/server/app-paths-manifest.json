@@ -1,0 +1,15 @@
+{
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/health/route": "app/api/health/route.js",
+  "/api/ready/route": "app/api/ready/route.js",
+  "/audit/page": "app/audit/page.js",
+  "/instances/[id]/page": "app/instances/[id]/page.js",
+  "/messages/page": "app/messages/page.js",
+  "/page": "app/page.js",
+  "/support/page": "app/support/page.js",
+  "/users/page": "app/users/page.js",
+  "/workers/[id]/page": "app/workers/[id]/page.js",
+  "/workers/page": "app/workers/page.js",
+  "/workspaces/page": "app/workspaces/page.js"
+}

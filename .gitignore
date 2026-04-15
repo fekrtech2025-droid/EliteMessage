@@ -19,3 +19,7 @@ packages/*/dist
 packages/db/prisma/dev.db
 packages/db/prisma/dev.db-journal
 minio-data
+!apps/admin-web/cpanel-bundle/
+!apps/admin-web/cpanel-bundle/**
+!apps/customer-web/cpanel-bundle/
+!apps/customer-web/cpanel-bundle/**

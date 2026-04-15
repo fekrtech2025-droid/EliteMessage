@@ -1,6 +1,6 @@
 ---
 deployment:
   tasks:
-    - HUSKY=0 /home/levanpms/nodevenv/repositories/EliteMessage/apps/admin-web/22/bin/npm exec --yes --package=pnpm@10.33.0 pnpm -- install --frozen-lockfile
-    - NODE_ENV=production ELITEMESSAGE_SKIP_DOTENV_EXAMPLE=true /home/levanpms/nodevenv/repositories/EliteMessage/apps/admin-web/22/bin/npm exec --yes --package=pnpm@10.33.0 pnpm -- --filter @elite-message/admin-web build
-    - /home/levanpms/nodevenv/repositories/EliteMessage/apps/admin-web/22/bin/node -e "require('node:fs').writeFileSync('/home/levanpms/repositories/EliteMessage/.cpanel-last-deploy.txt', new Date().toISOString() + ' admin-web build ok\\n')"
+    - test -f apps/admin-web/cpanel-bundle/apps/admin-web/server.js
+    - test -f apps/customer-web/cpanel-bundle/apps/customer-web/server.js
+    - /bin/sh -c "date > /home/levanpms/repositories/EliteMessage/.cpanel-last-deploy.txt"
