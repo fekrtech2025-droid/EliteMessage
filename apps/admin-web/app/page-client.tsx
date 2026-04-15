@@ -713,21 +713,15 @@ export function AdminDashboardPage() {
                 aria-invalid={loginMfaError ? 'true' : undefined}
               />
             </Field>
-            <ActionButton
-              type="submit"
-              size="compact"
-              stretch
-              disabled={submitting}
-            >
-              {submitting ? 'Signing in...' : 'Sign in'}
-            </ActionButton>
+          <ActionButton
+            type="submit"
+            size="compact"
+            stretch
+            disabled={submitting}
+          >
+            {submitting ? 'Signing in...' : 'Sign in'}
+          </ActionButton>
           </form>
-          <div className="elite-auth-inline-actions">
-            <span>
-              Use the platform admin account created by{' '}
-              <code>pnpm db:seed</code>.
-            </span>
-          </div>
         </AuthSplitLayout>
       ) : null}
 
