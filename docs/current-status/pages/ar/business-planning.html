@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>توثيق الأعمال والتخطيط | Elite Message</title>
+    <link rel="stylesheet" href="../../assets/styles/pages.css" />
+  </head>
+  <body>
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <div class="docs-brand">
+          <img src="../../assets/branding/elite-message-icon-only.png" alt="Elite Message" />
+          <div>
+            <div class="docs-brand-mark">الصفحات</div>
+            <p class="docs-brand-title">Elite Message</p>
+            <p class="docs-brand-subtitle">مركز توثيق Elite Message</p>
+          </div>
+        </div>
+
+        <div class="docs-sidebar-group">
+          <p class="docs-sidebar-label">الصفحات</p>
+          <nav class="docs-nav">
+            <a href="index.html" class="">
+                  <span>الرئيسية</span>
+                  <small>مركز توثيق Elite Message</small>
+                </a><a href="executive-summary.html" class="">
+                  <span>الملخص التنفيذي</span>
+                  <small>الحالة الحالية</small>
+                </a><a href="business-planning.html" class="is-active">
+                  <span>توثيق الأعمال والتخطيط</span>
+                  <small>الأعمال</small>
+                </a><a href="requirements.html" class="">
+                  <span>توثيق المتطلبات</span>
+                  <small>المتطلبات</small>
+                </a><a href="product-design.html" class="">
+                  <span>توثيق المنتج والتصميم</span>
+                  <small>المنتج والتصميم</small>
+                </a><a href="appendix.html" class="">
+                  <span>الملاحق والمراجع</span>
+                  <small>الملاحق</small>
+                </a>
+          </nav>
+        </div>
+      </aside>
+
+      <main class="docs-main">
+        <header class="docs-topbar">
+          <div>
+            <p class="docs-kicker">الأعمال</p>
+            <h1 class="docs-page-title">توثيق الأعمال والتخطيط</h1>
+            <p class="docs-page-subtitle">نظرة عامة على المشروع، المقترح، النطاق، الجدوى، الجدول الزمني، أصحاب المصلحة، والمخاطر.</p>
+          </div>
+          <div class="docs-toolbar">
+            <a class="docs-chip primary" href="../en/business-planning.html">English version</a>
+            <a class="docs-chip" href="../index.html">اختيار اللغة</a>
+            <a class="docs-chip" href="../../output/Elite-Message-Current-Status-AR.pdf">فتح نسخة PDF</a>
+          </div>
+        </header>
+
+        <article class="docs-article">
+          <h1 id="توثيق-الأعمال-والتخطيط">توثيق الأعمال والتخطيط</h1>
+<h2 id="نظرة-عامة-على-المشروع">نظرة عامة على المشروع</h2>
+<p>يهدف Elite Message إلى توفير منصة متعددة المستأجرين لإدارة حسابات
+WhatsApp المرتبطة بـ instances قابلة للتشغيل والمتابعة من قبل العميل
+والإدارة. المشكلة الأساسية التي يعالجها النظام هي الحاجة إلى منصة موحدة
+تجمع:</p>
+<ul>
+<li>خدمة ذاتية للعميل</li>
+<li>تحكم تشغيلي للإدارة</li>
+<li>تتبع تشغيلي ورسائلي وتدقيقي</li>
+<li>واجهات API قابلة للاستهلاك من أنظمة backend</li>
+</ul>
+<h2 id="مقترح-البرمجية">مقترح البرمجية</h2>
+<p>الحل المقترح، والذي أصبح جزء كبير منه منفذاً بالفعل، يقوم على فصل
+السطحين الرئيسيين:</p>
+<ul>
+<li><strong>سطح العميل</strong> لإدارة الوصول وتهيئة الـ instances
+واستخدام الـ API</li>
+<li><strong>سطح الإدارة</strong> للمتابعة والدعم والإشراف والتحقيق</li>
+</ul>
+<p>مع الاعتماد على:</p>
+<ul>
+<li>API مركزية</li>
+<li>worker مستقل لإدارة جلسات WhatsApp</li>
+<li>قاعدة بيانات مركزية</li>
+<li>Queue-backed processing للعمليات غير المتزامنة</li>
+</ul>
+<h2 id="وثيقة-النطاق">وثيقة النطاق</h2>
+<p>الأمور الداخلة ضمن النطاق الحالي:</p>
+<ul>
+<li>تسجيل العملاء وتسجيل دخولهم</li>
+<li>Google OAuth للعملاء</li>
+<li>تسجيل دخول الإدارة ودعم MFA</li>
+<li>إنشاء الـ instances ومتابعة حالتها وعملياتها</li>
+<li>الرسائل الخارجة والداخلة وعمليات الـ webhook</li>
+<li>رموز الـ API للحساب والـ instance</li>
+<li>واجهات الإدارة للمستخدمين ومساحات العمل والعاملين والدعم
+والتدقيق</li>
+</ul>
+<p>الأمور الخارجة عن النطاق الحالي:</p>
+<ul>
+<li>تطبيقات موبايل أصلية</li>
+<li>تكاملات مؤسسية واسعة مع أنظمة خارجية</li>
+<li>نظام فوترة إنتاجي متكامل</li>
+<li>حزمة امتثال مؤسسية كاملة</li>
+</ul>
+<h2 id="دراسة-الجدوى">دراسة الجدوى</h2>
+<h3 id="الجدوى-التقنية">الجدوى التقنية</h3>
+<p>مرتفعة، لأن النظام موجود فعلياً في صورة تطبيقات وصفحات ومسارات API
+ونموذج بيانات واضح.</p>
+<h3 id="الجدوى-التشغيلية">الجدوى التشغيلية</h3>
+<p>متوسطة، لأن البيئة المحلية مدعومة جيداً لكن هناك فجوات متبقية في
+الجاهزية الإنتاجية والإجراءات التشغيلية.</p>
+<h3 id="الجدوى-الاقتصادية">الجدوى الاقتصادية</h3>
+<p>متوسطة إلى مرتفعة، لأن القسم الأكبر من البناء الأساسي موجود بالفعل،
+والتركيز القادم هو على الصقل والتوثيق والتقوية.</p>
+<h2 id="الميزانية-والجدول-الزمني">الميزانية والجدول الزمني</h2>
+<p>هذه الأرقام تقديرية وليست ناتجة عن سجلات مالية داخل المستودع:</p>
+<ul>
+<li>توثيق وتثبيت المتطلبات: 1 إلى 2 أسبوع</li>
+<li>تحسين تجربة العميل: 2 إلى 4 أسابيع</li>
+<li>تحسين تجربة الإدارة: 2 إلى 3 أسابيع</li>
+<li>التقوية التشغيلية والتحقق: 3 إلى 5 أسابيع</li>
+<li>جاهزية الإطلاق: 1 إلى 2 أسبوع</li>
+</ul>
+<h2 id="أصحاب-المصلحة">أصحاب المصلحة</h2>
+<ul>
+<li>مالك المنتج أو الراعي</li>
+<li>العميل صاحب مساحة العمل</li>
+<li>مشغلو العميل</li>
+<li>مشرفو المنصة</li>
+<li>فريق الدعم والتشغيل</li>
+<li>فريق التطوير الخلفي والواجهات</li>
+<li>الجودة والتحقق</li>
+<li>DevOps / SRE</li>
+</ul>
+<h2 id="سجل-المخاطر">سجل المخاطر</h2>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 44%" />
+<col style="width: 48%" />
+</colgroup>
+<thead>
+<tr>
+<th>المعرف</th>
+<th>الخطر</th>
+<th>المعالجة</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R1</td>
+<td>اختلاف التوثيق عن التنفيذ</td>
+<td>تحديث مرجع current-status مع أي تغيير رئيسي</td>
+</tr>
+<tr>
+<td>R2</td>
+<td>عدم استقرار runtime المرتبط بـ WhatsApp</td>
+<td>متابعة heartbeat والحالة والأحداث التشغيلية</td>
+</tr>
+<tr>
+<td>R3</td>
+<td>مشاكل إعداد OAuth أو الجلسات</td>
+<td>رسائل خطأ واضحة وتعليمات إعداد دقيقة</td>
+</tr>
+<tr>
+<td>R4</td>
+<td>بقاء الصلابة الإنتاجية جزئية</td>
+<td>إنهاء خطة hardening والتحقق قبل الإطلاق</td>
+</tr>
+<tr>
+<td>R5</td>
+<td>توسع نطاق تحسينات UI/UX بلا ضبط</td>
+<td>تنفيذ التحسينات على مراحل واضحة</td>
+</tr>
+</tbody>
+</table>
+
+        </article>
+        <p class="docs-footer">تم إنشاء هذه النسخة من مستندات المصدر الحالية داخل docs/current-status.</p>
+      </main>
+    </div>
+  </body>
+</html>

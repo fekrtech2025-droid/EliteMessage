@@ -1,0 +1,51 @@
+@page {
+  @bottom-center {
+    font-family: 'Geeza Pro', 'Arial Unicode MS', sans-serif;
+  }
+}
+
+html {
+  direction: rtl;
+  font-family: 'Geeza Pro', 'Arial Unicode MS', 'IBM Plex Sans', sans-serif;
+}
+
+body {
+  direction: rtl;
+  font-family: 'Geeza Pro', 'Arial Unicode MS', 'IBM Plex Sans', sans-serif;
+  text-align: right;
+}
+
+h1,
+h2,
+h3,
+h4,
+.cover-title {
+  font-family: 'Geeza Pro', 'Arial Unicode MS', 'Space Grotesk', sans-serif;
+}
+
+th,
+td {
+  text-align: right;
+}
+
+blockquote {
+  border-left: 0;
+  border-right: 4px solid #0e6a56;
+}
+
+nav#TOC ul {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+nav#TOC li ul {
+  padding-left: 0;
+  padding-right: 1.2em;
+}
+
+.cover-page,
+.cover-subtitle,
+.cover-meta,
+figcaption {
+  text-align: center;
+}

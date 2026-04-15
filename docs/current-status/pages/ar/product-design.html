@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>توثيق المنتج والتصميم | Elite Message</title>
+    <link rel="stylesheet" href="../../assets/styles/pages.css" />
+  </head>
+  <body>
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <div class="docs-brand">
+          <img src="../../assets/branding/elite-message-icon-only.png" alt="Elite Message" />
+          <div>
+            <div class="docs-brand-mark">الصفحات</div>
+            <p class="docs-brand-title">Elite Message</p>
+            <p class="docs-brand-subtitle">مركز توثيق Elite Message</p>
+          </div>
+        </div>
+
+        <div class="docs-sidebar-group">
+          <p class="docs-sidebar-label">الصفحات</p>
+          <nav class="docs-nav">
+            <a href="index.html" class="">
+                  <span>الرئيسية</span>
+                  <small>مركز توثيق Elite Message</small>
+                </a><a href="executive-summary.html" class="">
+                  <span>الملخص التنفيذي</span>
+                  <small>الحالة الحالية</small>
+                </a><a href="business-planning.html" class="">
+                  <span>توثيق الأعمال والتخطيط</span>
+                  <small>الأعمال</small>
+                </a><a href="requirements.html" class="">
+                  <span>توثيق المتطلبات</span>
+                  <small>المتطلبات</small>
+                </a><a href="product-design.html" class="is-active">
+                  <span>توثيق المنتج والتصميم</span>
+                  <small>المنتج والتصميم</small>
+                </a><a href="appendix.html" class="">
+                  <span>الملاحق والمراجع</span>
+                  <small>الملاحق</small>
+                </a>
+          </nav>
+        </div>
+      </aside>
+
+      <main class="docs-main">
+        <header class="docs-topbar">
+          <div>
+            <p class="docs-kicker">المنتج والتصميم</p>
+            <h1 class="docs-page-title">توثيق المنتج والتصميم</h1>
+            <p class="docs-page-subtitle">المعمارية، مستويات التصميم، مخطط البيانات، تصميم الـ API، تجربة الاستخدام، والمخططات.</p>
+          </div>
+          <div class="docs-toolbar">
+            <a class="docs-chip primary" href="../en/product-design.html">English version</a>
+            <a class="docs-chip" href="../index.html">اختيار اللغة</a>
+            <a class="docs-chip" href="../../output/Elite-Message-Current-Status-AR.pdf">فتح نسخة PDF</a>
+          </div>
+        </header>
+
+        <article class="docs-article">
+          <h1 id="توثيق-المنتج-والتصميم">توثيق المنتج والتصميم</h1>
+<h2 id="وثيقة-معمارية-النظام">وثيقة معمارية النظام</h2>
+<p>يمتلك النظام بنية مؤلفة من أربع تطبيقات تشغيلية رئيسية:</p>
+<ul>
+<li><code>Customer Web</code></li>
+<li><code>Admin Web</code></li>
+<li><code>API</code></li>
+<li><code>Worker</code></li>
+</ul>
+<p>ويرتكز على الحزم المشتركة التالية:</p>
+<ul>
+<li><code>packages/config</code></li>
+<li><code>packages/contracts</code></li>
+<li><code>packages/db</code></li>
+<li><code>packages/ui</code></li>
+</ul>
+<h3 id="مخطط-المعمارية-التشغيلية">مخطط المعمارية التشغيلية</h3>
+<figure>
+<img src="../../assets/diagrams/ar/runtime-architecture.png"
+class="diagram" alt="مخطط المعمارية التشغيلية" />
+<figcaption aria-hidden="true">مخطط المعمارية التشغيلية</figcaption>
+</figure>
+<h2 id="التصميم-عالي-المستوى-hld">التصميم عالي المستوى HLD</h2>
+<p>يوزّع النظام المسؤوليات على ثلاث طبقات رئيسية:</p>
+<ol type="1">
+<li><strong>واجهات الاستخدام</strong>: العميل والإدارة</li>
+<li><strong>طبقة التحكم</strong>: API</li>
+<li><strong>طبقة التنفيذ</strong>: worker + queue + runtime</li>
+</ol>
+<p>كما توجد نطاقات بيانات رئيسية:</p>
+<ul>
+<li>الهوية والوصول</li>
+<li>المستأجرون ومساحات العمل</li>
+<li>الـ instances والحالة التشغيلية</li>
+<li>الرسائل والتسليمات</li>
+<li>الدعم والتدقيق والعاملون</li>
+</ul>
+<h2 id="التصميم-منخفض-المستوى-lld">التصميم منخفض المستوى LLD</h2>
+<h3 id="تطبيق-العميل">تطبيق العميل</h3>
+<p>المسارات الحالية تشمل:</p>
+<ul>
+<li><code>/</code></li>
+<li><code>/signup</code></li>
+<li><code>/messages</code></li>
+<li><code>/settings</code></li>
+<li><code>/subscription</code></li>
+<li><code>/api-documents</code></li>
+<li><code>/instances/[id]</code></li>
+<li><code>/auth/google</code></li>
+</ul>
+<h3 id="تطبيق-الإدارة">تطبيق الإدارة</h3>
+<p>المسارات الحالية تشمل:</p>
+<ul>
+<li><code>/</code></li>
+<li><code>/messages</code></li>
+<li><code>/users</code></li>
+<li><code>/workspaces</code></li>
+<li><code>/workers</code></li>
+<li><code>/workers/[id]</code></li>
+<li><code>/instances/[id]</code></li>
+<li><code>/support</code></li>
+<li><code>/audit</code></li>
+</ul>
+<h3 id="الـ-api">الـ API</h3>
+<p>تتضمن:</p>
+<ul>
+<li>مسارات <code>auth</code></li>
+<li>مسارات <code>customer</code></li>
+<li>مسارات <code>admin</code></li>
+<li>مسارات <code>internal</code></li>
+<li>مسارات <code>instance</code> العامة</li>
+<li><code>/health</code> و <code>/ready</code> و
+<code>/metrics</code></li>
+</ul>
+<h2 id="توثيق-مخطط-قاعدة-البيانات">توثيق مخطط قاعدة البيانات</h2>
+<p>تستخدم المنصة <code>PostgreSQL</code> مع <code>Prisma 7</code>.</p>
+<p>الكيانات الأساسية:</p>
+<ul>
+<li><code>User</code></li>
+<li><code>Workspace</code></li>
+<li><code>Membership</code></li>
+<li><code>RefreshSession</code></li>
+<li><code>ApiToken</code></li>
+<li><code>Instance</code></li>
+<li><code>InstanceSettings</code></li>
+<li><code>InstanceRuntimeState</code></li>
+<li><code>InstanceOperation</code></li>
+<li><code>InstanceLifecycleEvent</code></li>
+<li><code>OutboundMessage</code></li>
+<li><code>OutboundMessageAttempt</code></li>
+<li><code>InboundMessage</code></li>
+<li><code>WebhookDelivery</code></li>
+<li><code>WorkerHeartbeat</code></li>
+<li><code>AuditLog</code></li>
+<li><code>SupportCase</code></li>
+</ul>
+<h3 id="ملاحظات-تصميمية">ملاحظات تصميمية</h3>
+<ul>
+<li>يتم حفظ الـ tokens بشكل Hash مع Prefix للعرض</li>
+<li>لكل instance معرف داخلي ومعرف عام للاستخدام البرمجي</li>
+<li>حالة التشغيل منفصلة عن بيانات الـ instance الأساسية</li>
+<li>سجلات التدقيق والدعم كيانات مستقلة وليست ملاحظات حرة فقط</li>
+</ul>
+<h2 id="تصميم-الـ-api-ومواصفاته">تصميم الـ API ومواصفاته</h2>
+<p>الواجهة تعتمد على:</p>
+<ul>
+<li><code>HTTP/JSON</code></li>
+<li>إصدار <code>v1</code></li>
+<li>فصل واضح بين مسارات العميل والإدارة والداخلية والعامة</li>
+</ul>
+<p>أنماط المصادقة الحالية:</p>
+<ul>
+<li>جلسات dashboard</li>
+<li>Google OAuth للعملاء</li>
+<li>MFA للإدارة</li>
+<li>account tokens</li>
+<li>instance tokens</li>
+</ul>
+<h2 id="توثيق-uiux">توثيق UI/UX</h2>
+<p>الاتجاه الحالي للتجربة:</p>
+<ul>
+<li>Light theme أولاً</li>
+<li>فصل بصري واضح بين العميل والإدارة</li>
+<li>Sidebar + Topbar للمسارات المصادق عليها</li>
+<li>صفحات استكشاف وتشغيل قابلة للمسح السريع</li>
+<li>شاشات signin/signup حديثة مع validation ومساعدة سياقية</li>
+</ul>
+<h2 id="wireframes-و-mockups">Wireframes و Mockups</h2>
+<h3 id="بنية-صفحة-تسجيل-الدخول-للعميل">بنية صفحة تسجيل الدخول
+للعميل</h3>
+<pre class="text"><code>+--------------------------------------------------------------+
+| Brand / topbar                                               |
++----------------------------+---------------------------------+
+| Visual brand panel         | Signin form card                |
+|                            | email / password / Google       |
+|                            | help / submit                   |
++----------------------------+---------------------------------+</code></pre>
+<h3 id="بنية-لوحة-العميل">بنية لوحة العميل</h3>
+<pre class="text"><code>+-------------------+------------------------------------------+
+| Sidebar           | Sticky topbar                            |
+| routes            +------------------------------------------+
+| workspace         | breadcrumb / page title                  |
+| account chips     +------------------------------------------+
+|                   | dashboard cards / explorers / detail     |
++-------------------+------------------------------------------+</code></pre>
+<h2 id="المخططات-الانسيابية-وتسلسل-العمليات">المخططات الانسيابية وتسلسل
+العمليات</h2>
+<h3 id="تدفق-مصادقة-العميل">تدفق مصادقة العميل</h3>
+<figure>
+<img src="../../assets/diagrams/ar/customer-auth-flow.png"
+class="diagram" alt="تدفق مصادقة العميل" />
+<figcaption aria-hidden="true">تدفق مصادقة العميل</figcaption>
+</figure>
+<h3 id="من-إنشاء-الـ-instance-إلى-استخدام-الـ-api">من إنشاء الـ instance
+إلى استخدام الـ API</h3>
+<figure>
+<img src="../../assets/diagrams/ar/instance-to-api-flow.png"
+class="diagram" alt="من إنشاء الـ instance إلى استخدام الـ API" />
+<figcaption aria-hidden="true">من إنشاء الـ instance إلى استخدام الـ
+API</figcaption>
+</figure>
+<h3 id="تسلسل-عمليات-الـ-worker-ودورة-الحياة">تسلسل عمليات الـ worker
+ودورة الحياة</h3>
+<figure>
+<img src="../../assets/diagrams/ar/worker-lifecycle-sequence.png"
+class="diagram" alt="تسلسل عمليات الـ worker" />
+<figcaption aria-hidden="true">تسلسل عمليات الـ worker</figcaption>
+</figure>
+<h3 id="تدفق-تسليم-الـ-webhook">تدفق تسليم الـ webhook</h3>
+<figure>
+<img src="../../assets/diagrams/ar/webhook-delivery-sequence.png"
+class="diagram" alt="تدفق تسليم الـ webhook" />
+<figcaption aria-hidden="true">تدفق تسليم الـ webhook</figcaption>
+</figure>
+
+        </article>
+        <p class="docs-footer">تم إنشاء هذه النسخة من مستندات المصدر الحالية داخل docs/current-status.</p>
+      </main>
+    </div>
+  </body>
+</html>

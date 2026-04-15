@@ -1,0 +1,12 @@
+html {
+  direction: ltr;
+}
+
+body {
+  direction: ltr;
+}
+
+.control-page table th,
+.control-page table td {
+  text-align: left;
+}

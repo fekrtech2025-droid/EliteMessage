@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>elite-message-mvp-phase-plan</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="/Users/apple/python_learning/EliteMessage/docs/architecture-print.css" />
+</head>
+<body>
+<h1 id="elite-message">Elite Message</h1>
+<h2 id="mvp-phase-plan">MVP Phase Plan</h2>
+<p>Version: 1.0<br />
+Prepared for: Elite Message project<br />
+Document type: implementation phase plan<br />
+Target: UltraMsg-equivalent MVP with customer dashboard, admin
+dashboard, worker runtime, public API, and core operations</p>
+<hr />
+<h2 id="1-goal">1. Goal</h2>
+<p>This document defines a realistic MVP phase plan for Elite
+Message.</p>
+<p>The objective is not to build every feature UltraMsg has on day one.
+The objective is to deliver a production-credible first version that
+can:</p>
+<ul>
+<li>create and manage WhatsApp instances</li>
+<li>authorize instances with QR</li>
+<li>send and receive messages</li>
+<li>expose a developer API</li>
+<li>provide a usable customer dashboard</li>
+<li>provide a basic admin dashboard</li>
+<li>handle queueing, webhooks, and worker recovery</li>
+</ul>
+<p>The MVP should be built in phases so the platform becomes testable
+early and hardening work starts before feature expansion gets too
+wide.</p>
+<hr />
+<h2 id="2-mvp-definition">2. MVP Definition</h2>
+<p>Elite Message MVP is considered complete when all of the following
+are true:</p>
+<ul>
+<li>a customer can register and log in</li>
+<li>a customer can create at least one instance</li>
+<li>the instance can reach QR state and be authenticated</li>
+<li>the instance can send text messages from API and dashboard</li>
+<li>the instance can receive inbound messages and deliver them to
+webhook</li>
+<li>the customer dashboard shows live status and message logs</li>
+<li>an admin can inspect users, instances, workers, and webhook
+failures</li>
+<li>queueing and resend flows work for core cases</li>
+<li>logging, audit, and basic monitoring exist</li>
+</ul>
+<p>The MVP does not need full feature parity with UltraMsg.</p>
+<hr />
+<h2 id="3-product-scope-for-mvp">3. Product Scope for MVP</h2>
+<h2 id="31-in-scope">3.1 In Scope</h2>
+<ul>
+<li>customer authentication</li>
+<li>account and subscription skeleton</li>
+<li>instance creation and management</li>
+<li>QR authorization</li>
+<li>instance state transitions</li>
+<li>worker orchestration</li>
+<li>send text message</li>
+<li>basic media upload</li>
+<li>outbound message logs</li>
+<li>inbound message capture</li>
+<li>webhook delivery with retries</li>
+<li>basic contact check</li>
+<li>customer dashboard</li>
+<li>admin dashboard</li>
+<li>token rotation</li>
+<li>restart, logout, clear actions</li>
+<li>audit logs</li>
+<li>queue-based async processing</li>
+</ul>
+<h2 id="32-explicitly-out-of-scope-for-mvp">3.2 Explicitly Out of Scope
+for MVP</h2>
+<ul>
+<li>advanced chatbot builder</li>
+<li>large analytics suite</li>
+<li>multi-language UI completeness</li>
+<li>full invoice/payment gateway automation</li>
+<li>advanced abuse engine</li>
+<li>enterprise team workflows</li>
+<li>complex bulk campaign tooling</li>
+<li>white-label support</li>
+<li>deep group management features</li>
+</ul>
+<hr />
+<h2 id="4-delivery-model">4. Delivery Model</h2>
+<p>Recommended delivery sequence:</p>
+<ol type="1">
+<li>Foundation and architecture baseline</li>
+<li>Core customer-facing messaging flow</li>
+<li>Worker stability and webhook reliability</li>
+<li>Admin operations and support tooling</li>
+<li>Production hardening and launch readiness</li>
+</ol>
+<p>Why this order:</p>
+<ul>
+<li>you need a real instance lifecycle before anything else matters</li>
+<li>sending and receiving messages is the core proof of value</li>
+<li>admin tooling is necessary before inviting real users</li>
+<li>production hardening must happen before scale, not after
+failures</li>
+</ul>
+<hr />
+<h2 id="5-team-recommendation">5. Team Recommendation</h2>
+<p>Ideal MVP team:</p>
+<ul>
+<li>1 product/technical lead</li>
+<li>2 backend engineers</li>
+<li>1 frontend engineer</li>
+<li>1 worker/runtime engineer</li>
+<li>1 DevOps/platform engineer part-time or shared</li>
+<li>1 QA engineer part-time or shared</li>
+</ul>
+<p>Lean team alternative:</p>
+<ul>
+<li>1 senior full-stack lead</li>
+<li>1 backend engineer</li>
+<li>1 frontend engineer</li>
+<li>1 DevOps/runtime engineer part-time</li>
+</ul>
+<hr />
+<h2 id="6-proposed-timeline">6. Proposed Timeline</h2>
+<p>Recommended MVP timeline:</p>
+<ul>
+<li>Phase 0: 1 week</li>
+<li>Phase 1: 2 weeks</li>
+<li>Phase 2: 3 weeks</li>
+<li>Phase 3: 2 weeks</li>
+<li>Phase 4: 2 weeks</li>
+<li>Phase 5: 2 weeks</li>
+</ul>
+<p>Total recommended first MVP delivery window:</p>
+<ul>
+<li>10 to 12 weeks</li>
+</ul>
+<p>Compressed timeline risk:</p>
+<ul>
+<li>below 8 weeks will likely push reliability problems into
+post-launch</li>
+</ul>
+<hr />
+<h2 id="7-phase-0-foundation">7. Phase 0: Foundation</h2>
+<p>Duration:</p>
+<ul>
+<li>1 week</li>
+</ul>
+<p>Goal:</p>
+<ul>
+<li>establish the monorepo, architecture boundaries, environment setup,
+and non-negotiable engineering standards</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>monorepo with <code>apps/web</code>, <code>apps/admin-web</code>,
+<code>apps/api</code>, <code>apps/worker</code>,
+<code>packages/contracts</code>, <code>packages/sdk</code>,
+<code>packages/ui</code></li>
+<li>local Docker setup</li>
+<li>PostgreSQL, Redis, object storage local config</li>
+<li>base NestJS application</li>
+<li>base Next.js applications</li>
+<li>worker application skeleton</li>
+<li>CI pipeline</li>
+<li>linting, formatting, type-check, test baseline</li>
+<li>environment variable strategy</li>
+<li>migration framework</li>
+<li>seed scripts</li>
+</ul>
+<p>Key technical tasks:</p>
+<ul>
+<li>repository structure</li>
+<li>shared TypeScript config</li>
+<li>API conventions</li>
+<li>DTO and schema strategy</li>
+<li>auth strategy selection</li>
+<li>queue naming conventions</li>
+<li>event naming conventions</li>
+<li>logging format</li>
+</ul>
+<p>Acceptance criteria:</p>
+<ul>
+<li>all apps boot locally</li>
+<li>database migrations run from clean state</li>
+<li>Redis and queue connectivity work</li>
+<li>CI passes on a clean branch</li>
+<li>base health endpoints are available</li>
+</ul>
+<p>Exit artifact:</p>
+<ul>
+<li>development environment stable enough for feature work</li>
+</ul>
+<p>Major risks:</p>
+<ul>
+<li>unclear module boundaries</li>
+<li>weak local environment reproducibility</li>
+</ul>
+<hr />
+<h2 id="8-phase-1-identity-accounts-and-instance-skeleton">8. Phase 1:
+Identity, Accounts, and Instance Skeleton</h2>
+<p>Duration:</p>
+<ul>
+<li>2 weeks</li>
+</ul>
+<p>Goal:</p>
+<ul>
+<li>make the platform usable at the account level and create the first
+instance records and admin visibility</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>customer auth</li>
+<li>admin auth</li>
+<li>account creation</li>
+<li>account membership basics</li>
+<li>plans and subscription skeleton</li>
+<li>instance CRUD in API</li>
+<li>account API tokens</li>
+<li>per-instance API tokens</li>
+<li>customer dashboard shell</li>
+<li>admin dashboard shell</li>
+<li>audit log base</li>
+</ul>
+<p>Customer-facing features:</p>
+<ul>
+<li>sign up</li>
+<li>sign in</li>
+<li>profile</li>
+<li>dashboard overview placeholder</li>
+<li>create instance</li>
+<li>list instances</li>
+<li>rotate token</li>
+</ul>
+<p>Admin-facing features:</p>
+<ul>
+<li>login</li>
+<li>list users</li>
+<li>list accounts</li>
+<li>list instances</li>
+<li>inspect account and instance detail</li>
+</ul>
+<p>Backend modules finished in this phase:</p>
+<ul>
+<li>AuthModule</li>
+<li>UsersModule</li>
+<li>AccountsModule</li>
+<li>RolesModule</li>
+<li>InstancesModule</li>
+<li>InstanceTokensModule</li>
+<li>AuditLogsModule</li>
+</ul>
+<p>Acceptance criteria:</p>
+<ul>
+<li>a customer can create an account</li>
+<li>a customer can create an instance record</li>
+<li>an admin can find that instance in the admin panel</li>
+<li>account token and instance token generation both work</li>
+<li>audit logs record creation and rotation actions</li>
+</ul>
+<p>Exit artifact:</p>
+<ul>
+<li>a functioning control plane with no live WhatsApp session yet</li>
+</ul>
+<p>Major risks:</p>
+<ul>
+<li>overbuilding billing too early</li>
+<li>mixing customer and admin permissions incorrectly</li>
+</ul>
+<hr />
+<h2 id="9-phase-2-worker-runtime-and-qr-authorization">9. Phase 2:
+Worker Runtime and QR Authorization</h2>
+<p>Duration:</p>
+<ul>
+<li>3 weeks</li>
+</ul>
+<p>Goal:</p>
+<ul>
+<li>make instances real by connecting them to browser-backed workers and
+exposing live runtime status</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>worker registration</li>
+<li>worker assignment service</li>
+<li>Chromium session bootstrap</li>
+<li>WhatsApp Web session handling</li>
+<li>QR generation</li>
+<li>runtime state detection</li>
+<li>instance status API</li>
+<li>realtime Socket.IO status updates</li>
+<li>screenshot endpoint</li>
+<li>restart, logout, clear actions</li>
+<li>conflict/takeover handling</li>
+</ul>
+<p>Runtime states to support:</p>
+<ul>
+<li><code>initialize</code></li>
+<li><code>booting</code></li>
+<li><code>loading</code></li>
+<li><code>qr</code></li>
+<li><code>authenticated</code></li>
+<li><code>retrying</code></li>
+<li><code>disconnected</code></li>
+<li><code>standby</code></li>
+</ul>
+<p>Customer-facing features:</p>
+<ul>
+<li>instance manage page</li>
+<li>QR view</li>
+<li>live status badge</li>
+<li>screenshot preview</li>
+<li>restart/log out/clear actions</li>
+</ul>
+<p>Admin-facing features:</p>
+<ul>
+<li>worker list</li>
+<li>worker detail</li>
+<li>instance-to-worker mapping</li>
+<li>force restart</li>
+</ul>
+<p>Backend modules finished in this phase:</p>
+<ul>
+<li>WorkerOrchestrationModule</li>
+<li>InstanceLifecycleModule</li>
+<li>RealtimeModule</li>
+<li>worker browser runtime</li>
+</ul>
+<p>Acceptance criteria:</p>
+<ul>
+<li>a customer can scan QR and authenticate an instance</li>
+<li>authenticated status is visible live in dashboard</li>
+<li>logout returns the instance to QR</li>
+<li>clear resets session and settings</li>
+<li>restart recovers the instance runtime</li>
+<li>screenshot endpoint returns a valid image</li>
+</ul>
+<p>Exit artifact:</p>
+<ul>
+<li>first end-to-end live session lifecycle working</li>
+</ul>
+<p>Major risks:</p>
+<ul>
+<li>browser instability</li>
+<li>session persistence bugs</li>
+<li>conflict state edge cases</li>
+</ul>
+<hr />
+<h2 id="10-phase-3-core-messaging-flow">10. Phase 3: Core Messaging
+Flow</h2>
+<p>Duration:</p>
+<ul>
+<li>3 weeks</li>
+</ul>
+<p>Goal:</p>
+<ul>
+<li>support the minimum valuable customer workflow: send, log, receive,
+and webhook</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>outbound text message API</li>
+<li>outbound dashboard test-send flow</li>
+<li>message queue with priority</li>
+<li>send delays</li>
+<li>outbound message log</li>
+<li>inbound message ingestion</li>
+<li>webhook delivery with retry</li>
+<li>message statistics</li>
+<li>resend by id</li>
+<li>resend by status</li>
+<li>clear message logs by status</li>
+</ul>
+<p>Customer-facing features:</p>
+<ul>
+<li>send test message widget</li>
+<li>message log page</li>
+<li>filters by status, ack, from, to, referenceId</li>
+<li>webhook settings form</li>
+<li>resend actions</li>
+</ul>
+<p>Public API features:</p>
+<ul>
+<li><code>/messages/chat</code></li>
+<li><code>/messages</code></li>
+<li><code>/messages/statistics</code></li>
+<li><code>/messages/resendById</code></li>
+<li><code>/messages/resendByStatus</code></li>
+<li><code>/messages/clear</code></li>
+<li><code>/instance/status</code></li>
+<li><code>/instance/settings</code></li>
+</ul>
+<p>Backend modules finished in this phase:</p>
+<ul>
+<li>MessagesModule</li>
+<li>WebhooksModule</li>
+<li>queue processors for outbound send and webhook delivery</li>
+</ul>
+<p>Acceptance criteria:</p>
+<ul>
+<li>customer can send a text message from API</li>
+<li>dashboard logs reflect queued and sent messages</li>
+<li>inbound messages are captured and stored</li>
+<li>webhook delivery succeeds to a configured endpoint</li>
+<li>failed webhook attempts retry according to policy</li>
+<li>resend flows operate correctly</li>
+</ul>
+<p>Exit artifact:</p>
+<ul>
+<li>customer can integrate Elite Message into a real application</li>
+</ul>
+<p>Major risks:</p>
+<ul>
+<li>duplicate webhook deliveries</li>
+<li>missing idempotency on message status updates</li>
+<li>queue starvation or ordering bugs</li>
+</ul>
+<hr />
+<h2 id="11-phase-4-customer-dashboard-mvp-completion">11. Phase 4:
+Customer Dashboard MVP Completion</h2>
+<p>Duration:</p>
+<ul>
+<li>2 weeks</li>
+</ul>
+<p>Goal:</p>
+<ul>
+<li>make the customer dashboard usable enough for real beta
+customers</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>dashboard overview metrics</li>
+<li>polished instance list and instance detail screens</li>
+<li>settings and profile pages</li>
+<li>account API token screen</li>
+<li>instance token management</li>
+<li>message statistics widgets</li>
+<li>basic media upload</li>
+<li>contact check UI</li>
+<li>invoices and subscription placeholder screens</li>
+</ul>
+<p>Customer-facing pages ready:</p>
+<ul>
+<li>login and signup</li>
+<li>overview</li>
+<li>instances list</li>
+<li>instance manage page</li>
+<li>messages</li>
+<li>settings</li>
+<li>subscription overview</li>
+</ul>
+<p>UX requirements:</p>
+<ul>
+<li>fast feedback for lifecycle actions</li>
+<li>live status updates without page refresh</li>
+<li>sane empty states</li>
+<li>API examples on instance pages</li>
+</ul>
+<p>Acceptance criteria:</p>
+<ul>
+<li>a customer can complete the full flow without touching internal
+tools</li>
+<li>UI exposes the important API values and status states clearly</li>
+<li>webhook and message settings can be edited from the dashboard</li>
+<li>media upload works for future use in send flows</li>
+</ul>
+<p>Exit artifact:</p>
+<ul>
+<li>closed beta-ready customer-facing application</li>
+</ul>
+<p>Major risks:</p>
+<ul>
+<li>weak UX around QR expiry and queue behavior</li>
+<li>exposing too much low-level runtime detail to customers</li>
+</ul>
+<hr />
+<h2 id="12-phase-5-admin-dashboard-mvp-completion">12. Phase 5: Admin
+Dashboard MVP Completion</h2>
+<p>Duration:</p>
+<ul>
+<li>2 weeks</li>
+</ul>
+<p>Goal:</p>
+<ul>
+<li>give internal operators enough visibility and control to support
+beta customers safely</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>global overview metrics</li>
+<li>user management</li>
+<li>account management</li>
+<li>instance explorer</li>
+<li>worker explorer</li>
+<li>global message search</li>
+<li>webhook delivery inspector</li>
+<li>support case skeleton</li>
+<li>audit log explorer</li>
+</ul>
+<p>Admin actions required:</p>
+<ul>
+<li>suspend account</li>
+<li>unsuspend account</li>
+<li>extend trial</li>
+<li>restart instance</li>
+<li>log out instance</li>
+<li>clear instance</li>
+<li>reassign worker</li>
+<li>replay webhook</li>
+<li>view screenshot</li>
+</ul>
+<p>Acceptance criteria:</p>
+<ul>
+<li>support/admin team can diagnose the common failure cases</li>
+<li>worker failures and webhook failures are visible</li>
+<li>there is a safe path to help a customer recover an instance</li>
+<li>every admin action is auditable</li>
+</ul>
+<p>Exit artifact:</p>
+<ul>
+<li>internal operations MVP complete</li>
+</ul>
+<p>Major risks:</p>
+<ul>
+<li>missing filters in admin tools</li>
+<li>too much power without RBAC and audit enforcement</li>
+</ul>
+<hr />
+<h2 id="13-phase-6-hardening-and-launch-readiness">13. Phase 6:
+Hardening and Launch Readiness</h2>
+<p>Duration:</p>
+<ul>
+<li>2 weeks</li>
+</ul>
+<p>Goal:</p>
+<ul>
+<li>reduce launch risk before onboarding real paying customers</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>structured logs across all services</li>
+<li>Prometheus metrics and Grafana dashboards</li>
+<li>alerting for worker heartbeat loss</li>
+<li>alerting for webhook failure rate</li>
+<li>retry/backoff review</li>
+<li>load test for core send path</li>
+<li>security review</li>
+<li>backup and restore validation</li>
+<li>retention jobs</li>
+<li>token redaction review</li>
+<li>deployment playbooks</li>
+<li>incident checklist</li>
+</ul>
+<p>Hardening checklist:</p>
+<ul>
+<li>queue dead-letter handling</li>
+<li>browser crash recovery</li>
+<li>idempotent event ingestion</li>
+<li>signed webhooks</li>
+<li>admin MFA</li>
+<li>audit log coverage</li>
+<li>rate limits on public API</li>
+<li>basic abuse heuristics</li>
+</ul>
+<p>Acceptance criteria:</p>
+<ul>
+<li>the system survives worker restarts without data loss</li>
+<li>key metrics and alerts are visible</li>
+<li>deployment rollback is documented</li>
+<li>security review findings are addressed or explicitly accepted</li>
+</ul>
+<p>Exit artifact:</p>
+<ul>
+<li>beta launch candidate</li>
+</ul>
+<p>Major risks:</p>
+<ul>
+<li>weak observability</li>
+<li>launch without operational alarms</li>
+</ul>
+<hr />
+<h2 id="14-recommended-milestone-gates">14. Recommended Milestone
+Gates</h2>
+<p>Use explicit go/no-go gates between phases.</p>
+<h3 id="gate-a-after-phase-1">Gate A: After Phase 1</h3>
+<p>Questions:</p>
+<ul>
+<li>can we create and manage accounts and instances cleanly</li>
+<li>are auth and RBAC stable enough to continue</li>
+</ul>
+<p>Decision:</p>
+<ul>
+<li>do not start worker runtime work if control plane basics are
+unstable</li>
+</ul>
+<h3 id="gate-b-after-phase-2">Gate B: After Phase 2</h3>
+<p>Questions:</p>
+<ul>
+<li>can we authenticate instances reliably</li>
+<li>do runtime states look trustworthy</li>
+</ul>
+<p>Decision:</p>
+<ul>
+<li>do not begin messaging volume tests until QR/session flow is
+stable</li>
+</ul>
+<h3 id="gate-c-after-phase-3">Gate C: After Phase 3</h3>
+<p>Questions:</p>
+<ul>
+<li>can we actually send and receive messages correctly</li>
+<li>do webhooks work with retries and logs</li>
+</ul>
+<p>Decision:</p>
+<ul>
+<li>this is the real MVP core gate</li>
+</ul>
+<h3 id="gate-d-after-phase-5">Gate D: After Phase 5</h3>
+<p>Questions:</p>
+<ul>
+<li>can the support/admin team operate the system safely</li>
+<li>do we have enough visibility to run beta customers</li>
+</ul>
+<p>Decision:</p>
+<ul>
+<li>no beta launch without this gate passing</li>
+</ul>
+<hr />
+<h2 id="15-recommended-sprint-breakdown">15. Recommended Sprint
+Breakdown</h2>
+<p>Example 12-week breakdown:</p>
+<ul>
+<li>Week 1: foundation</li>
+<li>Week 2: auth and accounts</li>
+<li>Week 3: instances and tokens</li>
+<li>Week 4: worker bootstrap</li>
+<li>Week 5: QR and status flow</li>
+<li>Week 6: runtime actions and screenshots</li>
+<li>Week 7: outbound messaging</li>
+<li>Week 8: inbound and webhooks</li>
+<li>Week 9: customer dashboard completion</li>
+<li>Week 10: admin dashboard completion</li>
+<li>Week 11: hardening and load testing</li>
+<li>Week 12: bug fix, beta readiness, controlled rollout</li>
+</ul>
+<hr />
+<h2 id="16-dependency-map">16. Dependency Map</h2>
+<p>Dependencies by phase:</p>
+<h3 id="phase-0-depends-on">Phase 0 depends on</h3>
+<ul>
+<li>architecture sign-off</li>
+<li>tech stack sign-off</li>
+<li>repository access</li>
+</ul>
+<h3 id="phase-1-depends-on">Phase 1 depends on</h3>
+<ul>
+<li>Phase 0 complete</li>
+<li>database schema approved</li>
+</ul>
+<h3 id="phase-2-depends-on">Phase 2 depends on</h3>
+<ul>
+<li>instance data model stable</li>
+<li>runtime storage strategy decided</li>
+<li>worker infrastructure available</li>
+</ul>
+<h3 id="phase-3-depends-on">Phase 3 depends on</h3>
+<ul>
+<li>Phase 2 working session lifecycle</li>
+<li>queue framework stable</li>
+</ul>
+<h3 id="phase-4-depends-on">Phase 4 depends on</h3>
+<ul>
+<li>Phase 3 public APIs stable enough for UI binding</li>
+</ul>
+<h3 id="phase-5-depends-on">Phase 5 depends on</h3>
+<ul>
+<li>reliable worker and message data already visible in API</li>
+</ul>
+<h3 id="phase-6-depends-on">Phase 6 depends on</h3>
+<ul>
+<li>end-to-end feature set usable</li>
+</ul>
+<hr />
+<h2 id="17-testing-strategy-by-phase">17. Testing Strategy by Phase</h2>
+<h2 id="phase-0">Phase 0</h2>
+<ul>
+<li>smoke tests</li>
+<li>migration tests</li>
+<li>CI verification</li>
+</ul>
+<h2 id="phase-1">Phase 1</h2>
+<ul>
+<li>auth integration tests</li>
+<li>RBAC tests</li>
+<li>token generation tests</li>
+</ul>
+<h2 id="phase-2">Phase 2</h2>
+<ul>
+<li>worker assignment tests</li>
+<li>QR lifecycle tests</li>
+<li>instance state transition tests</li>
+<li>browser session restore tests</li>
+</ul>
+<h2 id="phase-3">Phase 3</h2>
+<ul>
+<li>message send integration tests</li>
+<li>queue ordering tests</li>
+<li>webhook retry tests</li>
+<li>duplicate event protection tests</li>
+</ul>
+<h2 id="phase-4">Phase 4</h2>
+<ul>
+<li>end-to-end customer flows</li>
+<li>UI regression tests for critical screens</li>
+</ul>
+<h2 id="phase-5">Phase 5</h2>
+<ul>
+<li>admin permission tests</li>
+<li>audit logging tests</li>
+<li>support recovery flow tests</li>
+</ul>
+<h2 id="phase-6">Phase 6</h2>
+<ul>
+<li>load testing</li>
+<li>failure injection</li>
+<li>restart recovery drills</li>
+</ul>
+<hr />
+<h2 id="18-mvp-success-metrics">18. MVP Success Metrics</h2>
+<p>Suggested operational KPIs for MVP:</p>
+<ul>
+<li>instance authentication success rate</li>
+<li>outbound send success rate</li>
+<li>webhook delivery success rate</li>
+<li>worker crash recovery time</li>
+<li>average time from instance creation to first authenticated
+state</li>
+<li>average time from message request to sent state</li>
+<li>support time to resolve common instance issues</li>
+</ul>
+<p>Suggested product KPIs for beta:</p>
+<ul>
+<li>percentage of beta users who create at least one instance</li>
+<li>percentage of beta users who send at least one successful
+message</li>
+<li>percentage of beta users who configure a webhook</li>
+</ul>
+<hr />
+<h2 id="19-launch-sequence-recommendation">19. Launch Sequence
+Recommendation</h2>
+<p>Recommended launch stages:</p>
+<h3 id="stage-1-internal-alpha">Stage 1: Internal alpha</h3>
+<ul>
+<li>team members only</li>
+<li>3 to 5 test instances</li>
+<li>aggressive logging</li>
+</ul>
+<h3 id="stage-2-friendly-beta">Stage 2: Friendly beta</h3>
+<ul>
+<li>5 to 10 trusted external users</li>
+<li>daily operational review</li>
+<li>limited instance count</li>
+</ul>
+<h3 id="stage-3-controlled-public-beta">Stage 3: Controlled public
+beta</h3>
+<ul>
+<li>capped signups</li>
+<li>support response coverage</li>
+<li>worker capacity monitoring</li>
+</ul>
+<h3 id="stage-4-paid-onboarding">Stage 4: Paid onboarding</h3>
+<ul>
+<li>only after support flow and billing flow are stable enough</li>
+</ul>
+<hr />
+<h2 id="20-major-mvp-risks">20. Major MVP Risks</h2>
+<h3 id="technical-risks">Technical risks</h3>
+<ul>
+<li>browser runtime instability</li>
+<li>session corruption</li>
+<li>queue duplication</li>
+<li>webhook retry storms</li>
+<li>insufficient worker isolation</li>
+</ul>
+<h3 id="product-risks">Product risks</h3>
+<ul>
+<li>copying too much of UltraMsg too early</li>
+<li>spending time on low-value parity features</li>
+<li>weak onboarding UX for QR and token setup</li>
+</ul>
+<h3 id="operational-risks">Operational risks</h3>
+<ul>
+<li>no admin tooling for failures</li>
+<li>insufficient metrics</li>
+<li>no incident playbook</li>
+</ul>
+<h3 id="compliance-and-platform-risks">Compliance and platform
+risks</h3>
+<ul>
+<li>WhatsApp account bans</li>
+<li>abuse by bad customers</li>
+<li>token leakage through logs or UI</li>
+</ul>
+<hr />
+<h2 id="21-what-must-not-slip">21. What Must Not Slip</h2>
+<p>The following should be treated as non-negotiable for MVP:</p>
+<ul>
+<li>instance lifecycle reliability</li>
+<li>message send correctness</li>
+<li>webhook retries and visibility</li>
+<li>admin ability to inspect and recover broken instances</li>
+<li>audit logs for privileged actions</li>
+<li>token rotation and token redaction</li>
+</ul>
+<p>If schedule pressure appears, cut scope from these areas instead:</p>
+<ul>
+<li>advanced billing automation</li>
+<li>richer analytics</li>
+<li>lower-value UI polish</li>
+<li>non-essential utilities</li>
+</ul>
+<hr />
+<h2 id="22-recommended-post-mvp-backlog">22. Recommended Post-MVP
+Backlog</h2>
+<p>Features for immediately after MVP:</p>
+<ul>
+<li>richer media send support</li>
+<li>chats and contacts sync improvements</li>
+<li>group metadata improvements</li>
+<li>advanced retry policies</li>
+<li>analytics dashboards</li>
+<li>customer team roles</li>
+<li>support impersonation with safeguards</li>
+<li>stronger abuse detection</li>
+<li>payment gateway automation</li>
+<li>export and reporting tools</li>
+</ul>
+<hr />
+<h2 id="23-final-recommendation">23. Final Recommendation</h2>
+<p>Elite Message MVP should be delivered in six sequential phases:</p>
+<ol type="1">
+<li>Foundation</li>
+<li>Identity, accounts, and instance skeleton</li>
+<li>Worker runtime and QR authorization</li>
+<li>Core messaging flow</li>
+<li>Customer dashboard completion</li>
+<li>Admin dashboard completion and hardening</li>
+</ol>
+<p>The real milestone is not when the UI looks complete. The real
+milestone is when this end-to-end chain is stable:</p>
+<ul>
+<li>create instance</li>
+<li>scan QR</li>
+<li>authenticate</li>
+<li>send message</li>
+<li>receive message</li>
+<li>deliver webhook</li>
+<li>recover from failure through admin tools</li>
+</ul>
+<p>That is the correct MVP center of gravity for Elite Message.</p>
+</body>
+</html>

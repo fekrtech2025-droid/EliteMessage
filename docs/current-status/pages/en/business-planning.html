@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Business and Planning Documentation | Elite Message</title>
+    <link rel="stylesheet" href="../../assets/styles/pages.css" />
+  </head>
+  <body>
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <div class="docs-brand">
+          <img src="../../assets/branding/elite-message-icon-only.png" alt="Elite Message" />
+          <div>
+            <div class="docs-brand-mark">Pages</div>
+            <p class="docs-brand-title">Elite Message</p>
+            <p class="docs-brand-subtitle">Elite Message Documentation Hub</p>
+          </div>
+        </div>
+
+        <div class="docs-sidebar-group">
+          <p class="docs-sidebar-label">Pages</p>
+          <nav class="docs-nav">
+            <a href="index.html" class="">
+                  <span>Home</span>
+                  <small>Elite Message Documentation Hub</small>
+                </a><a href="executive-summary.html" class="">
+                  <span>Executive Summary</span>
+                  <small>Current State</small>
+                </a><a href="business-planning.html" class="is-active">
+                  <span>Business and Planning Documentation</span>
+                  <small>Business</small>
+                </a><a href="requirements.html" class="">
+                  <span>Requirements Documentation</span>
+                  <small>Requirements</small>
+                </a><a href="product-design.html" class="">
+                  <span>Product and Design Documentation</span>
+                  <small>Product Design</small>
+                </a><a href="appendix.html" class="">
+                  <span>Appendix and References</span>
+                  <small>Appendix</small>
+                </a>
+          </nav>
+        </div>
+      </aside>
+
+      <main class="docs-main">
+        <header class="docs-topbar">
+          <div>
+            <p class="docs-kicker">Business</p>
+            <h1 class="docs-page-title">Business and Planning Documentation</h1>
+            <p class="docs-page-subtitle">Project overview, proposal, scope, feasibility, budget, stakeholders, and risks.</p>
+          </div>
+          <div class="docs-toolbar">
+            <a class="docs-chip primary" href="../ar/business-planning.html">النسخة العربية</a>
+            <a class="docs-chip" href="../index.html">Language index</a>
+            <a class="docs-chip" href="../../output/Elite-Message-Current-Status-EN.pdf">Open PDF version</a>
+          </div>
+        </header>
+
+        <article class="docs-article">
+          <h1 id="business-and-planning-documentation">Business and Planning
+Documentation</h1>
+<h2 id="project-overview">Project Overview</h2>
+<h3 id="purpose">Purpose</h3>
+<p>Elite Message is a multi-tenant messaging platform intended to let
+customers create and manage WhatsApp-linked instances, send and observe
+messages through APIs and dashboards, and let platform administrators
+oversee workspaces, workers, support cases, audit trails, and
+operational health.</p>
+<h3 id="business-problem">Business Problem</h3>
+<p>Organizations that rely on WhatsApp delivery often need:</p>
+<ul>
+<li>a managed way to operate multiple sending instances</li>
+<li>a customer-facing workspace for runtime control and API use</li>
+<li>an admin-facing control plane for operations and support</li>
+<li>traceability for messages, lifecycle events, tokens, and
+incidents</li>
+</ul>
+<p>Elite Message addresses that by combining customer self-service,
+admin supervision, and worker-driven runtime execution in one
+platform.</p>
+<h3 id="product-scope-summary">Product Scope Summary</h3>
+<p>Current repository scope includes:</p>
+<ul>
+<li>customer signup, signin, Google OAuth, and session management</li>
+<li>admin signin and MFA-capable authentication flow</li>
+<li>workspace and membership management</li>
+<li>instance creation, lifecycle operations, runtime visibility, QR/auth
+state, and token management</li>
+<li>outbound/inbound messaging records and webhook delivery
+tracking</li>
+<li>public API usage via account and instance tokens</li>
+<li>support, audit, workers, and admin operational screens</li>
+</ul>
+<h3 id="current-technical-baseline">Current Technical Baseline</h3>
+<ul>
+<li>Monorepo: <code>pnpm</code> + <code>Turborepo</code></li>
+<li>Web apps: Next.js 16 and React 19</li>
+<li>API: NestJS 11 with Express 5 and Socket.IO</li>
+<li>Worker: BullMQ + Redis + <code>whatsapp-web.js</code></li>
+<li>Database: PostgreSQL via Prisma 7</li>
+<li>Object storage: MinIO / S3-compatible</li>
+<li>Observability: Prometheus, Alertmanager, Grafana</li>
+</ul>
+<h3 id="current-product-status">Current Product Status</h3>
+<p>The codebase is beyond foundation stage. It already contains working
+customer/admin applications, API and worker services, operational data
+models, public API documentation UI, and local observability assets. It
+should be treated as an active MVP-to-post-MVP platform rather than a
+project bootstrap.</p>
+<h3 id="target-users">Target Users</h3>
+<ul>
+<li>customer workspace owners and operators</li>
+<li>platform administrators</li>
+<li>support and operations staff</li>
+<li>backend integrators consuming Elite Message APIs</li>
+</ul>
+<h3 id="success-criteria">Success Criteria</h3>
+<ul>
+<li>customers can authenticate, create instances, link WhatsApp,
+retrieve tokens, and call APIs</li>
+<li>admins can supervise workspaces, workers, messaging activity,
+support, and audit history</li>
+<li>runtime state, operations, and delivery history are visible and
+traceable</li>
+<li>the platform is maintainable through shared contracts, typed config,
+and a documented architecture</li>
+</ul>
+<h2 id="software-proposal">Software Proposal</h2>
+<h3 id="proposal-summary">Proposal Summary</h3>
+<p>This proposal positions Elite Message as an operational messaging
+platform that combines:</p>
+<ul>
+<li>customer self-service for instance creation, API access, and
+day-to-day runtime work</li>
+<li>administrator tooling for supervision, support, compliance, and
+intervention</li>
+<li>worker-based execution for QR sessions, lifecycle operations, and
+queue-backed message processing</li>
+</ul>
+<h3 id="proposed-solution">Proposed Solution</h3>
+<p>Deliver and continue maturing a platform with these layers:</p>
+<ol type="1">
+<li>Customer surface
+<ul>
+<li>authentication</li>
+<li>dashboard and runtime views</li>
+<li>messaging explorer</li>
+<li>API documentation and token use</li>
+</ul></li>
+<li>Admin surface
+<ul>
+<li>users, workspaces, workers, support, audit, and messaging
+oversight</li>
+</ul></li>
+<li>Platform API
+<ul>
+<li>dashboard endpoints</li>
+<li>admin endpoints</li>
+<li>internal worker endpoints</li>
+<li>public instance/account API endpoints</li>
+</ul></li>
+<li>Worker runtime
+<ul>
+<li>WhatsApp session handling</li>
+<li>operations execution</li>
+<li>queue processing</li>
+<li>heartbeat reporting</li>
+</ul></li>
+</ol>
+<h3 id="expected-business-outcomes">Expected Business Outcomes</h3>
+<ul>
+<li>reduce manual instance handling by exposing customer
+self-service</li>
+<li>improve incident handling via centralized admin and audit
+tooling</li>
+<li>create a reusable API product for backend integrations</li>
+<li>establish a platform that can grow into stronger multi-tenant
+operational controls</li>
+</ul>
+<h3 id="why-this-architecture-is-appropriate">Why This Architecture Is
+Appropriate</h3>
+<ul>
+<li>web surfaces and runtime worker concerns are separated cleanly</li>
+<li>PostgreSQL and Prisma provide a clear source of truth for
+multi-tenant records</li>
+<li>Redis and BullMQ fit queue-backed lifecycle and message
+processing</li>
+<li>Next.js + NestJS keep the stack type-safe and straightforward for a
+TypeScript team</li>
+</ul>
+<h3 id="current-recommendation">Current Recommendation</h3>
+<p>The project should continue from its current working baseline rather
+than being replanned as a greenfield build. Recommended near-term
+focus:</p>
+<ul>
+<li>finish current-state documentation</li>
+<li>continue customer/admin UX refinement</li>
+<li>strengthen operational hardening and production-readiness gaps</li>
+<li>formalize release and support procedures</li>
+</ul>
+<h2 id="scope-document">Scope Document</h2>
+<h3 id="scope-statement">Scope Statement</h3>
+<p>Elite Message delivers a multi-tenant messaging control platform for
+customers and administrators, backed by a runtime worker and an
+operational API surface.</p>
+<h3 id="in-scope">In Scope</h3>
+<h4 id="customer-scope">Customer scope</h4>
+<ul>
+<li>signup and signin</li>
+<li>Google OAuth signin/signup</li>
+<li>workspace dashboard</li>
+<li>instance creation and inspection</li>
+<li>QR/auth lifecycle visibility</li>
+<li>instance token visibility and rotation-assisted workflows</li>
+<li>outbound/inbound message exploration</li>
+<li>settings and subscription pages</li>
+<li>API documentation and language examples</li>
+</ul>
+<h4 id="admin-scope">Admin scope</h4>
+<ul>
+<li>admin signin and MFA</li>
+<li>users management</li>
+<li>workspaces management</li>
+<li>workers monitoring</li>
+<li>instance detail inspection</li>
+<li>messages explorer</li>
+<li>support case views</li>
+<li>audit views</li>
+</ul>
+<h4 id="platform-scope">Platform scope</h4>
+<ul>
+<li>PostgreSQL-backed tenant and runtime data model</li>
+<li>API tokens for account and instance access</li>
+<li>webhook delivery tracking</li>
+<li>rate limiting and retention settings</li>
+<li>internal metrics and local observability configuration</li>
+</ul>
+<h3 id="out-of-scope">Out of Scope</h3>
+<ul>
+<li>native mobile applications</li>
+<li>dedicated billing gateway implementation</li>
+<li>third-party CRM or ERP connectors beyond API/webhook patterns</li>
+<li>full production SRE runbooks and enterprise compliance pack</li>
+<li>dark mode or multi-brand theming</li>
+</ul>
+<h3 id="constraints">Constraints</h3>
+<ul>
+<li>the project is currently optimized for local/docker-based
+development</li>
+<li>some planning and commercial data is not stored in the
+repository</li>
+<li>parts of operational hardening remain partial even where
+configuration scaffolding exists</li>
+</ul>
+<h3 id="assumptions">Assumptions</h3>
+<ul>
+<li>PostgreSQL remains the primary system of record</li>
+<li>Redis remains the queue and transient coordination layer</li>
+<li>customer usage centers on instance-oriented sending workflows</li>
+<li>admin users require higher-trust controls than customers</li>
+</ul>
+<h3 id="current-scope-boundary-assessment">Current Scope Boundary
+Assessment</h3>
+<p>The repository already exceeds simple MVP scaffolding. The practical
+scope boundary today is not “build the first app”, but “stabilize and
+harden an already broad platform surface.”</p>
+<h2 id="feasibility-study">Feasibility Study</h2>
+<h3 id="executive-assessment">Executive Assessment</h3>
+<p>Elite Message is technically feasible and already partially realized.
+The main feasibility question is no longer whether the system can be
+built, but whether the current implementation can be matured into a
+reliably operated production platform.</p>
+<h3 id="technical-feasibility">Technical Feasibility</h3>
+<p>Assessment: High</p>
+<p>Reasons:</p>
+<ul>
+<li>the repository already contains customer web, admin web, API,
+worker, database schema, and observability assets</li>
+<li>the stack is coherent and mainstream for a TypeScript platform
+team</li>
+<li>the data model already covers users, workspaces, memberships,
+instances, tokens, messages, webhooks, audit, workers, and support
+cases</li>
+</ul>
+<h3 id="operational-feasibility">Operational Feasibility</h3>
+<p>Assessment: Medium</p>
+<p>Reasons:</p>
+<ul>
+<li>local developer operations are supported through Docker Compose and
+environment-driven configuration</li>
+<li>observability configuration exists for Prometheus, Grafana, and
+Alertmanager</li>
+<li>however, production operating procedures, incident playbooks, and
+full hardening are not yet documented as complete</li>
+</ul>
+<h3 id="economic-feasibility">Economic Feasibility</h3>
+<p>Assessment: Medium to High</p>
+<p>Reasons:</p>
+<ul>
+<li>the codebase already captures a large share of platform scope,
+reducing greenfield cost</li>
+<li>continued investment should focus on stabilization, UX refinement,
+and production-readiness rather than basic scaffolding</li>
+<li>the broad scope means uncontrolled polish/hardening work could still
+expand cost if not sequenced carefully</li>
+</ul>
+<h3 id="schedule-feasibility">Schedule Feasibility</h3>
+<p>Assessment: Medium</p>
+<p>Reasons:</p>
+<ul>
+<li>incremental delivery is feasible because the system already runs
+locally</li>
+<li>the backlog spans customer UX, admin UX, hardening, and support
+documentation</li>
+<li>final production-readiness depends on resolving operational gaps,
+not only feature completion</li>
+</ul>
+<h3 id="legal-and-security-feasibility">Legal and Security
+Feasibility</h3>
+<p>Assessment: Medium</p>
+<p>Reasons:</p>
+<ul>
+<li>the system already models sessions, tokens, audit logs, webhook
+signing, rate limits, and admin MFA</li>
+<li>legal/compliance posture still needs explicit policy documentation
+for data retention, support handling, and incident response</li>
+</ul>
+<h3 id="recommendation">Recommendation</h3>
+<p>Proceed with a structured stabilization program:</p>
+<ol type="1">
+<li>freeze and document current-state architecture and requirements</li>
+<li>finish customer/admin UX refinement</li>
+<li>validate operational controls end to end</li>
+<li>close security, support, and observability gaps before production
+launch</li>
+</ol>
+<h2 id="budget-and-timeline">Budget and Timeline</h2>
+<h3 id="important-note">Important Note</h3>
+<p>The repository does not contain an approved commercial budget. The
+figures below are planning estimates derived from the current project
+scope and should be treated as a standard budgeting baseline, not as
+recorded spend.</p>
+<h3 id="delivery-assumptions">Delivery Assumptions</h3>
+<ul>
+<li>1 backend/platform engineer</li>
+<li>1 frontend engineer</li>
+<li>0.5 QA engineer</li>
+<li>0.25 product/design lead</li>
+<li>0.25 DevOps/SRE support</li>
+</ul>
+<h3 id="indicative-effort">Indicative Effort</h3>
+<table>
+<thead>
+<tr>
+<th>Workstream</th>
+<th>Estimated effort</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Documentation and requirements baseline</td>
+<td>1 to 2 weeks</td>
+</tr>
+<tr>
+<td>Customer UX refinement</td>
+<td>2 to 4 weeks</td>
+</tr>
+<tr>
+<td>Admin UX refinement</td>
+<td>2 to 3 weeks</td>
+</tr>
+<tr>
+<td>Operational hardening and verification</td>
+<td>3 to 5 weeks</td>
+</tr>
+<tr>
+<td>Release readiness and support processes</td>
+<td>1 to 2 weeks</td>
+</tr>
+</tbody>
+</table>
+<p>Estimated total: 9 to 16 calendar weeks, depending on how much work
+is parallelized and how much operational hardening is required for the
+release target.</p>
+<h3 id="indicative-budget-model">Indicative Budget Model</h3>
+<p>Using a blended delivery cost of approximately USD 2,500 to USD 5,000
+per full-time-equivalent week:</p>
+<ul>
+<li>lower-bound estimate: USD 62,500</li>
+<li>upper-bound estimate: USD 150,000</li>
+</ul>
+<p>These numbers are reasonable planning placeholders for taking the
+current codebase to a better-documented, better-hardened release
+state.</p>
+<h3 id="suggested-milestone-plan">Suggested Milestone Plan</h3>
+<table>
+<thead>
+<tr>
+<th>Milestone</th>
+<th>Target outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M1</td>
+<td>Current-state documentation baseline approved</td>
+</tr>
+<tr>
+<td>M2</td>
+<td>Customer UI/UX stabilization completed</td>
+</tr>
+<tr>
+<td>M3</td>
+<td>Admin UI/UX stabilization completed</td>
+</tr>
+<tr>
+<td>M4</td>
+<td>Hardening, metrics, alerts, and validation complete</td>
+</tr>
+<tr>
+<td>M5</td>
+<td>Release readiness review and go-live decision</td>
+</tr>
+</tbody>
+</table>
+<h3 id="timeline-risk-drivers">Timeline Risk Drivers</h3>
+<ul>
+<li>WhatsApp runtime reliability work</li>
+<li>environment and OAuth configuration issues</li>
+<li>backlog growth from UX redesign requests</li>
+<li>production hardening requirements beyond local validation</li>
+</ul>
+<h2 id="stakeholder-list">Stakeholder List</h2>
+<h3 id="important-note-1">Important Note</h3>
+<p>The repository does not store a formal stakeholder register. The list
+below is a standard current-state stakeholder model inferred from the
+implemented product surfaces and platform responsibilities.</p>
+<h3 id="stakeholder-register">Stakeholder Register</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Stakeholder</th>
+<th>Role in project</th>
+<th>Main interests</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Product owner / sponsor</td>
+<td>Business direction and funding</td>
+<td>Scope, timeline, value delivery, release decisions</td>
+</tr>
+<tr>
+<td>Customer workspace owner</td>
+<td>Primary external operator</td>
+<td>Instance setup, token access, messaging, visibility</td>
+</tr>
+<tr>
+<td>Customer operator / admin</td>
+<td>Day-to-day workspace user</td>
+<td>Runtime status, messages, settings, API usage</td>
+</tr>
+<tr>
+<td>Platform administrator</td>
+<td>Internal operational owner</td>
+<td>User/workspace governance, interventions, oversight</td>
+</tr>
+<tr>
+<td>Support / operations team</td>
+<td>Issue triage and recovery</td>
+<td>Support cases, auditability, operational tooling</td>
+</tr>
+<tr>
+<td>Backend/platform engineering</td>
+<td>Core system delivery</td>
+<td>API correctness, worker orchestration, data integrity</td>
+</tr>
+<tr>
+<td>Frontend engineering</td>
+<td>Customer/admin UX delivery</td>
+<td>Usability, clarity, route architecture, feedback states</td>
+</tr>
+<tr>
+<td>QA / validation</td>
+<td>Product quality</td>
+<td>Regression coverage, manual flows, acceptance readiness</td>
+</tr>
+<tr>
+<td>DevOps / SRE</td>
+<td>Runtime reliability</td>
+<td>Infra, metrics, alerting, deployment posture</td>
+</tr>
+<tr>
+<td>Security / compliance reviewer</td>
+<td>Risk control</td>
+<td>Sessions, tokens, MFA, retention, auditability</td>
+</tr>
+</tbody>
+</table>
+<h3 id="stakeholder-priorities">Stakeholder Priorities</h3>
+<ul>
+<li>customers need predictable self-service and clear API
+onboarding</li>
+<li>admins need reliable operational visibility and intervention
+tools</li>
+<li>engineering needs shared contracts, stable data models, and
+documented boundaries</li>
+<li>operations needs observability and support playbooks</li>
+</ul>
+<h2 id="risk-register">Risk Register</h2>
+<h3 id="risk-scale">Risk Scale</h3>
+<ul>
+<li>Probability: Low / Medium / High</li>
+<li>Impact: Low / Medium / High</li>
+</ul>
+<h3 id="current-risks">Current Risks</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr>
+<th>ID</th>
+<th>Risk</th>
+<th>Probability</th>
+<th>Impact</th>
+<th>Mitigation</th>
+<th>Current status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R1</td>
+<td>Product docs drift from implementation</td>
+<td>High</td>
+<td>Medium</td>
+<td>Maintain current-state docs in-repo and update with major feature
+changes</td>
+<td>Active</td>
+</tr>
+<tr>
+<td>R2</td>
+<td>Runtime reliability issues in WhatsApp worker flows</td>
+<td>Medium</td>
+<td>High</td>
+<td>Keep worker heartbeats, lifecycle event logs, and recovery tooling
+visible</td>
+<td>Active</td>
+</tr>
+<tr>
+<td>R3</td>
+<td>OAuth or auth misconfiguration blocks access</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Validate env setup, clear error messaging, and test-user
+instructions</td>
+<td>Active</td>
+</tr>
+<tr>
+<td>R4</td>
+<td>Security controls remain partial for production use</td>
+<td>Medium</td>
+<td>High</td>
+<td>Complete hardening checklist, threat review, and validation
+plan</td>
+<td>Active</td>
+</tr>
+<tr>
+<td>R5</td>
+<td>UI redesign work expands scope without closure</td>
+<td>High</td>
+<td>Medium</td>
+<td>Sequence UX changes by shell, dashboard, explorer, detail pages</td>
+<td>Active</td>
+</tr>
+<tr>
+<td>R6</td>
+<td>Queue, webhook, or retry behavior becomes hard to operate at
+scale</td>
+<td>Medium</td>
+<td>High</td>
+<td>Keep metrics, delivery explorer, replay support, and retention
+policies documented</td>
+<td>Active</td>
+</tr>
+<tr>
+<td>R7</td>
+<td>Local-only assumptions leak into production planning</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Document environment dependencies and production gaps
+explicitly</td>
+<td>Active</td>
+</tr>
+<tr>
+<td>R8</td>
+<td>Token/session handling expectations are unclear to users</td>
+<td>Medium</td>
+<td>Medium</td>
+<td>Keep API docs, token rotation guidance, and account-vs-instance
+token distinctions explicit</td>
+<td>Active</td>
+</tr>
+</tbody>
+</table>
+<h3 id="priority-risks">Priority Risks</h3>
+<p>The highest-priority current risks are:</p>
+<ul>
+<li>R2 runtime reliability</li>
+<li>R4 incomplete production hardening</li>
+<li>R5 uncontrolled UX scope expansion</li>
+</ul>
+<p>These should drive near-term planning decisions.</p>
+
+        </article>
+        <p class="docs-footer">This page set is generated from the current source documents under docs/current-status.</p>
+      </main>
+    </div>
+  </body>
+</html>

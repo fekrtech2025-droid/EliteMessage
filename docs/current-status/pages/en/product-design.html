@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Product and Design Documentation | Elite Message</title>
+    <link rel="stylesheet" href="../../assets/styles/pages.css" />
+  </head>
+  <body>
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <div class="docs-brand">
+          <img src="../../assets/branding/elite-message-icon-only.png" alt="Elite Message" />
+          <div>
+            <div class="docs-brand-mark">Pages</div>
+            <p class="docs-brand-title">Elite Message</p>
+            <p class="docs-brand-subtitle">Elite Message Documentation Hub</p>
+          </div>
+        </div>
+
+        <div class="docs-sidebar-group">
+          <p class="docs-sidebar-label">Pages</p>
+          <nav class="docs-nav">
+            <a href="index.html" class="">
+                  <span>Home</span>
+                  <small>Elite Message Documentation Hub</small>
+                </a><a href="executive-summary.html" class="">
+                  <span>Executive Summary</span>
+                  <small>Current State</small>
+                </a><a href="business-planning.html" class="">
+                  <span>Business and Planning Documentation</span>
+                  <small>Business</small>
+                </a><a href="requirements.html" class="">
+                  <span>Requirements Documentation</span>
+                  <small>Requirements</small>
+                </a><a href="product-design.html" class="is-active">
+                  <span>Product and Design Documentation</span>
+                  <small>Product Design</small>
+                </a><a href="appendix.html" class="">
+                  <span>Appendix and References</span>
+                  <small>Appendix</small>
+                </a>
+          </nav>
+        </div>
+      </aside>
+
+      <main class="docs-main">
+        <header class="docs-topbar">
+          <div>
+            <p class="docs-kicker">Product Design</p>
+            <h1 class="docs-page-title">Product and Design Documentation</h1>
+            <p class="docs-page-subtitle">Architecture, design levels, schema, API design, UI/UX, wireframes, and flow documentation.</p>
+          </div>
+          <div class="docs-toolbar">
+            <a class="docs-chip primary" href="../ar/product-design.html">النسخة العربية</a>
+            <a class="docs-chip" href="../index.html">Language index</a>
+            <a class="docs-chip" href="../../output/Elite-Message-Current-Status-EN.pdf">Open PDF version</a>
+          </div>
+        </header>
+
+        <article class="docs-article">
+          <h1 id="product-and-design-documentation">Product and Design
+Documentation</h1>
+<h2 id="system-architecture-document">System Architecture Document</h2>
+<h3 id="overview">Overview</h3>
+<p>Elite Message is organized as a monorepo with four primary runtime
+applications:</p>
+<ul>
+<li>customer web</li>
+<li>admin web</li>
+<li>API</li>
+<li>worker</li>
+</ul>
+<p>These applications depend on shared packages for configuration,
+contracts, UI primitives, and database access.</p>
+<h3 id="runtime-architecture">Runtime Architecture</h3>
+<figure>
+<img src="../../assets/diagrams/en/runtime-architecture.png"
+class="diagram" alt="Runtime Architecture Diagram" />
+<figcaption aria-hidden="true">Runtime Architecture Diagram</figcaption>
+</figure>
+<h3 id="architectural-characteristics">Architectural
+Characteristics</h3>
+<ul>
+<li>multi-application, role-separated UI surfaces</li>
+<li>centralized API and persistence model</li>
+<li>queue-backed worker execution</li>
+<li>typed shared contracts and shared environment parsing</li>
+<li>local operational tooling through Docker Compose</li>
+</ul>
+<h3 id="current-state-assessment">Current-State Assessment</h3>
+<p>What is clearly implemented:</p>
+<ul>
+<li>customer and admin web apps</li>
+<li>a structured NestJS API surface</li>
+<li>a runtime worker with queue-backed dependencies</li>
+<li>a rich Prisma data model</li>
+<li>observability configuration assets</li>
+</ul>
+<p>What remains partially mature:</p>
+<ul>
+<li>production hardening depth</li>
+<li>operational runbooks</li>
+<li>formal release documentation</li>
+</ul>
+<h3 id="supporting-infrastructure">Supporting Infrastructure</h3>
+<ul>
+<li>PostgreSQL stores tenant, runtime, audit, support, and message
+data</li>
+<li>Redis supports queue-backed and worker-related flows</li>
+<li>MinIO supports S3-compatible object storage needs</li>
+<li>Prometheus, Grafana, and Alertmanager are provisioned for local
+observability</li>
+</ul>
+<h2 id="high-level-design-hld">High-Level Design (HLD)</h2>
+<h3 id="module-decomposition">Module Decomposition</h3>
+<h4 id="applications">Applications</h4>
+<ul>
+<li><code>apps/customer-web</code>
+<ul>
+<li>customer authentication</li>
+<li>customer dashboard and navigation shell</li>
+<li>instance detail</li>
+<li>messages, settings, subscription, and API docs pages</li>
+</ul></li>
+<li><code>apps/admin-web</code>
+<ul>
+<li>admin authentication</li>
+<li>users, workspaces, workers, instances, support, audit, and messages
+pages</li>
+</ul></li>
+<li><code>apps/api</code>
+<ul>
+<li>authentication</li>
+<li>customer dashboard endpoints</li>
+<li>admin endpoints</li>
+<li>internal endpoints</li>
+<li>public instance/account API endpoints</li>
+</ul></li>
+<li><code>apps/worker</code>
+<ul>
+<li>worker heartbeat and health</li>
+<li>instance runtime/session handling</li>
+<li>queue-backed operations</li>
+</ul></li>
+</ul>
+<h4 id="shared-packages">Shared packages</h4>
+<ul>
+<li><code>packages/config</code>: environment parsing and logger-related
+configuration</li>
+<li><code>packages/contracts</code>: shared Zod contracts</li>
+<li><code>packages/db</code>: Prisma client and schema</li>
+<li><code>packages/ui</code>: shared UI primitives and shell
+components</li>
+</ul>
+<h3 id="system-boundaries">System Boundaries</h3>
+<ul>
+<li>Web apps do not speak to the database directly.</li>
+<li>The worker does not own customer-facing UI concerns.</li>
+<li>The API is the primary integration boundary for customer UI, admin
+UI, and external API use.</li>
+<li>Shared packages keep config, schema, and UI conventions
+centralized.</li>
+</ul>
+<h3 id="major-data-domains">Major Data Domains</h3>
+<ul>
+<li>identity and sessions</li>
+<li>tenancy and membership</li>
+<li>instances and runtime</li>
+<li>messages and delivery</li>
+<li>tokens and webhook delivery</li>
+<li>workers and support</li>
+<li>auditability and retention</li>
+</ul>
+<h3 id="hld-decisions">HLD Decisions</h3>
+<ul>
+<li>separate admin and customer experiences instead of one overloaded
+application</li>
+<li>use workspace and instance as core business abstractions</li>
+<li>distinguish internal instance UUIDs from public API instance
+IDs</li>
+<li>keep long-running runtime work out of synchronous HTTP request
+handling</li>
+</ul>
+<h2 id="low-level-design-lld">Low-Level Design (LLD)</h2>
+<h3 id="customer-web">Customer Web</h3>
+<p>Current route set includes:</p>
+<ul>
+<li><code>/</code></li>
+<li><code>/signup</code></li>
+<li><code>/messages</code></li>
+<li><code>/settings</code></li>
+<li><code>/subscription</code></li>
+<li><code>/api-documents</code></li>
+<li><code>/instances/[id]</code></li>
+<li><code>/auth/google</code></li>
+</ul>
+<p>Current client concerns include:</p>
+<ul>
+<li>auth/session handling</li>
+<li>workspace-aware shell and topbar/sidebar navigation</li>
+<li>navigation progress behavior</li>
+<li>API documentation rendering with language examples</li>
+<li>instance credential handling in browser session state</li>
+</ul>
+<h3 id="admin-web">Admin Web</h3>
+<p>Current route set includes:</p>
+<ul>
+<li><code>/</code></li>
+<li><code>/messages</code></li>
+<li><code>/users</code></li>
+<li><code>/workspaces</code></li>
+<li><code>/workers</code></li>
+<li><code>/workers/[id]</code></li>
+<li><code>/instances/[id]</code></li>
+<li><code>/support</code></li>
+<li><code>/audit</code></li>
+</ul>
+<p>Current client concerns include:</p>
+<ul>
+<li>admin login and MFA flows</li>
+<li>operational explorer pages</li>
+<li>worker and instance inspection</li>
+<li>support and audit review</li>
+</ul>
+<h3 id="api">API</h3>
+<p>Current API concerns include:</p>
+<ul>
+<li>login, signup, refresh, Google auth callback, and admin MFA-related
+flows</li>
+<li>customer dashboard routes</li>
+<li>admin routes</li>
+<li>public instance/account API routes</li>
+<li>health, readiness, and metrics</li>
+<li>internal coordination endpoints</li>
+</ul>
+<h3 id="worker">Worker</h3>
+<p>Current worker concerns include:</p>
+<ul>
+<li>heartbeat reporting</li>
+<li>runtime session state management</li>
+<li>queued operation execution</li>
+<li>WhatsApp backend integration through
+<code>whatsapp-web.js</code></li>
+<li>local health endpoint</li>
+</ul>
+<h3 id="data-layer">Data Layer</h3>
+<ul>
+<li>Prisma schema in <code>packages/db/prisma/schema.prisma</code></li>
+<li>PostgreSQL source of truth</li>
+<li>relation-heavy model centered on <code>User</code>,
+<code>Workspace</code>, <code>Membership</code>, and
+<code>Instance</code></li>
+</ul>
+<h3 id="observability-layer">Observability Layer</h3>
+<ul>
+<li>Prometheus scrape config</li>
+<li>Alertmanager config</li>
+<li>Grafana dashboard provisioning</li>
+</ul>
+<h3 id="lld-observation">LLD Observation</h3>
+<p>The codebase favors clear package boundaries and shared TypeScript
+contracts, but some domain logic is still spread across UI clients, API
+endpoints, and worker behavior. That is normal at current maturity and
+should be documented rather than hidden.</p>
+<h2 id="database-schema-documentation">Database Schema
+Documentation</h2>
+<h3 id="primary-technology">Primary Technology</h3>
+<ul>
+<li>Database: PostgreSQL</li>
+<li>Access layer: Prisma 7</li>
+<li>Schema source: <code>packages/db/prisma/schema.prisma</code></li>
+</ul>
+<h3 id="core-entity-groups">Core Entity Groups</h3>
+<h4 id="identity-and-tenancy">Identity and tenancy</h4>
+<ul>
+<li><code>User</code></li>
+<li><code>Workspace</code></li>
+<li><code>Membership</code></li>
+<li><code>RefreshSession</code></li>
+<li><code>ApiToken</code></li>
+</ul>
+<h4 id="runtime-and-lifecycle">Runtime and lifecycle</h4>
+<ul>
+<li><code>Instance</code></li>
+<li><code>InstanceSettings</code></li>
+<li><code>InstanceRuntimeState</code></li>
+<li><code>InstanceOperation</code></li>
+<li><code>InstanceLifecycleEvent</code></li>
+</ul>
+<h4 id="messaging-and-webhook-delivery">Messaging and webhook
+delivery</h4>
+<ul>
+<li><code>OutboundMessage</code></li>
+<li><code>OutboundMessageAttempt</code></li>
+<li><code>InboundMessage</code></li>
+<li><code>WebhookDelivery</code></li>
+</ul>
+<h4 id="operations-and-governance">Operations and governance</h4>
+<ul>
+<li><code>WorkerHeartbeat</code></li>
+<li><code>AuditLog</code></li>
+<li><code>SupportCase</code></li>
+</ul>
+<h3 id="key-relationships">Key Relationships</h3>
+<ul>
+<li>one user can have many memberships</li>
+<li>one workspace can have many memberships, instances, tokens, audit
+logs, and support cases</li>
+<li>one instance belongs to one workspace and can have settings, runtime
+state, operations, messages, webhook deliveries, lifecycle events, and
+tokens</li>
+<li>outbound messages can have many attempts and optional related
+webhook deliveries</li>
+</ul>
+<h3 id="important-enums">Important Enums</h3>
+<ul>
+<li><code>UserRole</code>, <code>UserStatus</code></li>
+<li><code>WorkspaceStatus</code>, <code>MembershipRole</code></li>
+<li><code>InstanceLifecycleStatus</code>,
+<code>InstanceOperationType</code>,
+<code>InstanceOperationStatus</code></li>
+<li><code>OutboundMessageType</code>,
+<code>MessageDeliveryStatus</code>, <code>MessageDeliveryAck</code></li>
+<li><code>WebhookEventType</code>,
+<code>WebhookDeliveryStatus</code></li>
+<li><code>WorkerStatus</code></li>
+<li><code>SupportCaseStatus</code>,
+<code>SupportCasePriority</code></li>
+</ul>
+<h3 id="schema-design-notes">Schema Design Notes</h3>
+<ul>
+<li>API tokens are stored hashed, with prefix metadata retained for
+user-facing display.</li>
+<li>Instances have both internal UUIDs and public IDs for API use.</li>
+<li>Runtime state is separated from core instance metadata.</li>
+<li>Audit and support entities are first-class records rather than
+freeform logs.</li>
+</ul>
+<h3 id="important-indexes">Important Indexes</h3>
+<ul>
+<li>membership uniqueness on workspace/user</li>
+<li>refresh session index on user and expiry</li>
+<li>token indexes by workspace/instance and token type</li>
+<li>message indexes by instance, status, schedule, reference, recipient,
+and sender</li>
+<li>webhook delivery indexes by status and retry schedule</li>
+<li>audit/support indexes by status, actor, entity, workspace, and
+instance</li>
+</ul>
+<h3 id="reference">Reference</h3>
+<p>For a longer schema walkthrough, see the existing reference doc:</p>
+<ul>
+<li><a
+href="/Volumes/MACOS/EliteMessage/docs/elite-message-database-schema.md">Existing
+database schema reference</a></li>
+</ul>
+<h2 id="api-design-and-specification">API Design and Specification</h2>
+<h3 id="api-style">API Style</h3>
+<ul>
+<li>HTTP/JSON</li>
+<li>versioned routes under <code>/api/v1</code></li>
+<li>separate route families for auth, customer, admin, internal, and
+public instance/account APIs</li>
+</ul>
+<h3 id="api-consumer-types">API Consumer Types</h3>
+<ul>
+<li>customer web app</li>
+<li>admin web app</li>
+<li>worker/internal services</li>
+<li>external backend integrators</li>
+</ul>
+<h3 id="authentication-models">Authentication Models</h3>
+<h4 id="dashboard-session-auth">Dashboard session auth</h4>
+<ul>
+<li>email/password login</li>
+<li>refresh-backed session model</li>
+<li>Google OAuth for customer accounts when configured</li>
+<li>admin MFA for privileged access</li>
+</ul>
+<h4 id="token-auth">Token auth</h4>
+<ul>
+<li>account-level API tokens</li>
+<li>instance-level API tokens</li>
+<li>bearer usage and query-token patterns where supported by the public
+API</li>
+</ul>
+<h3 id="major-route-families">Major Route Families</h3>
+<ul>
+<li><code>/api/v1/auth/*</code></li>
+<li><code>/api/v1/customer/*</code></li>
+<li><code>/api/v1/admin/*</code></li>
+<li><code>/api/v1/internal/*</code></li>
+<li><code>/api/v1/instance/*</code></li>
+<li><code>/health</code>, <code>/ready</code>,
+<code>/metrics</code></li>
+</ul>
+<h3 id="design-principles">Design Principles</h3>
+<ul>
+<li>keep admin and customer concerns separated</li>
+<li>expose instance-scoped public APIs for sending and runtime
+inspection</li>
+<li>keep internal worker coordination separate from public routes</li>
+<li>preserve room for rate limiting, metrics, and retention
+controls</li>
+</ul>
+<h3 id="current-public-api-themes">Current Public API Themes</h3>
+<ul>
+<li>send chat and media messages</li>
+<li>inspect instance status</li>
+<li>inspect message history</li>
+<li>use account and instance tokens safely</li>
+<li>document payloads with code examples in common backend
+languages</li>
+</ul>
+<h3 id="error-and-response-design">Error and Response Design</h3>
+<p>The exact route-level shapes should be read from the implementation
+and existing route reference. In general, the design intent is:</p>
+<ul>
+<li>typed JSON payloads</li>
+<li>explicit unauthorized/forbidden handling</li>
+<li>rate-limit capable responses on public and dashboard routes</li>
+<li>machine-readable error bodies for UI and integration use</li>
+</ul>
+<h3 id="current-state-notes">Current-State Notes</h3>
+<ul>
+<li>API documentation exists in the customer app for practical developer
+onboarding.</li>
+<li>Admin and customer UIs rely on the same backend but different route
+families.</li>
+<li>Health and metrics endpoints exist for operational inspection.</li>
+</ul>
+<h3 id="reference-1">Reference</h3>
+<p>For the detailed route inventory, see:</p>
+<ul>
+<li><a
+href="/Volumes/MACOS/EliteMessage/docs/elite-message-api-route-list.md">Existing
+API route list</a></li>
+</ul>
+<h2 id="uiux-documentation">UI/UX Documentation</h2>
+<h3 id="product-surfaces">Product Surfaces</h3>
+<h4 id="customer-surface">Customer surface</h4>
+<p>Current major pages:</p>
+<ul>
+<li>signin</li>
+<li>signup</li>
+<li>dashboard</li>
+<li>messages</li>
+<li>settings</li>
+<li>subscription</li>
+<li>API documents</li>
+<li>instance detail</li>
+</ul>
+<h4 id="admin-surface">Admin surface</h4>
+<p>Current major pages:</p>
+<ul>
+<li>admin signin</li>
+<li>dashboard</li>
+<li>messages</li>
+<li>users</li>
+<li>workspaces</li>
+<li>workers</li>
+<li>worker detail</li>
+<li>support</li>
+<li>audit</li>
+<li>instance detail</li>
+</ul>
+<h3 id="current-ux-direction">Current UX Direction</h3>
+<ul>
+<li>light-theme-first</li>
+<li>role-separated customer/admin experiences</li>
+<li>persistent sidebar + topbar shell for authenticated routes</li>
+<li>scan-first explorer pages</li>
+<li>high-contrast operational status and action framing</li>
+</ul>
+<h3 id="shared-ui-characteristics">Shared UI Characteristics</h3>
+<ul>
+<li>shared <code>@elite-message/ui</code> package</li>
+<li>common shell, cards, badges, banners, and auth primitives</li>
+<li>modern auth flows with inline validation and contextual help</li>
+<li>progress feedback during page navigation</li>
+</ul>
+<h3 id="customer-ux-priorities">Customer UX Priorities</h3>
+<ul>
+<li>quick path from authentication to instance setup</li>
+<li>visible instance runtime and API access</li>
+<li>clear distinction between workspace-level and instance-level
+tokens</li>
+<li>strong API onboarding experience for backend developers</li>
+</ul>
+<h3 id="admin-ux-priorities">Admin UX Priorities</h3>
+<ul>
+<li>dense but readable operational explorers</li>
+<li>reliable filtering and traceability</li>
+<li>clear privileged-action framing</li>
+<li>strong session and MFA states</li>
+</ul>
+<h3 id="current-ux-gaps">Current UX Gaps</h3>
+<ul>
+<li>documentation and visual system alignment still needs ongoing
+maintenance</li>
+<li>some operational states still need more refinement for production
+polish</li>
+<li>current wireframes/mockups are mostly implemented in code rather
+than maintained in a separate design file</li>
+</ul>
+<h2 id="wireframes-and-mockups">Wireframes and Mockups</h2>
+<h3 id="note">Note</h3>
+<p>The repository currently stores implemented UI code rather than a
+dedicated Figma or wireframe package. The wireframes below are
+low-fidelity structural representations of the current product
+surfaces.</p>
+<h3 id="customer-signin">Customer Signin</h3>
+<pre class="text"><code>+---------------------------------------------------------------+
+| Topbar / brand                                                 |
++-----------------------------+---------------------------------+
+| Brand / logo panel          | Signin card                     |
+|                             | - email                         |
+|                             | - password                      |
+|                             | - sign in                       |
+|                             | - continue with Google          |
+|                             | - help dialog                   |
++-----------------------------+---------------------------------+</code></pre>
+<h3 id="customer-dashboard">Customer Dashboard</h3>
+<pre class="text"><code>+-------------------+-------------------------------------------+
+| Sidebar           | Sticky topbar                             |
+| - workspace       +-------------------------------------------+
+| - dashboard       | Page title / breadcrumb row               |
+| - messages        +-------------------------------------------+
+| - API docs        | Hero / summary / signals                  |
+| - settings        +-------------------------------------------+
+| - subscription    | Work cards / tables / API access panels   |
++-------------------+-------------------------------------------+</code></pre>
+<h3 id="customer-api-documents-page">Customer API Documents Page</h3>
+<pre class="text"><code>+---------------------------------------------------------------+
+| Page header / breadcrumb                                       |
++---------------------------------------------------------------+
+| Quick start summary                                            |
++---------------------------------------------------------------+
+| Reference selectors: workspace, instance, language            |
++---------------------------------------------------------------+
+| Endpoint cards + copy buttons                                 |
++---------------------------------------------------------------+
+| Code examples by language                                     |
++---------------------------------------------------------------+
+| Webhook examples + signature verification                     |
++---------------------------------------------------------------+</code></pre>
+<h3 id="admin-control-plane">Admin Control Plane</h3>
+<pre class="text"><code>+-------------------+-------------------------------------------+
+| Admin sidebar     | Admin topbar                              |
+| - users           +-------------------------------------------+
+| - workspaces      | Dashboard / explorer header               |
+| - workers         +-------------------------------------------+
+| - messages        | Tables / cards / detail content           |
+| - support         |                                           |
+| - audit           |                                           |
++-------------------+-------------------------------------------+</code></pre>
+<h3 id="mockup-guidance">Mockup Guidance</h3>
+<p>High-fidelity mockups should continue to reflect the implemented
+layout patterns already present in the Next.js apps rather than reinvent
+the information architecture.</p>
+<h2 id="flowcharts-and-sequence-diagrams">Flowcharts and Sequence
+Diagrams</h2>
+<h3 id="customer-authentication-flow">Customer Authentication Flow</h3>
+<figure>
+<img src="../../assets/diagrams/en/customer-auth-flow.png"
+class="diagram" alt="Customer Authentication Flow" />
+<figcaption aria-hidden="true">Customer Authentication Flow</figcaption>
+</figure>
+<h3 id="instance-creation-to-api-usage">Instance Creation to API
+Usage</h3>
+<figure>
+<img src="../../assets/diagrams/en/instance-to-api-flow.png"
+class="diagram" alt="Instance Creation to API Usage" />
+<figcaption aria-hidden="true">Instance Creation to API
+Usage</figcaption>
+</figure>
+<h3 id="worker-and-lifecycle-operation-sequence">Worker and Lifecycle
+Operation Sequence</h3>
+<figure>
+<img src="../../assets/diagrams/en/worker-lifecycle-sequence.png"
+class="diagram" alt="Worker and Lifecycle Operation Sequence" />
+<figcaption aria-hidden="true">Worker and Lifecycle Operation
+Sequence</figcaption>
+</figure>
+<h3 id="webhook-delivery-flow">Webhook Delivery Flow</h3>
+<figure>
+<img src="../../assets/diagrams/en/webhook-delivery-sequence.png"
+class="diagram" alt="Webhook Delivery Flow" />
+<figcaption aria-hidden="true">Webhook Delivery Flow</figcaption>
+</figure>
+<h3 id="documentation-note">Documentation Note</h3>
+<p>These diagrams represent the intended current runtime relationships
+at a level suitable for product, architecture, and onboarding
+documentation. Detailed route payloads and entity fields remain
+documented in the API and schema references.</p>
+
+        </article>
+        <p class="docs-footer">This page set is generated from the current source documents under docs/current-status.</p>
+      </main>
+    </div>
+  </body>
+</html>

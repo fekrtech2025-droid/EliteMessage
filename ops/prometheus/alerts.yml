@@ -1,0 +1,29 @@
+groups:
+  - name: elite-message-platform
+    rules:
+      - alert: EliteMessageWorkerHeartbeatLost
+        expr: elite_message_workers_stale_total > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: Worker heartbeat loss detected
+          description: One or more workers have stale heartbeats for at least two minutes.
+
+      - alert: EliteMessageWebhookFailureBacklog
+        expr: elite_message_webhook_deliveries_total{status="failed"} > 10
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Webhook failure backlog detected
+          description: Failed webhook deliveries have exceeded the warning threshold for five minutes.
+
+      - alert: EliteMessageWebhookDeadLetters
+        expr: elite_message_webhook_deliveries_total{status="exhausted"} > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Dead-lettered webhooks present
+          description: At least one webhook delivery has exhausted all retries.

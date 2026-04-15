@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>توثيق المتطلبات | Elite Message</title>
+    <link rel="stylesheet" href="../../assets/styles/pages.css" />
+  </head>
+  <body>
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <div class="docs-brand">
+          <img src="../../assets/branding/elite-message-icon-only.png" alt="Elite Message" />
+          <div>
+            <div class="docs-brand-mark">الصفحات</div>
+            <p class="docs-brand-title">Elite Message</p>
+            <p class="docs-brand-subtitle">مركز توثيق Elite Message</p>
+          </div>
+        </div>
+
+        <div class="docs-sidebar-group">
+          <p class="docs-sidebar-label">الصفحات</p>
+          <nav class="docs-nav">
+            <a href="index.html" class="">
+                  <span>الرئيسية</span>
+                  <small>مركز توثيق Elite Message</small>
+                </a><a href="executive-summary.html" class="">
+                  <span>الملخص التنفيذي</span>
+                  <small>الحالة الحالية</small>
+                </a><a href="business-planning.html" class="">
+                  <span>توثيق الأعمال والتخطيط</span>
+                  <small>الأعمال</small>
+                </a><a href="requirements.html" class="is-active">
+                  <span>توثيق المتطلبات</span>
+                  <small>المتطلبات</small>
+                </a><a href="product-design.html" class="">
+                  <span>توثيق المنتج والتصميم</span>
+                  <small>المنتج والتصميم</small>
+                </a><a href="appendix.html" class="">
+                  <span>الملاحق والمراجع</span>
+                  <small>الملاحق</small>
+                </a>
+          </nav>
+        </div>
+      </aside>
+
+      <main class="docs-main">
+        <header class="docs-topbar">
+          <div>
+            <p class="docs-kicker">المتطلبات</p>
+            <h1 class="docs-page-title">توثيق المتطلبات</h1>
+            <p class="docs-page-subtitle">متطلبات الأعمال والبرمجية، المتطلبات الوظيفية وغير الوظيفية، حالات الاستخدام، وقبول التنفيذ.</p>
+          </div>
+          <div class="docs-toolbar">
+            <a class="docs-chip primary" href="../en/requirements.html">English version</a>
+            <a class="docs-chip" href="../index.html">اختيار اللغة</a>
+            <a class="docs-chip" href="../../output/Elite-Message-Current-Status-AR.pdf">فتح نسخة PDF</a>
+          </div>
+        </header>
+
+        <article class="docs-article">
+          <h1 id="توثيق-المتطلبات">توثيق المتطلبات</h1>
+<h2 id="وثيقة-متطلبات-الأعمال-brd">وثيقة متطلبات الأعمال BRD</h2>
+<p>المتطلبات التجارية الأساسية هي:</p>
+<ul>
+<li>تمكين العميل من تشغيل الخدمة ذاتياً</li>
+<li>تمكين الإدارة من الإشراف الكامل</li>
+<li>تمكين التكامل البرمجي عبر API</li>
+<li>ضمان إمكانية التتبع والتحقيق في الحالات التشغيلية</li>
+</ul>
+<h2 id="مواصفة-المتطلبات-البرمجية-srs">مواصفة المتطلبات البرمجية
+SRS</h2>
+<p>يتكوّن النظام من:</p>
+<ul>
+<li>تطبيق عميل</li>
+<li>تطبيق إدارة</li>
+<li>API مركزية</li>
+<li>worker runtime</li>
+<li>PostgreSQL</li>
+<li>Redis</li>
+<li>MinIO</li>
+<li>منظومة مراقبة</li>
+</ul>
+<p>المستخدمون الرئيسيون:</p>
+<ul>
+<li>عميل</li>
+<li>مدير منصة</li>
+<li>فريق دعم</li>
+<li>مطور backend خارجي يستهلك الـ API</li>
+</ul>
+<h2 id="المتطلبات-الوظيفية">المتطلبات الوظيفية</h2>
+<ul>
+<li>يجب أن يسمح النظام بتسجيل العملاء وتسجيل دخولهم.</li>
+<li>يجب أن يدعم النظام Google OAuth عندما يكون مضبوطاً.</li>
+<li>يجب أن يدعم النظام تسجيل دخول الإدارة مع MFA.</li>
+<li>يجب أن يتيح إنشاء instances وربطها وتتبع حالتها.</li>
+<li>يجب أن يخزّن النظام الرسائل الخارجة والداخلة وتسليمات الـ
+webhook.</li>
+<li>يجب أن يوفّر رموز API على مستوى الحساب والـ instance.</li>
+<li>يجب أن يوفّر صفحات تشغيلية للإدارة تشمل المستخدمين ومساحات العمل
+والعاملين والرسائل والدعم والتدقيق.</li>
+</ul>
+<h2 id="المتطلبات-غير-الوظيفية">المتطلبات غير الوظيفية</h2>
+<ul>
+<li>يجب أن يبقى فصل الصلاحيات واضحاً بين العميل والإدارة.</li>
+<li>يجب أن تبقى الإعدادات والأنواع والـ contracts مشتركة وTyped.</li>
+<li>يجب أن تكون العمليات الطويلة غير متزامنة وتعتمد على Queue.</li>
+<li>يجب أن تكون القياسات والحالة الصحية متاحة عبر endpoints.</li>
+<li>يجب أن تكون واجهات العميل والإدارة واضحة وقابلة للاستخدام
+اليومي.</li>
+</ul>
+<h2 id="حالات-الاستخدام">حالات الاستخدام</h2>
+<h3 id="العميل-يسجل-حسابا">العميل يسجل حساباً</h3>
+<ol type="1">
+<li>يفتح العميل التطبيق.</li>
+<li>يدخل بياناته أو يستخدم Google.</li>
+<li>يتم إنشاء الحساب والجلسة.</li>
+<li>يصل إلى صفحات العميل.</li>
+</ol>
+<h3 id="العميل-ينشئ-instance-ويستخدم-الـ-api">العميل ينشئ instance
+ويستخدم الـ API</h3>
+<ol type="1">
+<li>يسجّل العميل الدخول.</li>
+<li>ينشئ instance جديدة.</li>
+<li>يفتح صفحة الـ instance.</li>
+<li>يربط حساب WhatsApp.</li>
+<li>يحصل على <code>public instance ID</code> والـ token.</li>
+<li>يستخدم مسارات الـ API من نظام backend.</li>
+</ol>
+<h3 id="الإدارة-تحقق-في-مشكلة">الإدارة تحقق في مشكلة</h3>
+<ol type="1">
+<li>يدخل المسؤول إلى صفحة الرسائل أو الـ instance.</li>
+<li>يراجع الرسائل أو محاولات التسليم أو الـ webhook.</li>
+<li>يربط المعلومات مع السجلات والأحداث.</li>
+<li>يتخذ إجراء دعم أو تشغيل.</li>
+</ol>
+<h2 id="قصص-المستخدم">قصص المستخدم</h2>
+<ul>
+<li>كعميل، أريد إنشاء instance بسرعة حتى أبدأ التكامل.</li>
+<li>كعميل، أريد رؤية الـ token والـ instance ID حتى أستخدم الـ API.</li>
+<li>كمسؤول، أريد البحث في الرسائل والويبهوكات عالمياً حتى أحقق في
+المشاكل.</li>
+<li>كمسؤول، أريد رؤية العاملين وحالاتهم حتى أتابع الأعطال
+التشغيلية.</li>
+</ul>
+<h2 id="معايير-القبول">معايير القبول</h2>
+<ul>
+<li>يمكن للعميل التسجيل وتسجيل الدخول والوصول إلى لوحة التحكم.</li>
+<li>يمكنه إنشاء instance ورؤية حالتها وحالة الربط.</li>
+<li>تظهر وثائق الـ API وأمثلة الاستخدام.</li>
+<li>يمكن للإدارة الدخول والوصول إلى صفحات التشغيل الرئيسية.</li>
+<li>تتوفر endpoints للحالة الصحية والقياسات.</li>
+</ul>
+
+        </article>
+        <p class="docs-footer">تم إنشاء هذه النسخة من مستندات المصدر الحالية داخل docs/current-status.</p>
+      </main>
+    </div>
+  </body>
+</html>

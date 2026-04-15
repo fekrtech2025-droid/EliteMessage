@@ -1,0 +1,1570 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>elite-message-api-route-list</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="/Users/apple/python_learning/EliteMessage/docs/architecture-print.css" />
+</head>
+<body>
+<h1 id="elite-message">Elite Message</h1>
+<h2 id="api-route-list">API Route List</h2>
+<p>Version: 1.0<br />
+Prepared for: Elite Message project<br />
+Target style: UltraMsg-equivalent API surface with customer dashboard,
+admin dashboard, and worker-backed instance runtime</p>
+<hr />
+<h2 id="1-purpose">1. Purpose</h2>
+<p>This document defines the recommended API route list for Elite
+Message.</p>
+<p>The route catalog is organized into these groups:</p>
+<ul>
+<li>authentication and session routes</li>
+<li>customer account routes</li>
+<li>customer dashboard routes</li>
+<li>admin dashboard routes</li>
+<li>account-level API routes</li>
+<li>per-instance public API routes</li>
+<li>internal worker routes</li>
+<li>realtime routes</li>
+<li>health and operations routes</li>
+</ul>
+<p>The design goal is to support:</p>
+<ul>
+<li>a customer-facing web application</li>
+<li>an admin-facing web application</li>
+<li>external API consumers</li>
+<li>internal worker orchestration</li>
+<li>future UltraMsg-compatible endpoint aliases</li>
+</ul>
+<hr />
+<h2 id="2-api-surface-overview">2. API Surface Overview</h2>
+<p>Recommended base prefixes:</p>
+<ul>
+<li><code>/api/v1/auth</code></li>
+<li><code>/api/v1/account</code></li>
+<li><code>/api/v1/customer</code></li>
+<li><code>/api/v1/admin</code></li>
+<li><code>/api/v1/public</code></li>
+<li><code>/api/v1/internal</code></li>
+<li><code>/socket.io</code></li>
+</ul>
+<p>Compatibility aliases:</p>
+<ul>
+<li><code>/api/list</code></li>
+<li><code>/api/create</code></li>
+<li><code>/api/update</code></li>
+<li><code>/instance/{instanceId}/...</code></li>
+</ul>
+<p>Authentication modes:</p>
+<ul>
+<li>dashboard bearer session or cookie auth for customer/admin
+routes</li>
+<li>account API token for account-level API routes</li>
+<li>instance API token for per-instance public routes</li>
+<li>internal service token or mTLS for worker routes</li>
+</ul>
+<hr />
+<h2 id="3-auth-routes">3. Auth Routes</h2>
+<h2 id="31-customer-authentication">3.1 Customer Authentication</h2>
+<h3 id="post-apiv1authlogin"><code>POST /api/v1/auth/login</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>customer login</li>
+</ul>
+<p>Body:</p>
+<ul>
+<li><code>email</code></li>
+<li><code>password</code></li>
+</ul>
+<p>Response:</p>
+<ul>
+<li>access token</li>
+<li>refresh token</li>
+<li>user profile</li>
+<li>account summary</li>
+</ul>
+<h3 id="post-apiv1authlogout"><code>POST /api/v1/auth/logout</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>revoke current login session</li>
+</ul>
+<h3
+id="post-apiv1authrefresh"><code>POST /api/v1/auth/refresh</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>exchange refresh token for new access token</li>
+</ul>
+<h3
+id="post-apiv1authforgot-password"><code>POST /api/v1/auth/forgot-password</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>start password reset flow</li>
+</ul>
+<h3
+id="post-apiv1authreset-password"><code>POST /api/v1/auth/reset-password</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>complete password reset</li>
+</ul>
+<h3 id="get-apiv1authme"><code>GET /api/v1/auth/me</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>fetch current authenticated customer identity</li>
+</ul>
+<h2 id="32-admin-authentication">3.2 Admin Authentication</h2>
+<h3
+id="post-apiv1authadminlogin"><code>POST /api/v1/auth/admin/login</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>admin login</li>
+</ul>
+<h3
+id="post-apiv1authadminlogout"><code>POST /api/v1/auth/admin/logout</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>admin logout</li>
+</ul>
+<h3
+id="post-apiv1authadminrefresh"><code>POST /api/v1/auth/admin/refresh</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>refresh admin access token</li>
+</ul>
+<h3
+id="post-apiv1authadminmfachallenge"><code>POST /api/v1/auth/admin/mfa/challenge</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>initiate MFA challenge</li>
+</ul>
+<h3
+id="post-apiv1authadminmfaverify"><code>POST /api/v1/auth/admin/mfa/verify</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>verify MFA code</li>
+</ul>
+<h3
+id="get-apiv1authadminme"><code>GET /api/v1/auth/admin/me</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>fetch current authenticated admin</li>
+</ul>
+<hr />
+<h2 id="4-customer-account-routes">4. Customer Account Routes</h2>
+<h2 id="41-profile-and-membership">4.1 Profile and Membership</h2>
+<h3
+id="get-apiv1accountprofile"><code>GET /api/v1/account/profile</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>get current user profile</li>
+</ul>
+<h3
+id="patch-apiv1accountprofile"><code>PATCH /api/v1/account/profile</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>update name, locale, timezone, phone</li>
+</ul>
+<h3
+id="patch-apiv1accountpassword"><code>PATCH /api/v1/account/password</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>change password</li>
+</ul>
+<h3
+id="get-apiv1accountmembers"><code>GET /api/v1/account/members</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list account members</li>
+</ul>
+<h3
+id="post-apiv1accountmembers"><code>POST /api/v1/account/members</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>invite member</li>
+</ul>
+<h3
+id="patch-apiv1accountmembersmemberid"><code>PATCH /api/v1/account/members/{memberId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>change member role or status</li>
+</ul>
+<h3
+id="delete-apiv1accountmembersmemberid"><code>DELETE /api/v1/account/members/{memberId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>remove member from account</li>
+</ul>
+<h2 id="42-account-api-tokens">4.2 Account API Tokens</h2>
+<h3
+id="get-apiv1accountapi-tokens"><code>GET /api/v1/account/api-tokens</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list account API tokens</li>
+</ul>
+<h3
+id="post-apiv1accountapi-tokens"><code>POST /api/v1/account/api-tokens</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>create account API token</li>
+</ul>
+<h3
+id="post-apiv1accountapi-tokenstokenidrotate"><code>POST /api/v1/account/api-tokens/{tokenId}/rotate</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>rotate account API token</li>
+</ul>
+<h3
+id="delete-apiv1accountapi-tokenstokenid"><code>DELETE /api/v1/account/api-tokens/{tokenId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>revoke account API token</li>
+</ul>
+<h2 id="43-billing">4.3 Billing</h2>
+<h3
+id="get-apiv1accountsubscription"><code>GET /api/v1/account/subscription</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>get current subscription and limits</li>
+</ul>
+<h3
+id="get-apiv1accountplans"><code>GET /api/v1/account/plans</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list purchasable plans</li>
+</ul>
+<h3
+id="post-apiv1accountsubscriptioncheckout"><code>POST /api/v1/account/subscription/checkout</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>start checkout for plan purchase or renewal</li>
+</ul>
+<h3
+id="post-apiv1accountsubscriptioncancel"><code>POST /api/v1/account/subscription/cancel</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>cancel renewal</li>
+</ul>
+<h3
+id="post-apiv1accountsubscriptionenable-auto-renewal"><code>POST /api/v1/account/subscription/enable-auto-renewal</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>enable auto renewal</li>
+</ul>
+<h3
+id="post-apiv1accountsubscriptiondisable-auto-renewal"><code>POST /api/v1/account/subscription/disable-auto-renewal</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>disable auto renewal</li>
+</ul>
+<h3
+id="get-apiv1accountinvoices"><code>GET /api/v1/account/invoices</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list invoices</li>
+</ul>
+<h3
+id="get-apiv1accountinvoicesinvoiceid"><code>GET /api/v1/account/invoices/{invoiceId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>get invoice detail</li>
+</ul>
+<hr />
+<h2 id="5-customer-dashboard-routes">5. Customer Dashboard Routes</h2>
+<p>These routes power the customer web app and are authenticated with
+dashboard auth, not instance tokens.</p>
+<h2 id="51-overview">5.1 Overview</h2>
+<h3
+id="get-apiv1customerdashboardoverview"><code>GET /api/v1/customer/dashboard/overview</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>account summary stats</li>
+<li>instance counts</li>
+<li>daily messaging usage</li>
+<li>webhook health summary</li>
+</ul>
+<h3
+id="get-apiv1customerdashboardactivity"><code>GET /api/v1/customer/dashboard/activity</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>recent account activity feed</li>
+</ul>
+<h2 id="52-instances">5.2 Instances</h2>
+<h3
+id="get-apiv1customerinstances"><code>GET /api/v1/customer/instances</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list instances for the current account</li>
+</ul>
+<p>Query params:</p>
+<ul>
+<li><code>status</code></li>
+<li><code>search</code></li>
+<li><code>page</code></li>
+<li><code>limit</code></li>
+<li><code>sort</code></li>
+</ul>
+<h3
+id="post-apiv1customerinstances"><code>POST /api/v1/customer/instances</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>create instance from dashboard</li>
+</ul>
+<p>Body:</p>
+<ul>
+<li><code>displayName</code></li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceid"><code>GET /api/v1/customer/instances/{instanceId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>fetch instance summary</li>
+</ul>
+<h3
+id="patch-apiv1customerinstancesinstanceid"><code>PATCH /api/v1/customer/instances/{instanceId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>rename instance or update display metadata</li>
+</ul>
+<h3
+id="delete-apiv1customerinstancesinstanceid"><code>DELETE /api/v1/customer/instances/{instanceId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>soft delete instance</li>
+</ul>
+<h3
+id="post-apiv1customerinstancesinstanceidrotate-token"><code>POST /api/v1/customer/instances/{instanceId}/rotate-token</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>rotate per-instance API token</li>
+</ul>
+<h3
+id="post-apiv1customerinstancesinstanceidrestart"><code>POST /api/v1/customer/instances/{instanceId}/restart</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>restart instance worker/runtime</li>
+</ul>
+<h3
+id="post-apiv1customerinstancesinstanceidlogout"><code>POST /api/v1/customer/instances/{instanceId}/logout</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>log out WhatsApp session and return to QR</li>
+</ul>
+<h3
+id="post-apiv1customerinstancesinstanceidclear"><code>POST /api/v1/customer/instances/{instanceId}/clear</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>clear messages, settings, and session</li>
+</ul>
+<h3
+id="post-apiv1customerinstancesinstanceidtakeover"><code>POST /api/v1/customer/instances/{instanceId}/takeover</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>resolve conflict and force current worker session takeover</li>
+</ul>
+<h3
+id="post-apiv1customerinstancesinstanceidtroubleshootsoft-reset"><code>POST /api/v1/customer/instances/{instanceId}/troubleshoot/soft-reset</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>soft reset recovery action</li>
+</ul>
+<h3
+id="post-apiv1customerinstancesinstanceidtroubleshoothard-reset"><code>POST /api/v1/customer/instances/{instanceId}/troubleshoot/hard-reset</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>full recovery and worker reassignment</li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceidscreenshot"><code>GET /api/v1/customer/instances/{instanceId}/screenshot</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>fetch worker screenshot preview</li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceidstatus"><code>GET /api/v1/customer/instances/{instanceId}/status</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>current status snapshot</li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceidlimits"><code>GET /api/v1/customer/instances/{instanceId}/limits</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>current effective limits and usage</li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceidstatistics"><code>GET /api/v1/customer/instances/{instanceId}/statistics</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>message status counters</li>
+</ul>
+<h2 id="53-instance-settings">5.3 Instance Settings</h2>
+<h3
+id="get-apiv1customerinstancesinstanceidsettings"><code>GET /api/v1/customer/instances/{instanceId}/settings</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>fetch instance settings</li>
+</ul>
+<h3
+id="patch-apiv1customerinstancesinstanceidsettings"><code>PATCH /api/v1/customer/instances/{instanceId}/settings</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>update send delays and webhook settings</li>
+</ul>
+<p>Body examples:</p>
+<ul>
+<li><code>sendDelaySeconds</code></li>
+<li><code>sendDelayMaxSeconds</code></li>
+<li><code>webhookUrl</code></li>
+<li><code>webhookRetries</code></li>
+<li>event toggle flags</li>
+</ul>
+<h2 id="54-messages">5.4 Messages</h2>
+<h3
+id="get-apiv1customerinstancesinstanceidmessages"><code>GET /api/v1/customer/instances/{instanceId}/messages</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list outbound message logs for dashboard</li>
+</ul>
+<p>Query params:</p>
+<ul>
+<li><code>status</code></li>
+<li><code>ack</code></li>
+<li><code>referenceId</code></li>
+<li><code>from</code></li>
+<li><code>to</code></li>
+<li><code>id</code></li>
+<li><code>page</code></li>
+<li><code>limit</code></li>
+<li><code>sort</code></li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceidmessagesmessageid"><code>GET /api/v1/customer/instances/{instanceId}/messages/{messageId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>get single outbound message detail</li>
+</ul>
+<h3
+id="post-apiv1customerinstancesinstanceidmessagesmessageidresend"><code>POST /api/v1/customer/instances/{instanceId}/messages/{messageId}/resend</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>resend one message</li>
+</ul>
+<h3
+id="post-apiv1customerinstancesinstanceidmessagesresend-by-status"><code>POST /api/v1/customer/instances/{instanceId}/messages/resend-by-status</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>resend all messages by status</li>
+</ul>
+<p>Body:</p>
+<ul>
+<li><code>status</code></li>
+</ul>
+<h3
+id="post-apiv1customerinstancesinstanceidmessagesclear"><code>POST /api/v1/customer/instances/{instanceId}/messages/clear</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>clear message logs by status</li>
+</ul>
+<p>Body:</p>
+<ul>
+<li><code>status</code></li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceidmessagesstatistics"><code>GET /api/v1/customer/instances/{instanceId}/messages/statistics</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>fetch queue, sent, unsent, invalid, expired counts</li>
+</ul>
+<h2 id="55-chats-contacts-groups">5.5 Chats, Contacts, Groups</h2>
+<h3
+id="get-apiv1customerinstancesinstanceidchats"><code>GET /api/v1/customer/instances/{instanceId}/chats</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>dashboard chat list</li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceidchatschatidmessages"><code>GET /api/v1/customer/instances/{instanceId}/chats/{chatId}/messages</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list recent chat messages</li>
+</ul>
+<h3
+id="post-apiv1customerinstancesinstanceidchatschatidmark-read"><code>POST /api/v1/customer/instances/{instanceId}/chats/{chatId}/mark-read</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>mark chat as read</li>
+</ul>
+<h3
+id="post-apiv1customerinstancesinstanceidchatschatidarchive"><code>POST /api/v1/customer/instances/{instanceId}/chats/{chatId}/archive</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>archive chat</li>
+</ul>
+<h3
+id="post-apiv1customerinstancesinstanceidchatschatidunarchive"><code>POST /api/v1/customer/instances/{instanceId}/chats/{chatId}/unarchive</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>unarchive chat</li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceidcontacts"><code>GET /api/v1/customer/instances/{instanceId}/contacts</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list cached contacts</li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceidcontactscheck"><code>GET /api/v1/customer/instances/{instanceId}/contacts/check</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>contact existence check</li>
+</ul>
+<p>Query params:</p>
+<ul>
+<li><code>phone</code></li>
+<li><code>nocache</code></li>
+</ul>
+<h3
+id="post-apiv1customerinstancesinstanceidcontactscontactidblock"><code>POST /api/v1/customer/instances/{instanceId}/contacts/{contactId}/block</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>block contact</li>
+</ul>
+<h3
+id="post-apiv1customerinstancesinstanceidcontactscontactidunblock"><code>POST /api/v1/customer/instances/{instanceId}/contacts/{contactId}/unblock</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>unblock contact</li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceidgroups"><code>GET /api/v1/customer/instances/{instanceId}/groups</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list groups</li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceidgroupsgroupid"><code>GET /api/v1/customer/instances/{instanceId}/groups/{groupId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>group detail</li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceidgroupsgroupidmembers"><code>GET /api/v1/customer/instances/{instanceId}/groups/{groupId}/members</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list group members</li>
+</ul>
+<h2 id="56-media-utilities">5.6 Media Utilities</h2>
+<h3
+id="post-apiv1customerinstancesinstanceidmediaupload"><code>POST /api/v1/customer/instances/{instanceId}/media/upload</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>upload dashboard media for future sends</li>
+</ul>
+<h3
+id="delete-apiv1customerinstancesinstanceidmediamediaid"><code>DELETE /api/v1/customer/instances/{instanceId}/media/{mediaId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>delete stored media asset</li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceidmediamediaid"><code>GET /api/v1/customer/instances/{instanceId}/media/{mediaId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>get media metadata or signed URL</li>
+</ul>
+<hr />
+<h2 id="6-admin-dashboard-routes">6. Admin Dashboard Routes</h2>
+<p>These routes are for internal operations only and require admin auth
+plus RBAC.</p>
+<h2 id="61-overview">6.1 Overview</h2>
+<h3
+id="get-apiv1admindashboardoverview"><code>GET /api/v1/admin/dashboard/overview</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>global health summary</li>
+</ul>
+<h3
+id="get-apiv1admindashboardmetrics"><code>GET /api/v1/admin/dashboard/metrics</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>platform metrics rollup</li>
+</ul>
+<h3
+id="get-apiv1admindashboardincidents"><code>GET /api/v1/admin/dashboard/incidents</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>active incidents and degraded services</li>
+</ul>
+<h2 id="62-users-and-accounts">6.2 Users and Accounts</h2>
+<h3 id="get-apiv1adminusers"><code>GET /api/v1/admin/users</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>search users</li>
+</ul>
+<h3
+id="get-apiv1adminusersuserid"><code>GET /api/v1/admin/users/{userId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>user detail</li>
+</ul>
+<h3
+id="patch-apiv1adminusersuserid"><code>PATCH /api/v1/admin/users/{userId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>admin updates to user state</li>
+</ul>
+<h3
+id="get-apiv1adminaccounts"><code>GET /api/v1/admin/accounts</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>search accounts</li>
+</ul>
+<h3
+id="get-apiv1adminaccountsaccountid"><code>GET /api/v1/admin/accounts/{accountId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>account detail</li>
+</ul>
+<h3
+id="patch-apiv1adminaccountsaccountid"><code>PATCH /api/v1/admin/accounts/{accountId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>update account status or profile</li>
+</ul>
+<h3
+id="post-apiv1adminaccountsaccountidsuspend"><code>POST /api/v1/admin/accounts/{accountId}/suspend</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>suspend account</li>
+</ul>
+<h3
+id="post-apiv1adminaccountsaccountidunsuspend"><code>POST /api/v1/admin/accounts/{accountId}/unsuspend</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>unsuspend account</li>
+</ul>
+<h3
+id="post-apiv1adminaccountsaccountidextend-trial"><code>POST /api/v1/admin/accounts/{accountId}/extend-trial</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>extend trial</li>
+</ul>
+<h2 id="63-instances">6.3 Instances</h2>
+<h3
+id="get-apiv1admininstances"><code>GET /api/v1/admin/instances</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>global instance search</li>
+</ul>
+<h3
+id="get-apiv1admininstancesinstanceid"><code>GET /api/v1/admin/instances/{instanceId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>admin instance detail</li>
+</ul>
+<h3
+id="get-apiv1admininstancesinstanceidevents"><code>GET /api/v1/admin/instances/{instanceId}/events</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>instance lifecycle events</li>
+</ul>
+<h3
+id="get-apiv1admininstancesinstanceidworker"><code>GET /api/v1/admin/instances/{instanceId}/worker</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>current worker assignment and health</li>
+</ul>
+<h3
+id="post-apiv1admininstancesinstanceidrestart"><code>POST /api/v1/admin/instances/{instanceId}/restart</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>restart instance</li>
+</ul>
+<h3
+id="post-apiv1admininstancesinstanceidlogout"><code>POST /api/v1/admin/instances/{instanceId}/logout</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>force logout session</li>
+</ul>
+<h3
+id="post-apiv1admininstancesinstanceidclear"><code>POST /api/v1/admin/instances/{instanceId}/clear</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>force clear instance</li>
+</ul>
+<h3
+id="post-apiv1admininstancesinstanceidrotate-token"><code>POST /api/v1/admin/instances/{instanceId}/rotate-token</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>rotate token on behalf of customer</li>
+</ul>
+<h3
+id="post-apiv1admininstancesinstanceidreassign-worker"><code>POST /api/v1/admin/instances/{instanceId}/reassign-worker</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>move instance to another worker</li>
+</ul>
+<h3
+id="get-apiv1admininstancesinstanceidscreenshot"><code>GET /api/v1/admin/instances/{instanceId}/screenshot</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>admin screenshot view</li>
+</ul>
+<h2 id="64-workers">6.4 Workers</h2>
+<h3
+id="get-apiv1adminworkers"><code>GET /api/v1/admin/workers</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list worker processes or pods</li>
+</ul>
+<h3
+id="get-apiv1adminworkersworkerid"><code>GET /api/v1/admin/workers/{workerId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>worker detail</li>
+</ul>
+<h3
+id="get-apiv1adminworkersworkeridevents"><code>GET /api/v1/admin/workers/{workerId}/events</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>worker event log</li>
+</ul>
+<h3
+id="post-apiv1adminworkersworkeriddrain"><code>POST /api/v1/admin/workers/{workerId}/drain</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>mark worker as draining</li>
+</ul>
+<h3
+id="post-apiv1adminworkersworkeridresume"><code>POST /api/v1/admin/workers/{workerId}/resume</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>resume worker</li>
+</ul>
+<h3
+id="post-apiv1adminworkersworkeridrestart"><code>POST /api/v1/admin/workers/{workerId}/restart</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>restart worker runtime</li>
+</ul>
+<h2 id="65-global-messages-and-webhooks">6.5 Global Messages and
+Webhooks</h2>
+<h3
+id="get-apiv1adminmessages"><code>GET /api/v1/admin/messages</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>cross-account message search</li>
+</ul>
+<h3
+id="get-apiv1adminmessagesmessageid"><code>GET /api/v1/admin/messages/{messageId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>message detail</li>
+</ul>
+<h3
+id="get-apiv1adminwebhooksdeliveries"><code>GET /api/v1/admin/webhooks/deliveries</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>delivery search</li>
+</ul>
+<h3
+id="get-apiv1adminwebhooksdeliveriesdeliveryid"><code>GET /api/v1/admin/webhooks/deliveries/{deliveryId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>delivery detail</li>
+</ul>
+<h3
+id="post-apiv1adminwebhooksdeliveriesdeliveryidreplay"><code>POST /api/v1/admin/webhooks/deliveries/{deliveryId}/replay</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>replay webhook delivery</li>
+</ul>
+<h3
+id="post-apiv1adminwebhooksendpointsendpointiddisable"><code>POST /api/v1/admin/webhooks/endpoints/{endpointId}/disable</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>disable webhook endpoint</li>
+</ul>
+<h2 id="66-billing-and-support">6.6 Billing and Support</h2>
+<h3
+id="get-apiv1admininvoices"><code>GET /api/v1/admin/invoices</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>global invoice search</li>
+</ul>
+<h3
+id="get-apiv1adminsubscriptions"><code>GET /api/v1/admin/subscriptions</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>global subscription list</li>
+</ul>
+<h3
+id="get-apiv1adminsupportcases"><code>GET /api/v1/admin/support/cases</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>support case list</li>
+</ul>
+<h3
+id="post-apiv1adminsupportcases"><code>POST /api/v1/admin/support/cases</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>create support case</li>
+</ul>
+<h3
+id="get-apiv1adminsupportcasescaseid"><code>GET /api/v1/admin/support/cases/{caseId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>support case detail</li>
+</ul>
+<h3
+id="post-apiv1adminsupportcasescaseidnotes"><code>POST /api/v1/admin/support/cases/{caseId}/notes</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>add support note</li>
+</ul>
+<h3
+id="post-apiv1adminsupportcasescaseidresolve"><code>POST /api/v1/admin/support/cases/{caseId}/resolve</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>resolve support case</li>
+</ul>
+<h2 id="67-audit-and-risk">6.7 Audit and Risk</h2>
+<h3
+id="get-apiv1adminaudit-logs"><code>GET /api/v1/admin/audit-logs</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>searchable audit history</li>
+</ul>
+<h3
+id="get-apiv1adminriskflags"><code>GET /api/v1/admin/risk/flags</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list abuse or risk flags</li>
+</ul>
+<h3
+id="post-apiv1adminriskflagsflagidresolve"><code>POST /api/v1/admin/risk/flags/{flagId}/resolve</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>resolve risk flag</li>
+</ul>
+<h3
+id="post-apiv1adminaccountsaccountidrate-limit"><code>POST /api/v1/admin/accounts/{accountId}/rate-limit</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>apply account-level rate control</li>
+</ul>
+<hr />
+<h2 id="7-account-level-public-api-routes">7. Account-Level Public API
+Routes</h2>
+<p>These routes are for external customer systems authenticated with
+account API token.</p>
+<p>Recommended auth:</p>
+<ul>
+<li><code>Authorization: Bearer {account_api_token}</code></li>
+</ul>
+<p>Compatibility support should also allow:</p>
+<ul>
+<li>query string token for UltraMsg-style parity</li>
+</ul>
+<h2 id="71-list-instances">7.1 List Instances</h2>
+<h3
+id="get-apiv1publicaccountinstances"><code>GET /api/v1/public/account/instances</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list all instances under the account</li>
+</ul>
+<p>Query params:</p>
+<ul>
+<li><code>status</code></li>
+<li><code>page</code></li>
+<li><code>limit</code></li>
+<li><code>sort</code></li>
+</ul>
+<p>Compatibility alias:</p>
+<ul>
+<li><code>GET /api/list</code></li>
+</ul>
+<h2 id="72-create-instance">7.2 Create Instance</h2>
+<h3
+id="post-apiv1publicaccountinstances"><code>POST /api/v1/public/account/instances</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>create instance via API</li>
+</ul>
+<p>Body:</p>
+<ul>
+<li><code>name</code></li>
+</ul>
+<p>Compatibility alias:</p>
+<ul>
+<li><code>POST /api/create</code></li>
+</ul>
+<h2 id="73-update-instance">7.3 Update Instance</h2>
+<h3
+id="patch-apiv1publicaccountinstancesinstanceid"><code>PATCH /api/v1/public/account/instances/{instanceId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>update instance metadata</li>
+</ul>
+<p>Body:</p>
+<ul>
+<li><code>name</code></li>
+</ul>
+<p>Compatibility alias:</p>
+<ul>
+<li><code>POST /api/update</code></li>
+</ul>
+<hr />
+<h2 id="8-per-instance-public-api-routes">8. Per-Instance Public API
+Routes</h2>
+<p>These routes are the core UltraMsg-like surface. They should support
+both:</p>
+<ul>
+<li><code>Authorization: Bearer {instance_token}</code></li>
+<li><code>?token={instance_token}</code> for compatibility</li>
+</ul>
+<p>Base path:</p>
+<ul>
+<li><code>/instance/{instanceId}</code></li>
+</ul>
+<hr />
+<h2 id="81-instance-runtime-routes">8.1 Instance Runtime Routes</h2>
+<h3
+id="get-instanceinstanceidinstancestatus"><code>GET /instance/{instanceId}/instance/status</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>get runtime status</li>
+</ul>
+<h3
+id="get-instanceinstanceidinstanceme"><code>GET /instance/{instanceId}/instance/me</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>get current WhatsApp identity metadata</li>
+</ul>
+<h3
+id="get-instanceinstanceidinstancesettings"><code>GET /instance/{instanceId}/instance/settings</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>fetch instance settings</li>
+</ul>
+<h3
+id="post-instanceinstanceidinstancesettings"><code>POST /instance/{instanceId}/instance/settings</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>update instance settings</li>
+</ul>
+<h3
+id="get-instanceinstanceidinstanceqr"><code>GET /instance/{instanceId}/instance/qr</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>QR image endpoint</li>
+</ul>
+<h3
+id="get-instanceinstanceidinstanceqrcode"><code>GET /instance/{instanceId}/instance/qrCode</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>QR code payload or QR representation</li>
+</ul>
+<h3
+id="post-instanceinstanceidinstancerestart"><code>POST /instance/{instanceId}/instance/restart</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>restart runtime</li>
+</ul>
+<h3
+id="post-instanceinstanceidinstancelogout"><code>POST /instance/{instanceId}/instance/logout</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>clear session and go back to QR</li>
+</ul>
+<h3
+id="post-instanceinstanceidinstanceclear"><code>POST /instance/{instanceId}/instance/clear</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>clear settings, session, and logs</li>
+</ul>
+<h3
+id="post-instanceinstanceidinstancetakeover"><code>POST /instance/{instanceId}/instance/takeover</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>conflict takeover</li>
+</ul>
+<h3
+id="get-instanceinstanceidinstancescreenshot"><code>GET /instance/{instanceId}/instance/screenshot</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>runtime screenshot</li>
+</ul>
+<p>Supported query params:</p>
+<ul>
+<li><code>encoding=base64</code></li>
+</ul>
+<hr />
+<h2 id="82-outbound-messaging-routes">8.2 Outbound Messaging Routes</h2>
+<h3
+id="post-instanceinstanceidmessageschat"><code>POST /instance/{instanceId}/messages/chat</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>send text message</li>
+</ul>
+<p>Body:</p>
+<ul>
+<li><code>to</code></li>
+<li><code>body</code></li>
+<li><code>priority</code></li>
+<li><code>referenceId</code></li>
+</ul>
+<h3
+id="post-instanceinstanceidmessagesimage"><code>POST /instance/{instanceId}/messages/image</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>send image</li>
+</ul>
+<p>Body examples:</p>
+<ul>
+<li><code>to</code></li>
+<li><code>image</code></li>
+<li><code>caption</code></li>
+<li><code>filename</code></li>
+<li><code>priority</code></li>
+</ul>
+<h3
+id="post-instanceinstanceidmessagesdocument"><code>POST /instance/{instanceId}/messages/document</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>send document</li>
+</ul>
+<h3
+id="post-instanceinstanceidmessagesvideo"><code>POST /instance/{instanceId}/messages/video</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>send video</li>
+</ul>
+<h3
+id="post-instanceinstanceidmessagesaudio"><code>POST /instance/{instanceId}/messages/audio</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>send audio</li>
+</ul>
+<h3
+id="post-instanceinstanceidmessagesvoice"><code>POST /instance/{instanceId}/messages/voice</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>send push-to-talk style voice message</li>
+</ul>
+<h3
+id="post-instanceinstanceidmessagessticker"><code>POST /instance/{instanceId}/messages/sticker</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>send sticker</li>
+</ul>
+<h3
+id="post-instanceinstanceidmessagescontact"><code>POST /instance/{instanceId}/messages/contact</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>send contact</li>
+</ul>
+<h3
+id="post-instanceinstanceidmessageslocation"><code>POST /instance/{instanceId}/messages/location</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>send location</li>
+</ul>
+<h3
+id="post-instanceinstanceidmessagesvcard"><code>POST /instance/{instanceId}/messages/vcard</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>send vCard</li>
+</ul>
+<h3
+id="post-instanceinstanceidmessagesreaction"><code>POST /instance/{instanceId}/messages/reaction</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>send reaction</li>
+</ul>
+<h3
+id="post-instanceinstanceidmessageslink"><code>POST /instance/{instanceId}/messages/link</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>optional rich link shortcut if the platform wants parity-style
+ergonomics</li>
+</ul>
+<h2 id="83-outbound-message-logs">8.3 Outbound Message Logs</h2>
+<h3
+id="get-instanceinstanceidmessages"><code>GET /instance/{instanceId}/messages</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list outbound message records</li>
+</ul>
+<p>Query params:</p>
+<ul>
+<li><code>page</code></li>
+<li><code>limit</code></li>
+<li><code>status</code></li>
+<li><code>ack</code></li>
+<li><code>id</code></li>
+<li><code>referenceId</code></li>
+<li><code>from</code></li>
+<li><code>to</code></li>
+<li><code>sort</code></li>
+</ul>
+<h3
+id="get-instanceinstanceidmessagesstatistics"><code>GET /instance/{instanceId}/messages/statistics</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>aggregated message counters</li>
+</ul>
+<h3
+id="post-instanceinstanceidmessagesresendbyid"><code>POST /instance/{instanceId}/messages/resendById</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>resend a single message by id</li>
+</ul>
+<p>Body:</p>
+<ul>
+<li><code>id</code></li>
+</ul>
+<h3
+id="post-instanceinstanceidmessagesresendbystatus"><code>POST /instance/{instanceId}/messages/resendByStatus</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>resend all messages by status</li>
+</ul>
+<p>Body:</p>
+<ul>
+<li><code>status</code></li>
+</ul>
+<h3
+id="post-instanceinstanceidmessagesclear"><code>POST /instance/{instanceId}/messages/clear</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>clear message logs by status</li>
+</ul>
+<p>Body:</p>
+<ul>
+<li><code>status</code></li>
+</ul>
+<hr />
+<h2 id="84-chats-contacts-and-groups">8.4 Chats, Contacts, and
+Groups</h2>
+<h3
+id="get-instanceinstanceidchats"><code>GET /instance/{instanceId}/chats</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list chats</li>
+</ul>
+<h3
+id="get-instanceinstanceidchatsmessages"><code>GET /instance/{instanceId}/chats/messages</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>fetch messages for a chat</li>
+</ul>
+<p>Query params:</p>
+<ul>
+<li><code>chatId</code></li>
+<li><code>limit</code></li>
+</ul>
+<h3
+id="get-instanceinstanceidchatsids"><code>GET /instance/{instanceId}/chats/ids</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list normalized chat identifiers</li>
+</ul>
+<h3
+id="post-instanceinstanceidchatsread"><code>POST /instance/{instanceId}/chats/read</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>mark chat as read</li>
+</ul>
+<h3
+id="post-instanceinstanceidchatsarchive"><code>POST /instance/{instanceId}/chats/archive</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>archive chat</li>
+</ul>
+<h3
+id="post-instanceinstanceidchatsunarchive"><code>POST /instance/{instanceId}/chats/unarchive</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>unarchive chat</li>
+</ul>
+<h3
+id="post-instanceinstanceidchatsdelete"><code>POST /instance/{instanceId}/chats/delete</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>delete chat</li>
+</ul>
+<h3
+id="get-instanceinstanceidcontacts"><code>GET /instance/{instanceId}/contacts</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list contacts</li>
+</ul>
+<h3
+id="get-instanceinstanceidcontactscheck"><code>GET /instance/{instanceId}/contacts/check</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>check whether a number is on WhatsApp</li>
+</ul>
+<h3
+id="get-instanceinstanceidcontactsids"><code>GET /instance/{instanceId}/contacts/ids</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list normalized contact identifiers</li>
+</ul>
+<h3
+id="post-instanceinstanceidcontactsblock"><code>POST /instance/{instanceId}/contacts/block</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>block contact</li>
+</ul>
+<h3
+id="post-instanceinstanceidcontactsunblock"><code>POST /instance/{instanceId}/contacts/unblock</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>unblock contact</li>
+</ul>
+<h3
+id="get-instanceinstanceidgroups"><code>GET /instance/{instanceId}/groups</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list groups</li>
+</ul>
+<h3
+id="get-instanceinstanceidgroupsids"><code>GET /instance/{instanceId}/groups/ids</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list normalized group identifiers</li>
+</ul>
+<h3
+id="get-instanceinstanceidgroupsgroupid"><code>GET /instance/{instanceId}/groups/{groupId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>group detail</li>
+</ul>
+<hr />
+<h2 id="85-media-routes">8.5 Media Routes</h2>
+<h3
+id="post-instanceinstanceidmediaupload"><code>POST /instance/{instanceId}/media/upload</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>upload media file or base64 payload</li>
+</ul>
+<h3
+id="post-instanceinstanceidmediadelete"><code>POST /instance/{instanceId}/media/delete</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>delete one media asset</li>
+</ul>
+<h3
+id="post-instanceinstanceidmediadeletebydate"><code>POST /instance/{instanceId}/media/deleteByDate</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>bulk delete media by retention window</li>
+</ul>
+<hr />
+<h2 id="9-internal-worker-routes">9. Internal Worker Routes</h2>
+<p>These routes are not public. They are used by session workers and
+orchestration services.</p>
+<p>Base path:</p>
+<ul>
+<li><code>/api/v1/internal</code></li>
+</ul>
+<p>Auth:</p>
+<ul>
+<li>service token or mTLS</li>
+</ul>
+<h2 id="91-worker-registration-and-health">9.1 Worker Registration and
+Health</h2>
+<h3
+id="post-apiv1internalworkersregister"><code>POST /api/v1/internal/workers/register</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>register worker process or pod</li>
+</ul>
+<h3
+id="post-apiv1internalworkersworkeridheartbeat"><code>POST /api/v1/internal/workers/{workerId}/heartbeat</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>push worker heartbeat</li>
+</ul>
+<h3
+id="post-apiv1internalworkersworkeridstatus"><code>POST /api/v1/internal/workers/{workerId}/status</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>update worker state</li>
+</ul>
+<h2 id="92-instance-assignment">9.2 Instance Assignment</h2>
+<h3
+id="post-apiv1internalinstancesinstanceidassign"><code>POST /api/v1/internal/instances/{instanceId}/assign</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>assign worker to instance</li>
+</ul>
+<h3
+id="post-apiv1internalinstancesinstanceidrelease"><code>POST /api/v1/internal/instances/{instanceId}/release</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>release worker assignment</li>
+</ul>
+<h3
+id="post-apiv1internalinstancesinstanceidstate"><code>POST /api/v1/internal/instances/{instanceId}/state</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>publish instance state update from worker</li>
+</ul>
+<h3
+id="post-apiv1internalinstancesinstanceidsession"><code>POST /api/v1/internal/instances/{instanceId}/session</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>update session metadata</li>
+</ul>
+<h2 id="93-message-and-event-ingestion">9.3 Message and Event
+Ingestion</h2>
+<h3
+id="post-apiv1internalinstancesinstanceideventsinbound-message"><code>POST /api/v1/internal/instances/{instanceId}/events/inbound-message</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>ingest inbound message from worker</li>
+</ul>
+<h3
+id="post-apiv1internalinstancesinstanceideventsmessage-ack"><code>POST /api/v1/internal/instances/{instanceId}/events/message-ack</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>ingest message ACK transition</li>
+</ul>
+<h3
+id="post-apiv1internalinstancesinstanceideventsmessage-status"><code>POST /api/v1/internal/instances/{instanceId}/events/message-status</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>ingest outbound status update</li>
+</ul>
+<h3
+id="post-apiv1internalinstancesinstanceideventsreaction"><code>POST /api/v1/internal/instances/{instanceId}/events/reaction</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>ingest reaction event</li>
+</ul>
+<h3
+id="post-apiv1internalinstancesinstanceideventsqr"><code>POST /api/v1/internal/instances/{instanceId}/events/qr</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>publish fresh QR</li>
+</ul>
+<h3
+id="post-apiv1internalinstancesinstanceideventsconflict"><code>POST /api/v1/internal/instances/{instanceId}/events/conflict</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>report conflict state</li>
+</ul>
+<h3
+id="post-apiv1internalinstancesinstanceideventsscreenshot"><code>POST /api/v1/internal/instances/{instanceId}/events/screenshot</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>upload or register screenshot artifact</li>
+</ul>
+<hr />
+<h2 id="10-webhook-receiver-and-billing-webhook-routes">10. Webhook
+Receiver and Billing Webhook Routes</h2>
+<h2 id="101-payment-provider-webhooks">10.1 Payment Provider
+Webhooks</h2>
+<h3
+id="post-apiv1publicwebhooksbillingprovider"><code>POST /api/v1/public/webhooks/billing/{provider}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>receive payment provider webhook</li>
+</ul>
+<h2 id="102-optional-customer-webhook-test-utilities">10.2 Optional
+Customer Webhook Test Utilities</h2>
+<h3
+id="post-apiv1customerinstancesinstanceidwebhookstest"><code>POST /api/v1/customer/instances/{instanceId}/webhooks/test</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>send test webhook to configured endpoint</li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceidwebhooksdeliveries"><code>GET /api/v1/customer/instances/{instanceId}/webhooks/deliveries</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>list webhook deliveries for that instance</li>
+</ul>
+<h3
+id="get-apiv1customerinstancesinstanceidwebhooksdeliveriesdeliveryid"><code>GET /api/v1/customer/instances/{instanceId}/webhooks/deliveries/{deliveryId}</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>webhook delivery detail</li>
+</ul>
+<hr />
+<h2 id="11-realtime-routes">11. Realtime Routes</h2>
+<p>Realtime transport:</p>
+<ul>
+<li>Socket.IO</li>
+</ul>
+<p>Primary endpoint:</p>
+<ul>
+<li><code>GET /socket.io</code></li>
+</ul>
+<p>Namespaces are optional, but rooms should exist for:</p>
+<ul>
+<li>account room</li>
+<li>instance room</li>
+<li>admin global room</li>
+<li>worker monitor room</li>
+</ul>
+<p>Recommended auth flows:</p>
+<ul>
+<li>customer dashboard websocket token</li>
+<li>admin dashboard websocket token</li>
+</ul>
+<p>Suggested events emitted by server:</p>
+<ul>
+<li><code>instance.status.changed</code></li>
+<li><code>instance.qr.updated</code></li>
+<li><code>instance.statistics.updated</code></li>
+<li><code>instance.settings.updated</code></li>
+<li><code>instance.limits.updated</code></li>
+<li><code>message.outbound.updated</code></li>
+<li><code>message.inbound.created</code></li>
+<li><code>webhook.delivery.updated</code></li>
+<li><code>worker.health.updated</code></li>
+</ul>
+<hr />
+<h2 id="12-health-and-operations-routes">12. Health and Operations
+Routes</h2>
+<h2 id="121-public-health">12.1 Public Health</h2>
+<h3 id="get-health"><code>GET /health</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>basic liveness</li>
+</ul>
+<h3 id="get-ready"><code>GET /ready</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>readiness check</li>
+</ul>
+<h2 id="122-internal-health">12.2 Internal Health</h2>
+<h3
+id="get-apiv1internalhealth"><code>GET /api/v1/internal/health</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>internal dependency health</li>
+</ul>
+<h3
+id="get-apiv1internalmetrics"><code>GET /api/v1/internal/metrics</code></h3>
+<p>Purpose:</p>
+<ul>
+<li>metrics endpoint for Prometheus or internal scraping</li>
+</ul>
+<hr />
+<h2 id="13-route-naming-and-compatibility-notes">13. Route Naming and
+Compatibility Notes</h2>
+<p>Design rules:</p>
+<ul>
+<li>customer and admin dashboards should call versioned REST routes</li>
+<li>public per-instance routes should preserve UltraMsg-style
+ergonomics</li>
+<li>compatibility aliases should be thin wrappers over the same
+application services</li>
+<li>internal worker routes must never be exposed to the internet
+directly</li>
+</ul>
+<p>Recommended compatibility strategy:</p>
+<ul>
+<li>build first-class versioned APIs under <code>/api/v1</code></li>
+<li>expose compatibility aliases only where needed</li>
+<li>keep request and response transformations isolated in adapter
+controllers</li>
+</ul>
+<hr />
+<h2 id="14-example-request-patterns">14. Example Request Patterns</h2>
+<h2 id="141-send-text-message">14.1 Send Text Message</h2>
+<p>Route:</p>
+<ul>
+<li><code>POST /instance/{instanceId}/messages/chat</code></li>
+</ul>
+<p>Parameters:</p>
+<ul>
+<li><code>token</code></li>
+<li><code>to</code></li>
+<li><code>body</code></li>
+<li><code>priority</code></li>
+<li><code>referenceId</code></li>
+</ul>
+<h2 id="142-get-message-logs">14.2 Get Message Logs</h2>
+<p>Route:</p>
+<ul>
+<li><code>GET /instance/{instanceId}/messages</code></li>
+</ul>
+<p>Parameters:</p>
+<ul>
+<li><code>token</code></li>
+<li><code>page</code></li>
+<li><code>limit</code></li>
+<li><code>status</code></li>
+<li><code>ack</code></li>
+<li><code>referenceId</code></li>
+</ul>
+<h2 id="143-update-instance-settings">14.3 Update Instance Settings</h2>
+<p>Route:</p>
+<ul>
+<li><code>POST /instance/{instanceId}/instance/settings</code></li>
+</ul>
+<p>Parameters:</p>
+<ul>
+<li><code>token</code></li>
+<li><code>sendDelaySeconds</code></li>
+<li><code>sendDelayMaxSeconds</code></li>
+<li><code>webhookUrl</code></li>
+<li><code>webhookRetries</code></li>
+<li>webhook toggles</li>
+</ul>
+<hr />
+<h2 id="15-final-recommendation">15. Final Recommendation</h2>
+<p>Elite Message should expose three route layers:</p>
+<ul>
+<li>dashboard routes for customer and admin applications</li>
+<li>public account and instance APIs for external customer systems</li>
+<li>internal orchestration routes for workers and support tooling</li>
+</ul>
+<p>If the product goal is real UltraMsg equivalence, the most important
+routes to get right first are:</p>
+<ul>
+<li>instance create/list/manage</li>
+<li>instance status and QR</li>
+<li>send message routes</li>
+<li>message log and resend routes</li>
+<li>settings and webhook routes</li>
+<li>restart/logout/clear/takeover routes</li>
+<li>admin instance and worker operations routes</li>
+</ul>
+<p>That route set is the minimum shape needed to support:</p>
+<ul>
+<li>a usable customer dashboard</li>
+<li>a workable admin dashboard</li>
+<li>a production worker runtime</li>
+<li>an external developer API</li>
+<li>future compatibility with UltraMsg-style integrations</li>
+</ul>
+</body>
+</html>

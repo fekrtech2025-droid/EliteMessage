@@ -1,0 +1,541 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  platform_admin
+  customer
+}
+
+enum UserStatus {
+  active
+  suspended
+}
+
+enum ThemePreference {
+  system
+  light
+  dark
+}
+
+enum WorkspaceStatus {
+  active
+  suspended
+}
+
+enum MembershipRole {
+  owner
+  admin
+  operator
+  viewer
+}
+
+enum InstanceLifecycleStatus {
+  qr
+  initialize
+  booting
+  loading
+  retrying
+  authenticated
+  disconnected
+  standby
+  stopped
+  expired
+}
+
+enum WorkerStatus {
+  online
+  degraded
+  draining
+  offline
+}
+
+enum ApiTokenType {
+  account_api
+  instance_api
+  internal_service
+}
+
+enum InstanceLifecycleEventType {
+  instance_created
+  token_rotated
+  worker_assigned
+  worker_released
+  status_changed
+  settings_updated
+  action_requested
+  action_completed
+  action_failed
+}
+
+enum InstanceActorType {
+  customer_user
+  platform_admin
+  worker
+  system
+}
+
+enum InstanceOperationType {
+  start
+  stop
+  restart
+  logout
+  clear
+  takeover
+  reassign
+}
+
+enum InstanceOperationStatus {
+  pending
+  running
+  completed
+  failed
+  cancelled
+}
+
+enum OutboundMessageType {
+  chat
+  image
+}
+
+enum MessageDeliveryStatus {
+  queue
+  sent
+  unsent
+  invalid
+  expired
+}
+
+enum MessageDeliveryAck {
+  pending
+  server
+  device
+  read
+  played
+}
+
+enum SessionBackend {
+  placeholder
+  whatsapp_web
+}
+
+enum InboundMessageKind {
+  chat
+  image
+  document
+  audio
+  video
+  sticker
+  unknown
+}
+
+enum WebhookEventType {
+  message_create
+  message_ack
+  message_received
+}
+
+enum WebhookDeliveryStatus {
+  pending
+  failed
+  delivered
+  exhausted
+}
+
+enum AuditActorType {
+  anonymous
+  customer_user
+  platform_admin
+  worker
+  system
+}
+
+enum AuditEntityType {
+  auth_session
+  user
+  workspace
+  account_api_token
+  instance
+  instance_settings
+  instance_api_token
+  instance_operation
+  outbound_message
+  inbound_message
+  webhook_delivery
+  worker
+  support_case
+}
+
+enum SupportCaseStatus {
+  open
+  in_progress
+  waiting_on_customer
+  resolved
+  closed
+}
+
+enum SupportCasePriority {
+  low
+  normal
+  high
+  urgent
+}
+
+model User {
+  id                    String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                 String           @unique @db.Citext
+  displayName           String
+  passwordHash          String
+  role                  UserRole         @default(customer)
+  status                UserStatus       @default(active)
+  themePreference       ThemePreference  @default(light)
+  adminMfaSecret        String?
+  adminMfaPendingSecret String?
+  adminMfaEnabledAt     DateTime?
+  memberships           Membership[]
+  refreshSessions       RefreshSession[]
+  createdTokens         ApiToken[]       @relation("ApiTokenCreatedBy")
+  createdInstances      Instance[]       @relation("InstanceCreatedBy")
+  requestedSupportCases SupportCase[] @relation("SupportCaseRequester")
+  assignedSupportCases  SupportCase[] @relation("SupportCaseAssignee")
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+}
+
+model Workspace {
+  id           String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  slug         String          @unique
+  status       WorkspaceStatus @default(active)
+  trialEndsAt  DateTime?
+  memberships  Membership[]
+  apiTokens    ApiToken[]
+  instances    Instance[]
+  auditLogs    AuditLog[]
+  supportCases SupportCase[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model Membership {
+  id          String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId String         @db.Uuid
+  userId      String         @db.Uuid
+  role        MembershipRole
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+}
+
+model RefreshSession {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String    @db.Uuid
+  tokenHash  String    @unique
+  userAgent  String?
+  ipAddress  String?
+  expiresAt  DateTime
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model ApiToken {
+  id              String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name            String
+  tokenType       ApiTokenType
+  tokenHash       String       @unique
+  prefix          String
+  workspaceId     String?      @db.Uuid
+  instanceId      String?      @db.Uuid
+  createdByUserId String?      @db.Uuid
+  lastUsedAt      DateTime?
+  expiresAt       DateTime?
+  revokedAt       DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  workspace       Workspace?   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  instance        Instance?    @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  createdBy       User?        @relation("ApiTokenCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, tokenType])
+  @@index([instanceId, tokenType])
+}
+
+model Instance {
+  id                   String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  publicId             String                  @unique
+  workspaceId          String                  @db.Uuid
+  name                 String
+  status               InstanceLifecycleStatus @default(standby)
+  substatus            String?
+  assignedWorkerId     String?
+  lastHeartbeatAt      DateTime?
+  lastLifecycleEventAt DateTime?
+  createdByUserId      String?                 @db.Uuid
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  workspace            Workspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  settings             InstanceSettings?
+  runtimeState         InstanceRuntimeState?
+  operations           InstanceOperation[]
+  outboundMessages     OutboundMessage[]
+  inboundMessages      InboundMessage[]
+  webhookDeliveries    WebhookDelivery[]
+  apiTokens            ApiToken[]
+  lifecycleEvents      InstanceLifecycleEvent[]
+  auditLogs            AuditLog[]
+  supportCases         SupportCase[]
+  createdBy            User?                   @relation("InstanceCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt])
+  @@index([assignedWorkerId])
+}
+
+model InstanceSettings {
+  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  instanceId             String   @unique @db.Uuid
+  sendDelay              Int      @default(1)
+  sendDelayMax           Int      @default(15)
+  webhookUrl             String?
+  webhookSecret          String   @default(dbgenerated("encode(gen_random_bytes(32), 'hex')"))
+  webhookMessageReceived Boolean  @default(false)
+  webhookMessageCreate   Boolean  @default(false)
+  webhookMessageAck      Boolean  @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  instance               Instance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+}
+
+model InstanceRuntimeState {
+  id                  String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  instanceId          String         @unique @db.Uuid
+  qrCode              String?
+  qrExpiresAt         DateTime?
+  sessionBackend      SessionBackend @default(placeholder)
+  currentSessionLabel String?
+  sessionDiagnostics  Json?
+  lastStartedAt       DateTime?
+  lastAuthenticatedAt DateTime?
+  lastDisconnectedAt DateTime?
+  lastInboundMessageAt DateTime?
+  lastScreenshotAt    DateTime?
+  lastScreenshotPath  String?
+  disconnectReason    String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  instance            Instance       @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+}
+
+model InstanceOperation {
+  id                 String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  instanceId         String                  @db.Uuid
+  operationType      InstanceOperationType
+  status             InstanceOperationStatus @default(pending)
+  requestedByActorType InstanceActorType
+  requestedByActorId String?
+  targetWorkerId     String?
+  message            String?
+  errorMessage       String?
+  metadata           Json?
+  createdAt          DateTime                @default(now())
+  startedAt          DateTime?
+  completedAt        DateTime?
+  updatedAt          DateTime                @updatedAt
+  instance           Instance                @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  @@index([instanceId, createdAt])
+  @@index([instanceId, status, createdAt])
+}
+
+model InstanceLifecycleEvent {
+  id         String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  instanceId String                    @db.Uuid
+  eventType  InstanceLifecycleEventType
+  actorType  InstanceActorType
+  actorId    String?
+  message    String
+  fromStatus InstanceLifecycleStatus?
+  toStatus   InstanceLifecycleStatus?
+  metadata   Json?
+  createdAt  DateTime                  @default(now())
+  instance   Instance                  @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  @@index([instanceId, createdAt])
+}
+
+model OutboundMessage {
+  id                 String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  publicMessageId    String                @unique
+  instanceId         String                @db.Uuid
+  messageType        OutboundMessageType
+  recipient          String
+  body               String?
+  mediaUrl           String?
+  caption            String?
+  referenceId        String?
+  priority           Int                   @default(100)
+  status             MessageDeliveryStatus @default(queue)
+  ack                MessageDeliveryAck    @default(pending)
+  scheduledFor       DateTime              @default(now())
+  processingWorkerId String?
+  processingStartedAt DateTime?
+  workerId           String?
+  providerMessageId  String?
+  errorMessage       String?
+  sentAt             DateTime?
+  acknowledgedAt     DateTime?
+  createdByActorType InstanceActorType
+  createdByActorId   String?
+  metadata           Json?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  instance           Instance              @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  attempts           OutboundMessageAttempt[]
+  webhookDeliveries  WebhookDelivery[]
+
+  @@index([instanceId, createdAt])
+  @@index([instanceId, status, scheduledFor, priority])
+  @@index([referenceId])
+  @@index([recipient])
+}
+
+model OutboundMessageAttempt {
+  id           String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  messageId    String                @db.Uuid
+  workerId     String?
+  attemptNumber Int
+  status       MessageDeliveryStatus
+  ack          MessageDeliveryAck?
+  message      String?
+  errorMessage String?
+  createdAt    DateTime              @default(now())
+  outboundMessage OutboundMessage    @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, attemptNumber])
+  @@index([messageId, createdAt])
+}
+
+model InboundMessage {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  publicMessageId   String             @unique
+  instanceId        String             @db.Uuid
+  providerMessageId String?
+  chatId            String?
+  sender            String
+  pushName          String?
+  kind              InboundMessageKind @default(chat)
+  body              String?
+  mediaUrl          String?
+  mimeType          String?
+  fromMe            Boolean            @default(false)
+  sentAt            DateTime?
+  receivedAt        DateTime           @default(now())
+  rawPayload        Json?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  instance          Instance           @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+
+  @@index([instanceId, receivedAt])
+  @@index([providerMessageId])
+  @@index([sender])
+}
+
+model WebhookDelivery {
+  id                 String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  instanceId         String                @db.Uuid
+  messageId          String?               @db.Uuid
+  eventType          WebhookEventType
+  status             WebhookDeliveryStatus @default(pending)
+  targetUrl          String
+  payload            Json
+  attemptCount       Int                   @default(0)
+  nextAttemptAt      DateTime              @default(now())
+  lastAttemptAt      DateTime?
+  deliveredAt        DateTime?
+  responseStatusCode Int?
+  responseBody       String?
+  errorMessage       String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  instance           Instance              @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  outboundMessage    OutboundMessage?      @relation(fields: [messageId], references: [id], onDelete: SetNull)
+
+  @@index([instanceId, createdAt])
+  @@index([messageId])
+  @@index([status, nextAttemptAt])
+}
+
+model WorkerHeartbeat {
+  id                  String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workerId            String       @unique
+  status              WorkerStatus
+  region              String
+  uptimeSeconds       Int
+  activeInstanceCount Int
+  lastSeenAt          DateTime
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @updatedAt
+
+  @@index([status, lastSeenAt])
+}
+
+model AuditLog {
+  id         String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId String?        @db.Uuid
+  instanceId String?         @db.Uuid
+  actorType  AuditActorType
+  actorId    String?
+  entityType AuditEntityType
+  entityId   String?
+  action     String
+  summary    String
+  metadata   Json?
+  createdAt  DateTime        @default(now())
+  workspace  Workspace?      @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  instance   Instance?       @relation(fields: [instanceId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId, createdAt])
+  @@index([instanceId, createdAt])
+  @@index([actorType, createdAt])
+  @@index([entityType, createdAt])
+  @@index([action, createdAt])
+}
+
+model SupportCase {
+  id                  String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  publicId            String              @unique
+  workspaceId         String?             @db.Uuid
+  instanceId          String?             @db.Uuid
+  requesterUserId     String?             @db.Uuid
+  assignedAdminUserId String?             @db.Uuid
+  title               String
+  description         String
+  priority            SupportCasePriority @default(normal)
+  status              SupportCaseStatus   @default(open)
+  internalNotes       String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  resolvedAt          DateTime?
+  workspace           Workspace?          @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  instance            Instance?           @relation(fields: [instanceId], references: [id], onDelete: SetNull)
+  requesterUser       User?               @relation("SupportCaseRequester", fields: [requesterUserId], references: [id], onDelete: SetNull)
+  assignedAdminUser   User?               @relation("SupportCaseAssignee", fields: [assignedAdminUserId], references: [id], onDelete: SetNull)
+
+  @@index([status, priority, createdAt])
+  @@index([workspaceId, createdAt])
+  @@index([instanceId, createdAt])
+  @@index([assignedAdminUserId, status, createdAt])
+}

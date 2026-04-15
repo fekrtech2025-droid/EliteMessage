@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>elite-message-full-module-architecture</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="/Users/apple/python_learning/EliteMessage/docs/architecture-print.css" />
+</head>
+<body>
+<h1 id="elite-message">Elite Message</h1>
+<h2 id="full-module-architecture">Full Module Architecture</h2>
+<p>Version: 1.0<br />
+Prepared for: Elite Message project<br />
+Architecture target: UltraMsg-equivalent platform with customer
+dashboard, admin dashboard, per-instance WhatsApp sessions, realtime
+status, queueing, webhook delivery, and subscription control</p>
+<hr />
+<h2 id="1-objective">1. Objective</h2>
+<p>Elite Message should be built as a hosted messaging platform that
+reproduces the operational behavior of UltraMsg as closely as
+practical:</p>
+<ul>
+<li>multi-tenant customer accounts</li>
+<li>multiple WhatsApp instances per account</li>
+<li>QR-based instance authorization</li>
+<li>long-lived per-instance sessions</li>
+<li>per-instance API tokens</li>
+<li>outbound send APIs for text and media</li>
+<li>inbound event capture and webhook delivery</li>
+<li>queueing with priority and delays</li>
+<li>realtime dashboard updates</li>
+<li>admin tooling for support, operations, worker health, and abuse
+control</li>
+</ul>
+<p>This document defines the full module architecture for that
+platform.</p>
+<hr />
+<h2 id="2-architecture-principles">2. Architecture Principles</h2>
+<p>The system should follow these principles:</p>
+<ul>
+<li>isolate the WhatsApp runtime from the business application</li>
+<li>keep all customer and admin actions behind a control-plane API</li>
+<li>treat each instance as an independently managed session unit</li>
+<li>use queues for anything asynchronous or retryable</li>
+<li>store every meaningful state transition as an event or audit
+trail</li>
+<li>separate customer-facing UI from internal operations UI</li>
+<li>assume worker crashes, browser corruption, and network instability
+will happen</li>
+<li>design for horizontal scaling from the first version</li>
+</ul>
+<hr />
+<h2 id="3-recommended-stack">3. Recommended Stack</h2>
+<h3 id="frontend">Frontend</h3>
+<ul>
+<li><code>Next.js</code> for customer dashboard</li>
+<li><code>Next.js</code> for admin dashboard</li>
+<li>shared component library for common UI primitives</li>
+<li><code>Socket.IO client</code> for realtime status and counters</li>
+</ul>
+<h3 id="backend">Backend</h3>
+<ul>
+<li><code>NestJS</code> as the control-plane API</li>
+<li><code>Socket.IO gateway</code> inside NestJS for realtime
+events</li>
+<li><code>BullMQ</code> for job queues</li>
+<li><code>Redis</code> for queues, rate-limits, caching, and
+pub/sub</li>
+<li><code>PostgreSQL</code> for primary relational storage</li>
+<li><code>S3-compatible object storage</code> for media and exports</li>
+</ul>
+<h3 id="whatsapp-runtime">WhatsApp Runtime</h3>
+<ul>
+<li><code>Node.js</code></li>
+<li><code>whatsapp-web.js</code></li>
+<li><code>Chromium</code> or <code>Chrome</code> in isolated worker
+containers</li>
+</ul>
+<h3 id="infrastructure">Infrastructure</h3>
+<ul>
+<li>Docker for local development</li>
+<li>Kubernetes for production deployment</li>
+<li>NGINX or cloud load balancer at the edge</li>
+<li>Prometheus + Grafana for metrics</li>
+<li>OpenTelemetry for tracing</li>
+<li>Loki or ELK for logs</li>
+</ul>
+<hr />
+<h2 id="4-top-level-system-layout">4. Top-Level System Layout</h2>
+<pre class="text"><code>Customer Web (Next.js)            Admin Web (Next.js)
+            |                                |
+            +------------ HTTPS -------------+
+                           |
+                    API Gateway / Control Plane
+                           |
+      +--------------------+--------------------+
+      |                    |                    |
+  PostgreSQL            Redis/BullMQ        Object Storage
+      |                    |                    |
+      +--------------------+--------------------+
+                           |
+                 Worker Orchestrator Service
+                           |
+        +------------------+------------------+
+        |                  |                  |
+   Instance Worker A  Instance Worker B  Instance Worker N
+        |                  |                  |
+   WhatsApp Web       WhatsApp Web       WhatsApp Web
+   browser session    browser session    browser session</code></pre>
+<hr />
+<h2 id="5-application-modules">5. Application Modules</h2>
+<h2 id="51-customer-dashboard">5.1 Customer Dashboard</h2>
+<p>Purpose: the customer-facing portal for managing accounts, instances,
+API usage, webhooks, and message history.</p>
+<p>Main modules:</p>
+<ul>
+<li>Authentication screens</li>
+<li>Account profile</li>
+<li>Subscription and invoices</li>
+<li>Instance list</li>
+<li>Instance detail</li>
+<li>QR authorization view</li>
+<li>Instance status monitor</li>
+<li>Message logs</li>
+<li>Webhook settings</li>
+<li>API documentation helper</li>
+<li>Media utility tools</li>
+<li>API token management</li>
+</ul>
+<p>Core pages:</p>
+<ul>
+<li>Dashboard overview</li>
+<li>Instances</li>
+<li>Instance manage page</li>
+<li>Messages</li>
+<li>Webhooks</li>
+<li>Subscription</li>
+<li>Settings</li>
+<li>Audit/activity feed</li>
+</ul>
+<p>Realtime widgets:</p>
+<ul>
+<li>instance connection state</li>
+<li>QR availability</li>
+<li>queue size</li>
+<li>send limit usage</li>
+<li>inbound/outbound counters</li>
+<li>webhook failure alerts</li>
+</ul>
+<h2 id="52-admin-dashboard">5.2 Admin Dashboard</h2>
+<p>Purpose: internal operations surface for support, infrastructure
+control, platform health, and abuse management.</p>
+<p>Main modules:</p>
+<ul>
+<li>Admin authentication and RBAC</li>
+<li>Global metrics overview</li>
+<li>User management</li>
+<li>Account management</li>
+<li>Instance explorer</li>
+<li>Worker health monitor</li>
+<li>Message search across tenants</li>
+<li>Webhook delivery inspector</li>
+<li>Subscription management</li>
+<li>Abuse/risk review</li>
+<li>Support actions</li>
+<li>Audit log explorer</li>
+</ul>
+<p>Privileged actions:</p>
+<ul>
+<li>suspend user</li>
+<li>disable instance</li>
+<li>restart worker</li>
+<li>rotate instance token</li>
+<li>clear instance session</li>
+<li>view worker screenshot</li>
+<li>replay webhook</li>
+<li>grant trial extension</li>
+<li>mark account for manual review</li>
+</ul>
+<h2 id="53-control-plane-api">5.3 Control Plane API</h2>
+<p>Purpose: the single authoritative backend for business rules,
+persistence, orchestration, audit logging, and external APIs.</p>
+<p>This should be implemented as a modular NestJS application.</p>
+<p>Main domain modules:</p>
+<ul>
+<li><code>AuthModule</code></li>
+<li><code>UsersModule</code></li>
+<li><code>AccountsModule</code></li>
+<li><code>RolesModule</code></li>
+<li><code>InstancesModule</code></li>
+<li><code>InstanceSettingsModule</code></li>
+<li><code>InstanceTokensModule</code></li>
+<li><code>InstanceLifecycleModule</code></li>
+<li><code>MessagesModule</code></li>
+<li><code>WebhooksModule</code></li>
+<li><code>MediaModule</code></li>
+<li><code>ChatsModule</code></li>
+<li><code>ContactsModule</code></li>
+<li><code>GroupsModule</code></li>
+<li><code>BillingModule</code></li>
+<li><code>AdminModule</code></li>
+<li><code>SupportModule</code></li>
+<li><code>AuditLogsModule</code></li>
+<li><code>RealtimeModule</code></li>
+<li><code>WorkerOrchestrationModule</code></li>
+<li><code>HealthModule</code></li>
+</ul>
+<h2 id="54-worker-runtime">5.4 Worker Runtime</h2>
+<p>Purpose: host the real WhatsApp Web sessions and execute all
+browser-backed actions.</p>
+<p>Each worker is responsible for one instance at a time.</p>
+<p>Worker modules:</p>
+<ul>
+<li>Browser launcher</li>
+<li>Persistent session store</li>
+<li>QR manager</li>
+<li>State detector</li>
+<li>Send engine</li>
+<li>Receive event adapter</li>
+<li>Screenshot service</li>
+<li>Conflict detector</li>
+<li>Takeover handler</li>
+<li>Retry and reconnect logic</li>
+<li>Worker heartbeat publisher</li>
+</ul>
+<h2 id="55-queue-and-event-layer">5.5 Queue and Event Layer</h2>
+<p>Purpose: handle delayed, retryable, and cross-service operations.</p>
+<p>Queue groups:</p>
+<ul>
+<li>instance lifecycle jobs</li>
+<li>outbound message jobs</li>
+<li>webhook delivery jobs</li>
+<li>media processing jobs</li>
+<li>billing jobs</li>
+<li>cleanup jobs</li>
+<li>support/admin operation jobs</li>
+<li>analytics aggregation jobs</li>
+</ul>
+<hr />
+<h2 id="6-detailed-backend-module-breakdown">6. Detailed Backend Module
+Breakdown</h2>
+<h2 id="61-auth-module">6.1 Auth Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>customer login</li>
+<li>admin login</li>
+<li>password reset</li>
+<li>refresh/access token flow</li>
+<li>MFA support for admin users</li>
+<li>session revocation</li>
+<li>API authentication middleware</li>
+</ul>
+<p>Interfaces:</p>
+<ul>
+<li>HTTP endpoints for login/logout/reset</li>
+<li>auth guards for customer and admin areas</li>
+<li>token issuance for dashboard sessions</li>
+</ul>
+<h2 id="62-users-module">6.2 Users Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>user profile management</li>
+<li>user preferences</li>
+<li>locale and timezone settings</li>
+<li>user state changes</li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>user</li>
+<li>user_profile</li>
+<li>user_preferences</li>
+</ul>
+<h2 id="63-accounts-module">6.3 Accounts Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>tenant/account creation</li>
+<li>account ownership</li>
+<li>plan association</li>
+<li>trial state</li>
+<li>account suspension</li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>account</li>
+<li>account_member</li>
+<li>account_status</li>
+</ul>
+<h2 id="64-roles-module">6.4 Roles Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>RBAC policy definitions</li>
+<li>account role mapping</li>
+<li>admin role mapping</li>
+<li>permission checks</li>
+</ul>
+<p>Example roles:</p>
+<ul>
+<li>customer owner</li>
+<li>customer admin</li>
+<li>customer operator</li>
+<li>support admin</li>
+<li>infra admin</li>
+<li>super admin</li>
+</ul>
+<h2 id="65-instances-module">6.5 Instances Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>create instance</li>
+<li>delete instance</li>
+<li>list instances</li>
+<li>retrieve instance details</li>
+<li>assign plan and limits</li>
+<li>store display metadata</li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>instance</li>
+<li>instance_metadata</li>
+</ul>
+<p>Key fields:</p>
+<ul>
+<li>instance id</li>
+<li>account id</li>
+<li>current status</li>
+<li>public API base URL</li>
+<li>assigned worker id</li>
+<li>expiry date</li>
+<li>trial flag</li>
+<li>auto renewal flag</li>
+</ul>
+<h2 id="66-instance-tokens-module">6.6 Instance Tokens Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>issue per-instance API token</li>
+<li>rotate token</li>
+<li>revoke token</li>
+<li>validate token for public API access</li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>instance_token</li>
+<li>instance_token_history</li>
+</ul>
+<p>Security rules:</p>
+<ul>
+<li>store hashed token material</li>
+<li>display clear token only at creation or rotation time</li>
+<li>log all rotations</li>
+</ul>
+<h2 id="67-instance-settings-module">6.7 Instance Settings Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>send delay</li>
+<li>send delay max</li>
+<li>webhook URL</li>
+<li>webhook retry count</li>
+<li>webhook event toggles</li>
+<li>rate and quota parameters</li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>instance_settings</li>
+</ul>
+<h2 id="68-instance-lifecycle-module">6.8 Instance Lifecycle Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>start worker</li>
+<li>stop worker</li>
+<li>restart worker</li>
+<li>logout session</li>
+<li>clear instance</li>
+<li>troubleshoot workflows</li>
+<li>move instance to standby or conflict state</li>
+</ul>
+<p>Supported states:</p>
+<ul>
+<li><code>qr</code></li>
+<li><code>initialize</code></li>
+<li><code>booting</code></li>
+<li><code>loading</code></li>
+<li><code>retrying</code></li>
+<li><code>authenticated</code></li>
+<li><code>disconnected</code></li>
+<li><code>standby</code></li>
+<li><code>stopped</code></li>
+<li><code>expired</code></li>
+</ul>
+<p>Lifecycle events:</p>
+<ul>
+<li>instance created</li>
+<li>worker assigned</li>
+<li>browser started</li>
+<li>QR ready</li>
+<li>QR expired</li>
+<li>authenticated</li>
+<li>disconnected</li>
+<li>conflict detected</li>
+<li>worker restarted</li>
+<li>session cleared</li>
+<li>token rotated</li>
+</ul>
+<h2 id="69-worker-orchestration-module">6.9 Worker Orchestration
+Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>assign a worker container to an instance</li>
+<li>recover crashed workers</li>
+<li>rebalance workers</li>
+<li>detect unhealthy sessions</li>
+<li>manage heartbeat timeouts</li>
+</ul>
+<p>Key outputs:</p>
+<ul>
+<li>worker assignment records</li>
+<li>health status</li>
+<li>orchestrator actions</li>
+</ul>
+<h2 id="610-messages-module">6.10 Messages Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>public send endpoints</li>
+<li>outbound message persistence</li>
+<li>inbound message persistence</li>
+<li>status updates</li>
+<li>ACK updates</li>
+<li>message search and filtering</li>
+<li>resend by status</li>
+<li>resend by id</li>
+<li>clear by status</li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>outbound_message</li>
+<li>inbound_message</li>
+<li>message_event</li>
+<li>message_status_snapshot</li>
+</ul>
+<p>Supported statuses:</p>
+<ul>
+<li>queue</li>
+<li>sent</li>
+<li>unsent</li>
+<li>invalid</li>
+<li>expired</li>
+</ul>
+<p>Supported ACK values:</p>
+<ul>
+<li>pending</li>
+<li>server</li>
+<li>device</li>
+<li>read</li>
+<li>played</li>
+</ul>
+<h2 id="611-chats-module">6.11 Chats Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>store chat identifiers</li>
+<li>sync recent chat state</li>
+<li>expose chat list to dashboard</li>
+<li>archive/read/delete markers</li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>chat</li>
+<li>chat_state</li>
+</ul>
+<h2 id="612-contacts-module">6.12 Contacts Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>contact listing</li>
+<li>existence checks</li>
+<li>caching of check results</li>
+<li>block/unblock metadata</li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>contact</li>
+<li>contact_check_cache</li>
+</ul>
+<h2 id="613-groups-module">6.13 Groups Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>group listing</li>
+<li>group metadata caching</li>
+<li>participant snapshots</li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>group</li>
+<li>group_member</li>
+</ul>
+<h2 id="614-media-module">6.14 Media Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>upload media</li>
+<li>receive media references from workers</li>
+<li>store object keys</li>
+<li>generate signed URLs</li>
+<li>delete media by policy</li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>media_asset</li>
+<li>media_reference</li>
+</ul>
+<h2 id="615-webhooks-module">6.15 Webhooks Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>build outbound webhook payloads</li>
+<li>enqueue delivery attempts</li>
+<li>retry non-200 responses</li>
+<li>sign payloads</li>
+<li>replay deliveries</li>
+<li>expose delivery logs</li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>webhook_endpoint</li>
+<li>webhook_delivery</li>
+<li>webhook_attempt</li>
+</ul>
+<h2 id="616-billing-module">6.16 Billing Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>plans</li>
+<li>trials</li>
+<li>subscriptions</li>
+<li>invoices</li>
+<li>renewals</li>
+<li>grace periods</li>
+<li>instance expiry enforcement</li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>plan</li>
+<li>subscription</li>
+<li>invoice</li>
+<li>payment</li>
+<li>renewal_event</li>
+</ul>
+<h2 id="617-audit-logs-module">6.17 Audit Logs Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>record customer actions</li>
+<li>record admin actions</li>
+<li>record automated system actions</li>
+<li>provide searchable evidence trails</li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>audit_log</li>
+</ul>
+<h2 id="618-realtime-module">6.18 Realtime Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>authenticated websocket sessions</li>
+<li>room subscriptions by account and by instance</li>
+<li>push instance state changes</li>
+<li>push live counters</li>
+<li>push worker health and queue stats</li>
+</ul>
+<p>Realtime channels:</p>
+<ul>
+<li>account room</li>
+<li>instance room</li>
+<li>admin global room</li>
+<li>admin worker room</li>
+</ul>
+<h2 id="619-support-module">6.19 Support Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>support notes</li>
+<li>safe impersonation</li>
+<li>troubleshooting commands</li>
+<li>case history</li>
+</ul>
+<p>Entities:</p>
+<ul>
+<li>support_case</li>
+<li>support_note</li>
+</ul>
+<h2 id="620-admin-module">6.20 Admin Module</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>admin dashboards</li>
+<li>global search</li>
+<li>emergency actions</li>
+<li>risk flags</li>
+<li>platform configuration</li>
+</ul>
+<hr />
+<h2 id="7-worker-module-breakdown">7. Worker Module Breakdown</h2>
+<p>Each instance worker should be a separate long-lived process with
+isolated browser storage.</p>
+<h2 id="71-browser-session-manager">7.1 Browser Session Manager</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>launch Chromium</li>
+<li>maintain user data directory</li>
+<li>restore session on restart</li>
+<li>terminate safely</li>
+</ul>
+<h2 id="72-qr-manager">7.2 QR Manager</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>detect QR generation</li>
+<li>cache active QR image</li>
+<li>emit QR updates</li>
+<li>expire QR after validity window</li>
+</ul>
+<h2 id="73-state-detector">7.3 State Detector</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>detect connected/authenticated state</li>
+<li>detect loading state</li>
+<li>detect retrying state</li>
+<li>detect standby state</li>
+<li>detect conflict state</li>
+</ul>
+<h2 id="74-send-engine">7.4 Send Engine</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>process outbound jobs</li>
+<li>honor priority ordering</li>
+<li>honor configured delays</li>
+<li>classify success/failure states</li>
+<li>emit send results</li>
+</ul>
+<h2 id="75-receive-event-adapter">7.5 Receive Event Adapter</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>normalize inbound messages</li>
+<li>normalize ACK events</li>
+<li>normalize reaction events</li>
+<li>normalize media events</li>
+<li>push events to API</li>
+</ul>
+<h2 id="76-screenshot-service">7.6 Screenshot Service</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>capture current browser window</li>
+<li>return base64 or temporary stored image</li>
+<li>restrict access to authorized API calls</li>
+</ul>
+<h2 id="77-conflict-and-takeover-handler">7.7 Conflict and Takeover
+Handler</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>detect another active browser/device session</li>
+<li>expose takeover flow</li>
+<li>emit conflict state</li>
+</ul>
+<h2 id="78-worker-heartbeat">7.8 Worker Heartbeat</h2>
+<p>Responsibilities:</p>
+<ul>
+<li>periodic health ping</li>
+<li>current browser memory stats</li>
+<li>active page state</li>
+<li>last successful action timestamp</li>
+</ul>
+<hr />
+<h2 id="8-public-api-surface">8. Public API Surface</h2>
+<p>The public API should preserve UltraMsg-like ergonomics.</p>
+<h2 id="81-account-level-api">8.1 Account-Level API</h2>
+<p>Purpose:</p>
+<ul>
+<li>list instances</li>
+<li>create instance</li>
+<li>update instance metadata</li>
+</ul>
+<p>Example routes:</p>
+<ul>
+<li><code>GET /api/account/instances</code></li>
+<li><code>POST /api/account/instances</code></li>
+<li><code>PATCH /api/account/instances/:id</code></li>
+</ul>
+<p>Compatibility facade:</p>
+<ul>
+<li><code>GET /api/list</code></li>
+<li><code>POST /api/create</code></li>
+<li><code>POST /api/update</code></li>
+</ul>
+<h2 id="82-per-instance-api">8.2 Per-Instance API</h2>
+<p>Example route groups:</p>
+<ul>
+<li><code>/instance/:instanceId/messages/chat</code></li>
+<li><code>/instance/:instanceId/messages/image</code></li>
+<li><code>/instance/:instanceId/messages/document</code></li>
+<li><code>/instance/:instanceId/messages/sticker</code></li>
+<li><code>/instance/:instanceId/messages/audio</code></li>
+<li><code>/instance/:instanceId/messages/video</code></li>
+<li><code>/instance/:instanceId/messages/voice</code></li>
+<li><code>/instance/:instanceId/messages/contact</code></li>
+<li><code>/instance/:instanceId/messages/location</code></li>
+<li><code>/instance/:instanceId/messages/reaction</code></li>
+<li><code>/instance/:instanceId/messages</code></li>
+<li><code>/instance/:instanceId/messages/statistics</code></li>
+<li><code>/instance/:instanceId/messages/resendById</code></li>
+<li><code>/instance/:instanceId/messages/resendByStatus</code></li>
+<li><code>/instance/:instanceId/messages/clear</code></li>
+<li><code>/instance/:instanceId/instance/status</code></li>
+<li><code>/instance/:instanceId/instance/settings</code></li>
+<li><code>/instance/:instanceId/instance/restart</code></li>
+<li><code>/instance/:instanceId/instance/logout</code></li>
+<li><code>/instance/:instanceId/instance/clear</code></li>
+<li><code>/instance/:instanceId/instance/screenshot</code></li>
+<li><code>/instance/:instanceId/instance/qr</code></li>
+<li><code>/instance/:instanceId/instance/qrCode</code></li>
+<li><code>/instance/:instanceId/chats</code></li>
+<li><code>/instance/:instanceId/contacts</code></li>
+<li><code>/instance/:instanceId/groups</code></li>
+<li><code>/instance/:instanceId/media/upload</code></li>
+</ul>
+<p>Authentication model:</p>
+<ul>
+<li>all per-instance routes require instance token</li>
+<li>dashboard requests to these routes should still pass through API
+policies where needed</li>
+</ul>
+<hr />
+<h2 id="9-realtime-event-model">9. Realtime Event Model</h2>
+<p>The API should aggregate worker events and publish normalized
+websocket updates.</p>
+<p>Core event types:</p>
+<ul>
+<li><code>instance.status.changed</code></li>
+<li><code>instance.qr.updated</code></li>
+<li><code>instance.settings.updated</code></li>
+<li><code>instance.messages.statistics.updated</code></li>
+<li><code>instance.limits.updated</code></li>
+<li><code>instance.me.updated</code></li>
+<li><code>message.outbound.created</code></li>
+<li><code>message.outbound.updated</code></li>
+<li><code>message.inbound.created</code></li>
+<li><code>webhook.delivery.updated</code></li>
+<li><code>worker.health.updated</code></li>
+</ul>
+<p>Design rules:</p>
+<ul>
+<li>workers publish internal events to Redis pub/sub</li>
+<li>API subscribes and rebroadcasts authorized events to dashboards</li>
+<li>clients never connect directly to workers</li>
+</ul>
+<hr />
+<h2 id="10-queue-architecture">10. Queue Architecture</h2>
+<p>BullMQ queue set:</p>
+<ul>
+<li><code>instance-lifecycle</code></li>
+<li><code>instance-recovery</code></li>
+<li><code>outbound-send</code></li>
+<li><code>message-resend</code></li>
+<li><code>webhook-delivery</code></li>
+<li><code>media-processing</code></li>
+<li><code>billing-renewal</code></li>
+<li><code>cleanup-retention</code></li>
+<li><code>admin-operations</code></li>
+</ul>
+<p>Key job patterns:</p>
+<ul>
+<li>delayed jobs for <code>sendDelay</code> and
+<code>sendDelayMax</code></li>
+<li>retry with backoff for webhooks</li>
+<li>unique job keys for idempotency</li>
+<li>dead-letter handling for exhausted retries</li>
+</ul>
+<p>Priority strategy:</p>
+<ul>
+<li>lower numeric priority sends first</li>
+<li>emergency admin jobs must not share a queue with normal sends</li>
+</ul>
+<hr />
+<h2 id="11-data-model-summary">11. Data Model Summary</h2>
+<p>Minimum database tables:</p>
+<ul>
+<li><code>users</code></li>
+<li><code>user_profiles</code></li>
+<li><code>accounts</code></li>
+<li><code>account_members</code></li>
+<li><code>roles</code></li>
+<li><code>permissions</code></li>
+<li><code>account_member_roles</code></li>
+<li><code>admin_users</code></li>
+<li><code>instances</code></li>
+<li><code>instance_tokens</code></li>
+<li><code>instance_settings</code></li>
+<li><code>instance_workers</code></li>
+<li><code>instance_sessions</code></li>
+<li><code>outbound_messages</code></li>
+<li><code>inbound_messages</code></li>
+<li><code>message_events</code></li>
+<li><code>message_status_snapshots</code></li>
+<li><code>contacts</code></li>
+<li><code>contact_check_cache</code></li>
+<li><code>chats</code></li>
+<li><code>chat_states</code></li>
+<li><code>groups</code></li>
+<li><code>group_members</code></li>
+<li><code>media_assets</code></li>
+<li><code>webhook_endpoints</code></li>
+<li><code>webhook_deliveries</code></li>
+<li><code>webhook_attempts</code></li>
+<li><code>plans</code></li>
+<li><code>subscriptions</code></li>
+<li><code>invoices</code></li>
+<li><code>payments</code></li>
+<li><code>audit_logs</code></li>
+<li><code>support_cases</code></li>
+<li><code>support_notes</code></li>
+</ul>
+<p>Design rules:</p>
+<ul>
+<li>use UUIDs internally where possible</li>
+<li>keep public instance IDs human-compatible if UltraMsg-style parity
+matters</li>
+<li>separate current snapshot tables from append-only event tables</li>
+<li>index by <code>instance_id</code>, <code>account_id</code>,
+<code>status</code>, <code>created_at</code>, and
+<code>reference_id</code></li>
+</ul>
+<hr />
+<h2 id="12-customer-dashboard-module-map">12. Customer Dashboard Module
+Map</h2>
+<h2 id="121-overview-module">12.1 Overview Module</h2>
+<p>Displays:</p>
+<ul>
+<li>active instance count</li>
+<li>pending/expired instance count</li>
+<li>daily send usage</li>
+<li>webhook failures</li>
+<li>recent inbound and outbound activity</li>
+</ul>
+<h2 id="122-instances-module">12.2 Instances Module</h2>
+<p>Displays:</p>
+<ul>
+<li>all instances</li>
+<li>filter by status</li>
+<li>expiry date</li>
+<li>auto renewal state</li>
+<li>manage action</li>
+</ul>
+<p>Actions:</p>
+<ul>
+<li>create instance</li>
+<li>rename instance</li>
+<li>rotate token</li>
+<li>open manage page</li>
+<li>pay or renew</li>
+</ul>
+<h2 id="123-instance-manage-module">12.3 Instance Manage Module</h2>
+<p>Displays:</p>
+<ul>
+<li>status badge</li>
+<li>API base URL</li>
+<li>token</li>
+<li>worker health</li>
+<li>QR section</li>
+<li>queue statistics</li>
+<li>limits section</li>
+</ul>
+<p>Actions:</p>
+<ul>
+<li>restart</li>
+<li>logout</li>
+<li>clear</li>
+<li>send test message</li>
+<li>edit webhook settings</li>
+<li>edit send delays</li>
+<li>screenshot view</li>
+<li>troubleshoot</li>
+</ul>
+<h2 id="124-messages-module">12.4 Messages Module</h2>
+<p>Displays:</p>
+<ul>
+<li>message list</li>
+<li>filters by status, ack, id, referenceId, from, to</li>
+<li>message timing</li>
+<li>resend availability</li>
+</ul>
+<h2 id="125-settings-and-billing-module">12.5 Settings and Billing
+Module</h2>
+<p>Displays:</p>
+<ul>
+<li>profile settings</li>
+<li>password reset</li>
+<li>invoices</li>
+<li>plan details</li>
+<li>account API token</li>
+</ul>
+<hr />
+<h2 id="13-admin-dashboard-module-map">13. Admin Dashboard Module
+Map</h2>
+<h2 id="131-global-overview">13.1 Global Overview</h2>
+<p>Displays:</p>
+<ul>
+<li>total active instances</li>
+<li>authenticated instances</li>
+<li>disconnected instances</li>
+<li>workers online</li>
+<li>queue backlog</li>
+<li>webhook failure rate</li>
+<li>account growth</li>
+</ul>
+<h2 id="132-users-and-accounts">13.2 Users and Accounts</h2>
+<p>Displays:</p>
+<ul>
+<li>account search</li>
+<li>plan state</li>
+<li>trial state</li>
+<li>suspension state</li>
+<li>recent support interactions</li>
+</ul>
+<p>Actions:</p>
+<ul>
+<li>suspend</li>
+<li>unsuspend</li>
+<li>extend trial</li>
+<li>reset account API token</li>
+</ul>
+<h2 id="133-instance-explorer">13.3 Instance Explorer</h2>
+<p>Displays:</p>
+<ul>
+<li>instance detail across all tenants</li>
+<li>assigned worker</li>
+<li>session state</li>
+<li>current browser health</li>
+<li>recent errors</li>
+</ul>
+<p>Actions:</p>
+<ul>
+<li>restart worker</li>
+<li>logout session</li>
+<li>clear session</li>
+<li>rotate token</li>
+<li>force reassign worker</li>
+<li>capture screenshot</li>
+</ul>
+<h2 id="134-worker-health">13.4 Worker Health</h2>
+<p>Displays:</p>
+<ul>
+<li>worker node</li>
+<li>CPU and memory</li>
+<li>browser process count</li>
+<li>crash loops</li>
+<li>heartbeat age</li>
+</ul>
+<h2 id="135-global-messages">13.5 Global Messages</h2>
+<p>Displays:</p>
+<ul>
+<li>cross-tenant search</li>
+<li>delivery states</li>
+<li>ACK progression</li>
+<li>queue aging</li>
+</ul>
+<h2 id="136-webhook-inspector">13.6 Webhook Inspector</h2>
+<p>Displays:</p>
+<ul>
+<li>endpoint URL</li>
+<li>event type</li>
+<li>response code</li>
+<li>retries</li>
+<li>payload preview</li>
+</ul>
+<p>Actions:</p>
+<ul>
+<li>replay delivery</li>
+<li>disable endpoint</li>
+</ul>
+<h2 id="137-risk-and-abuse">13.7 Risk and Abuse</h2>
+<p>Displays:</p>
+<ul>
+<li>spike detection</li>
+<li>repeated invalid targets</li>
+<li>excessive contact checks</li>
+<li>blocked account patterns</li>
+</ul>
+<p>Actions:</p>
+<ul>
+<li>rate-limit account</li>
+<li>require manual review</li>
+<li>disable instance creation</li>
+</ul>
+<hr />
+<h2 id="14-security-architecture">14. Security Architecture</h2>
+<p>Mandatory controls:</p>
+<ul>
+<li>hash stored tokens</li>
+<li>encrypt browser session artifacts at rest</li>
+<li>segregate customer and admin auth domains</li>
+<li>require MFA for admins</li>
+<li>record every admin action in audit logs</li>
+<li>sign webhook payloads</li>
+<li>rate-limit public APIs</li>
+<li>isolate workers by container or pod</li>
+<li>never expose worker network directly to browsers</li>
+</ul>
+<p>Sensitive data handling:</p>
+<ul>
+<li>redact tokens from logs</li>
+<li>redact message bodies in admin views unless explicitly
+authorized</li>
+<li>expire temporary screenshots</li>
+<li>use short-lived signed URLs for media access</li>
+</ul>
+<hr />
+<h2 id="15-observability">15. Observability</h2>
+<p>Metrics:</p>
+<ul>
+<li>active workers</li>
+<li>worker crash count</li>
+<li>authenticated instance count</li>
+<li>queue depth by type</li>
+<li>average send latency</li>
+<li>webhook success rate</li>
+<li>screenshot failures</li>
+<li>QR generation rate</li>
+</ul>
+<p>Logs:</p>
+<ul>
+<li>request logs</li>
+<li>worker lifecycle logs</li>
+<li>browser crash logs</li>
+<li>webhook delivery logs</li>
+<li>admin action logs</li>
+</ul>
+<p>Tracing:</p>
+<ul>
+<li>API request to queue job</li>
+<li>queue job to worker execution</li>
+<li>worker event to webhook delivery</li>
+</ul>
+<hr />
+<h2 id="16-deployment-topology">16. Deployment Topology</h2>
+<p>Production layout:</p>
+<ul>
+<li><code>customer-web</code> deployment</li>
+<li><code>admin-web</code> deployment</li>
+<li><code>api</code> deployment</li>
+<li><code>queue-worker</code> deployment for BullMQ processors</li>
+<li><code>worker-orchestrator</code> deployment</li>
+<li><code>session-worker</code> stateful or isolated workload pool</li>
+<li>PostgreSQL cluster</li>
+<li>Redis cluster</li>
+<li>object storage bucket</li>
+</ul>
+<p>Scaling rules:</p>
+<ul>
+<li>web and API scale horizontally</li>
+<li>queue processors scale by queue pressure</li>
+<li>session workers scale by instance count</li>
+<li>keep one active worker assignment per instance</li>
+</ul>
+<hr />
+<h2 id="17-implementation-phases">17. Implementation Phases</h2>
+<h2 id="phase-1-core-parity">Phase 1: Core Parity</h2>
+<ul>
+<li>auth</li>
+<li>account management</li>
+<li>instance create/list/manage</li>
+<li>QR authorization</li>
+<li>realtime status</li>
+<li>send text</li>
+<li>message logs</li>
+<li>webhook settings</li>
+<li>restart/logout/clear</li>
+</ul>
+<h2 id="phase-2-operational-parity">Phase 2: Operational Parity</h2>
+<ul>
+<li>media sends</li>
+<li>resend flows</li>
+<li>screenshot endpoint</li>
+<li>conflict/takeover</li>
+<li>chats/contacts/groups</li>
+<li>admin dashboard</li>
+<li>worker health views</li>
+</ul>
+<h2 id="phase-3-production-hardening">Phase 3: Production Hardening</h2>
+<ul>
+<li>horizontal scaling</li>
+<li>advanced rate controls</li>
+<li>abuse detection</li>
+<li>full observability</li>
+<li>billing automation</li>
+<li>retention cleanup</li>
+</ul>
+<hr />
+<h2 id="18-final-recommendation">18. Final Recommendation</h2>
+<p>Elite Message should be built as a platform with:</p>
+<ul>
+<li>two separate dashboards</li>
+<li>one control-plane API</li>
+<li>one orchestration layer</li>
+<li>many isolated browser-backed instance workers</li>
+<li>queue-driven asynchronous processing</li>
+<li>strong audit and admin tooling</li>
+</ul>
+<p>The system should not try to make the API server host live WhatsApp
+sessions directly. That coupling would make recovery, scaling, and
+support operations significantly harder.</p>
+<p>The clean architecture is:</p>
+<ul>
+<li><code>Next.js</code> for customer dashboard</li>
+<li><code>Next.js</code> for admin dashboard</li>
+<li><code>NestJS</code> for control plane</li>
+<li><code>Redis + BullMQ</code> for async operations</li>
+<li><code>PostgreSQL</code> for durable data</li>
+<li><code>whatsapp-web.js + Chromium workers</code> for session
+execution</li>
+<li><code>S3-compatible storage</code> for media and exports</li>
+</ul>
+<p>This structure gives the closest path to a real UltraMsg-equivalent
+system with room for production growth.</p>
+</body>
+</html>

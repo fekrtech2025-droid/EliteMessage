@@ -1,0 +1,14 @@
+{
+  "extends": "../../packages/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": "."
+  },
+  "include": [
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "scripts/**/*.ts",
+    "next-env.d.ts",
+    "vitest.config.ts"
+  ],
+  "exclude": ["node_modules"]
+}

@@ -1,0 +1,51 @@
+{
+  "name": "elite-message",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": "^20.19.0 || ^22.0.0"
+  },
+  "scripts": {
+    "dev": "turbo run build --filter=@elite-message/contracts --filter=@elite-message/config --filter=@elite-message/ui --filter=@elite-message/db && turbo run dev --parallel",
+    "dev:worker:whatsapp-web": "tsx ./scripts/run-worker-whatsapp-web.ts",
+    "dev:infra": "tsx ./scripts/dev-infra.ts",
+    "dev:infra:stop": "tsx ./scripts/dev-infra.ts stop",
+    "docs:pdf": "node ./scripts/build-docs-pdf.mjs",
+    "docs:pages": "node ./scripts/build-docs-pages.mjs",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:migrate": "tsx ./scripts/ensure-local-db.ts && pnpm --filter @elite-message/db db:migrate && pnpm db:seed",
+    "db:seed": "tsx ./scripts/bootstrap-dev-data.ts",
+    "db:reset": "pnpm --filter @elite-message/db db:reset",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,mjs,cjs,ts,tsx,json,md,yml,yaml}": [
+      "prettier --write"
+    ],
+    "*.{js,mjs,cjs,ts,tsx}": [
+      "eslint --fix"
+    ]
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.1",
+    "@testing-library/jest-dom": "6.9.1",
+    "@testing-library/react": "16.3.0",
+    "@types/node": "24.7.2",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "eslint": "9.39.1",
+    "husky": "9.1.7",
+    "jsdom": "27.0.1",
+    "lint-staged": "16.2.4",
+    "prettier": "3.8.1",
+    "turbo": "2.9.5",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.58.1",
+    "vitest": "3.2.4"
+  }
+}

@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Requirements Documentation | Elite Message</title>
+    <link rel="stylesheet" href="../../assets/styles/pages.css" />
+  </head>
+  <body>
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <div class="docs-brand">
+          <img src="../../assets/branding/elite-message-icon-only.png" alt="Elite Message" />
+          <div>
+            <div class="docs-brand-mark">Pages</div>
+            <p class="docs-brand-title">Elite Message</p>
+            <p class="docs-brand-subtitle">Elite Message Documentation Hub</p>
+          </div>
+        </div>
+
+        <div class="docs-sidebar-group">
+          <p class="docs-sidebar-label">Pages</p>
+          <nav class="docs-nav">
+            <a href="index.html" class="">
+                  <span>Home</span>
+                  <small>Elite Message Documentation Hub</small>
+                </a><a href="executive-summary.html" class="">
+                  <span>Executive Summary</span>
+                  <small>Current State</small>
+                </a><a href="business-planning.html" class="">
+                  <span>Business and Planning Documentation</span>
+                  <small>Business</small>
+                </a><a href="requirements.html" class="is-active">
+                  <span>Requirements Documentation</span>
+                  <small>Requirements</small>
+                </a><a href="product-design.html" class="">
+                  <span>Product and Design Documentation</span>
+                  <small>Product Design</small>
+                </a><a href="appendix.html" class="">
+                  <span>Appendix and References</span>
+                  <small>Appendix</small>
+                </a>
+          </nav>
+        </div>
+      </aside>
+
+      <main class="docs-main">
+        <header class="docs-topbar">
+          <div>
+            <p class="docs-kicker">Requirements</p>
+            <h1 class="docs-page-title">Requirements Documentation</h1>
+            <p class="docs-page-subtitle">Business requirements, software requirements, functional and non-functional requirements, use cases, and acceptance criteria.</p>
+          </div>
+          <div class="docs-toolbar">
+            <a class="docs-chip primary" href="../ar/requirements.html">النسخة العربية</a>
+            <a class="docs-chip" href="../index.html">Language index</a>
+            <a class="docs-chip" href="../../output/Elite-Message-Current-Status-EN.pdf">Open PDF version</a>
+          </div>
+        </header>
+
+        <article class="docs-article">
+          <h1 id="requirements-documentation">Requirements Documentation</h1>
+<h2 id="business-requirements-document-brd">Business Requirements
+Document (BRD)</h2>
+<h3 id="purpose">Purpose</h3>
+<p>This BRD defines the business outcomes Elite Message must support
+based on the current platform direction and implemented product
+surfaces.</p>
+<h3 id="business-objectives">Business Objectives</h3>
+<ul>
+<li>provide customers with a self-service messaging control plane</li>
+<li>provide administrators with an operational oversight plane</li>
+<li>support API-based message sending and runtime monitoring</li>
+<li>maintain traceability for instance lifecycle, messaging, support,
+and audit activities</li>
+</ul>
+<h3 id="business-capabilities-required">Business Capabilities
+Required</h3>
+<h4 id="customer-capabilities">Customer capabilities</h4>
+<ul>
+<li>register and authenticate securely</li>
+<li>manage workspaces and instances</li>
+<li>link WhatsApp and monitor runtime status</li>
+<li>retrieve API credentials and understand how to use the API</li>
+<li>review outbound, inbound, and webhook-related activity</li>
+</ul>
+<h4 id="admin-capabilities">Admin capabilities</h4>
+<ul>
+<li>authenticate with stronger controls than customers</li>
+<li>view and manage workspaces, users, instances, and workers</li>
+<li>inspect message and webhook activity globally</li>
+<li>support customers and review audit records</li>
+</ul>
+<h4 id="platform-capabilities">Platform capabilities</h4>
+<ul>
+<li>persist tenant, runtime, and audit data centrally</li>
+<li>support tokenized account and instance API access</li>
+<li>process worker operations and message delivery asynchronously</li>
+<li>expose internal metrics and operational health</li>
+</ul>
+<h3 id="business-success-measures">Business Success Measures</h3>
+<ul>
+<li>customer can go from signup to first API call without admin
+intervention</li>
+<li>admin can diagnose workspace or runtime problems from the
+platform</li>
+<li>support and audit records are sufficient for issue tracing</li>
+<li>common operational work can be completed through the UI without
+database access</li>
+</ul>
+<h3 id="current-business-status">Current Business Status</h3>
+<p>The current codebase already implements much of the business surface.
+The remaining business risk is concentrated in polish, documentation
+clarity, and production-readiness rather than missing core domain
+concepts.</p>
+<h2 id="software-requirements-specification-srs">Software Requirements
+Specification (SRS)</h2>
+<h3 id="scope">1. Scope</h3>
+<p>Elite Message is a multi-application software system composed of
+customer UI, admin UI, API services, and a worker runtime for managing
+WhatsApp-linked messaging instances.</p>
+<h3 id="system-context">2. System Context</h3>
+<p>Primary components:</p>
+<ul>
+<li>customer web application</li>
+<li>admin web application</li>
+<li>API service</li>
+<li>worker service</li>
+<li>PostgreSQL database</li>
+<li>Redis queue</li>
+<li>MinIO object storage</li>
+<li>observability stack</li>
+</ul>
+<h3 id="users">3. Users</h3>
+<ul>
+<li>customer user</li>
+<li>platform admin</li>
+<li>support/operator</li>
+<li>backend integrator using the public API</li>
+</ul>
+<h3 id="external-interfaces">4. External Interfaces</h3>
+<ul>
+<li>HTTP/JSON APIs</li>
+<li>browser-based web UIs</li>
+<li>Google OAuth</li>
+<li>S3-compatible storage</li>
+<li>Prometheus-compatible metrics scraping</li>
+</ul>
+<h3 id="major-software-functions">5. Major Software Functions</h3>
+<ul>
+<li>authentication and session management</li>
+<li>workspace and membership management</li>
+<li>instance creation and lifecycle control</li>
+<li>outbound and inbound messaging data handling</li>
+<li>webhook delivery tracking and replay-capable operations</li>
+<li>support and audit workflows</li>
+<li>admin worker monitoring and intervention</li>
+</ul>
+<h3 id="design-constraints">6. Design Constraints</h3>
+<ul>
+<li>TypeScript monorepo architecture</li>
+<li>PostgreSQL as the system of record</li>
+<li>Next.js for both web surfaces</li>
+<li>NestJS API</li>
+<li>BullMQ/Redis for queue-backed worker operations</li>
+</ul>
+<h3 id="assumptions">7. Assumptions</h3>
+<ul>
+<li>local/docker development remains a supported primary workflow</li>
+<li>customer-facing APIs remain versioned under
+<code>/api/v1</code></li>
+<li>worker runtime is required for real instance operation beyond static
+UI state</li>
+</ul>
+<h3 id="quality-targets">8. Quality Targets</h3>
+<ul>
+<li>typed boundaries between packages</li>
+<li>operational traceability through audit and lifecycle records</li>
+<li>sufficiently clear UI flows for customer self-service</li>
+<li>documented security controls for tokens, sessions, and admin
+access</li>
+</ul>
+<h2 id="functional-requirements">Functional Requirements</h2>
+<h3 id="identity-and-access">Identity and access</h3>
+<ul>
+<li>FR-001: The system shall allow customer users to sign up with email
+and password.</li>
+<li>FR-002: The system shall allow customer users to sign in with email
+and password.</li>
+<li>FR-003: The system shall support Google OAuth for customer
+authentication when configured.</li>
+<li>FR-004: The system shall allow platform admins to sign in through a
+dedicated admin surface.</li>
+<li>FR-005: The system shall support MFA-capable admin authentication
+flows.</li>
+</ul>
+<h3 id="workspace-and-tenancy">Workspace and tenancy</h3>
+<ul>
+<li>FR-006: The system shall persist workspaces and memberships.</li>
+<li>FR-007: The system shall allow customer users to access only
+workspaces where they have membership.</li>
+<li>FR-008: The system shall allow admins to inspect and manage
+workspaces globally.</li>
+<li>FR-009: The system shall store workspace status and trial
+metadata.</li>
+</ul>
+<h3 id="instance-lifecycle">Instance lifecycle</h3>
+<ul>
+<li>FR-010: The system shall allow customer users to create
+instances.</li>
+<li>FR-011: The system shall assign each instance both an internal UUID
+and a public API instance ID.</li>
+<li>FR-012: The system shall store lifecycle status and substatus for
+each instance.</li>
+<li>FR-013: The system shall expose instance runtime state including
+QR-related data and timestamps.</li>
+<li>FR-014: The system shall support lifecycle operations such as start,
+stop, restart, logout, clear, takeover, and reassign.</li>
+<li>FR-015: The system shall record lifecycle events and operations
+historically.</li>
+</ul>
+<h3 id="messaging">Messaging</h3>
+<ul>
+<li>FR-016: The system shall store outbound message records.</li>
+<li>FR-017: The system shall store inbound message records.</li>
+<li>FR-018: The system shall store outbound delivery attempts and
+acknowledgements.</li>
+<li>FR-019: The system shall support customer and admin message explorer
+views.</li>
+<li>FR-020: The system shall support public API message sending through
+instance-scoped routes.</li>
+</ul>
+<h3 id="webhooks">Webhooks</h3>
+<ul>
+<li>FR-021: The system shall persist webhook delivery records by event
+type and delivery status.</li>
+<li>FR-022: The system shall support signed webhook delivery semantics
+through instance secrets.</li>
+<li>FR-023: The system shall expose admin visibility into webhook
+deliveries.</li>
+<li>FR-024: The system shall support replay-capable webhook operations
+through the admin/API surface where implemented.</li>
+</ul>
+<h3 id="tokens-and-api-access">Tokens and API access</h3>
+<ul>
+<li>FR-025: The system shall support account-level API tokens.</li>
+<li>FR-026: The system shall support instance-level API tokens.</li>
+<li>FR-027: The system shall expose token metadata without storing raw
+token values after creation/rotation.</li>
+<li>FR-028: The customer UI shall explain how to use the API with
+practical code examples.</li>
+</ul>
+<h3 id="admin-operations">Admin operations</h3>
+<ul>
+<li>FR-029: The system shall expose admin routes for users, workspaces,
+workers, support, audit, messages, and instance detail.</li>
+<li>FR-030: The system shall store worker heartbeat data and
+status.</li>
+<li>FR-031: The system shall store support cases and assignment
+metadata.</li>
+<li>FR-032: The system shall store audit log records for major platform
+actions.</li>
+</ul>
+<h3 id="operational-support">Operational support</h3>
+<ul>
+<li>FR-033: The system shall expose health and metrics endpoints.</li>
+<li>FR-034: The system shall support rate limiting controls through
+configuration.</li>
+<li>FR-035: The system shall support retention settings for sessions,
+audit logs, and webhook deliveries.</li>
+</ul>
+<h2 id="non-functional-requirements">Non-Functional Requirements</h2>
+<h3 id="performance">Performance</h3>
+<ul>
+<li>NFR-001: The web applications should keep primary navigation
+responsive under normal local and staging loads.</li>
+<li>NFR-002: The API should support concurrent customer/admin UI access
+and worker traffic without blocking the request path on long-running
+operations.</li>
+<li>NFR-003: Queue-backed operations should be handled asynchronously
+through Redis/BullMQ rather than long-running UI requests.</li>
+</ul>
+<h3 id="availability-and-resilience">Availability and resilience</h3>
+<ul>
+<li>NFR-004: The system should degrade gracefully when external services
+such as Google OAuth are not configured.</li>
+<li>NFR-005: Worker unavailability should be visible through worker
+heartbeat and lifecycle status data.</li>
+<li>NFR-006: Health and metrics endpoints should be exposed for
+operational inspection.</li>
+</ul>
+<h3 id="security">Security</h3>
+<ul>
+<li>NFR-007: Access tokens, refresh sessions, and API tokens must be
+handled securely and never expose raw secret values except at
+creation/rotation boundaries.</li>
+<li>NFR-008: Customer and admin roles must remain separated by route and
+API authorization checks.</li>
+<li>NFR-009: Admin accounts should support MFA.</li>
+<li>NFR-010: Public APIs should remain rate-limited and versioned.</li>
+</ul>
+<h3 id="maintainability">Maintainability</h3>
+<ul>
+<li>NFR-011: Shared contracts and typed configuration should be used
+across apps and packages.</li>
+<li>NFR-012: Core domain entities should remain centralized in the
+Prisma schema.</li>
+<li>NFR-013: Documentation should distinguish between current-state
+implementation and target-state planning.</li>
+</ul>
+<h3 id="observability">Observability</h3>
+<ul>
+<li>NFR-014: The system should emit metrics compatible with Prometheus
+scraping.</li>
+<li>NFR-015: The local development environment should support Grafana
+and Alertmanager configuration.</li>
+<li>NFR-016: Audit and lifecycle records should be retained for
+operational diagnosis.</li>
+</ul>
+<h3 id="usability">Usability</h3>
+<ul>
+<li>NFR-017: Customer workflows should prioritize clarity for signup,
+signin, instance setup, token retrieval, and API usage.</li>
+<li>NFR-018: Admin workflows should prioritize scanability for users,
+workspaces, workers, messages, support, and audit records.</li>
+<li>NFR-019: Loading, empty, error, and session-expired states should be
+visibly distinct and recoverable.</li>
+</ul>
+<h3 id="portability">Portability</h3>
+<ul>
+<li>NFR-020: The platform should run locally through Docker-based infra
+plus node processes.</li>
+<li>NFR-021: Environment configuration should remain externalized
+through <code>.env</code> variables.</li>
+</ul>
+<h2 id="use-cases">Use Cases</h2>
+<h3 id="uc-01-customer-signs-up">UC-01 Customer signs up</h3>
+<ul>
+<li>Primary actor: Customer user</li>
+<li>Preconditions: User is not yet registered</li>
+<li>Main flow:
+<ol type="1">
+<li>User opens the customer app</li>
+<li>User completes the signup form or chooses Google signup</li>
+<li>System creates the user and workspace membership baseline</li>
+<li>User reaches authenticated customer routes</li>
+</ol></li>
+<li>Success outcome: Customer session exists and workspace access is
+available</li>
+</ul>
+<h3 id="uc-02-customer-creates-an-instance">UC-02 Customer creates an
+instance</h3>
+<ul>
+<li>Primary actor: Customer user</li>
+<li>Preconditions: Customer is authenticated and has workspace
+access</li>
+<li>Main flow:
+<ol type="1">
+<li>User opens the dashboard or instance creation flow</li>
+<li>User creates a new instance</li>
+<li>System persists the instance and related initial records</li>
+<li>UI exposes runtime and API access details</li>
+</ol></li>
+<li>Success outcome: Instance exists with internal and public
+identifiers</li>
+</ul>
+<h3 id="uc-03-customer-links-whatsapp-and-uses-api">UC-03 Customer links
+WhatsApp and uses API</h3>
+<ul>
+<li>Primary actor: Customer user</li>
+<li>Preconditions: Instance exists</li>
+<li>Main flow:
+<ol type="1">
+<li>User opens instance detail</li>
+<li>User scans the QR code / authenticates the runtime</li>
+<li>System updates runtime state and status</li>
+<li>User retrieves token guidance from the API access card or API docs
+page</li>
+<li>User sends a message through the public API</li>
+</ol></li>
+<li>Success outcome: Authenticated instance can be used through the
+API</li>
+</ul>
+<h3 id="uc-04-admin-investigates-a-delivery-problem">UC-04 Admin
+investigates a delivery problem</h3>
+<ul>
+<li>Primary actor: Platform admin</li>
+<li>Preconditions: Admin is authenticated</li>
+<li>Main flow:
+<ol type="1">
+<li>Admin opens messages or instance detail</li>
+<li>Admin filters outbound messages, inbound messages, or webhook
+deliveries</li>
+<li>Admin reviews status, attempts, and audit-related context</li>
+<li>Admin replays or escalates where supported</li>
+</ol></li>
+<li>Success outcome: Delivery issue is traceable and actionable</li>
+</ul>
+<h3 id="uc-05-support-handles-a-customer-issue">UC-05 Support handles a
+customer issue</h3>
+<ul>
+<li>Primary actor: Support/admin user</li>
+<li>Preconditions: Support case exists or customer escalates an
+issue</li>
+<li>Main flow:
+<ol type="1">
+<li>Support reviews workspace, instance, support, and audit data</li>
+<li>Support identifies the failure or configuration issue</li>
+<li>Support communicates next action or resolves the issue</li>
+</ol></li>
+<li>Success outcome: Issue is handled using platform data rather than ad
+hoc investigation</li>
+</ul>
+<h2 id="user-stories">User Stories</h2>
+<h3 id="customer-stories">Customer stories</h3>
+<ul>
+<li>As a customer owner, I want to sign up quickly so I can start using
+the platform without manual provisioning.</li>
+<li>As a customer user, I want to sign in with email/password or Google
+so I can use the access method appropriate to my account.</li>
+<li>As a customer operator, I want to create an instance so I can
+connect a WhatsApp account to the platform.</li>
+<li>As a customer operator, I want to see QR/auth status so I know
+whether the instance is ready.</li>
+<li>As a customer integrator, I want to see my instance ID and token so
+I can call the API from backend code.</li>
+<li>As a customer integrator, I want code examples in common languages
+so I can start integrating quickly.</li>
+<li>As a customer operator, I want to inspect outbound and inbound
+activity so I can diagnose message issues.</li>
+</ul>
+<h3 id="admin-stories">Admin stories</h3>
+<ul>
+<li>As a platform admin, I want to sign in with stronger protection so
+privileged access is safer.</li>
+<li>As a platform admin, I want to inspect users and workspaces so I can
+manage platform tenants.</li>
+<li>As a platform admin, I want to inspect workers and instance runtime
+state so I can diagnose operational failures.</li>
+<li>As a platform admin, I want to inspect webhook deliveries and
+messages globally so I can trace delivery issues.</li>
+<li>As a platform admin, I want support and audit views so I can
+investigate issues with context.</li>
+</ul>
+<h3 id="systemoperator-stories">System/operator stories</h3>
+<ul>
+<li>As an operator, I want metrics and health endpoints so I can observe
+system state.</li>
+<li>As an engineer, I want typed shared contracts so changes across apps
+are safer.</li>
+<li>As an engineer, I want the schema to encode platform entities
+clearly so the system remains maintainable.</li>
+</ul>
+<h2 id="acceptance-criteria">Acceptance Criteria</h2>
+<h3 id="authentication">Authentication</h3>
+<ul>
+<li>Customer user can sign up and sign in through the customer
+surface.</li>
+<li>Admin user can sign in through the admin surface.</li>
+<li>Google sign-in redirects correctly when OAuth credentials are
+configured.</li>
+<li>Invalid credentials produce a visible, actionable error
+message.</li>
+</ul>
+<h3 id="workspace-and-instance-setup">Workspace and instance setup</h3>
+<ul>
+<li>Authenticated customer user can create an instance.</li>
+<li>Instance detail exposes lifecycle and runtime information.</li>
+<li>QR/auth state updates are visible in the UI.</li>
+<li>Public API instance ID is visible after instance creation.</li>
+</ul>
+<h3 id="api-usage">API usage</h3>
+<ul>
+<li>Customer user can access an API documentation page.</li>
+<li>The API docs page shows endpoint examples in common backend
+languages.</li>
+<li>Copy actions exist for tokens, endpoints, or snippets where
+exposed.</li>
+<li>The docs clearly distinguish workspace-level tokens from
+instance-level tokens.</li>
+</ul>
+<h3 id="messaging-visibility">Messaging visibility</h3>
+<ul>
+<li>Customer messages page shows outbound and inbound activity.</li>
+<li>Admin messages page shows global activity and webhook context.</li>
+<li>Delivery status and related metadata are visible for
+troubleshooting.</li>
+</ul>
+<h3 id="admin-operations-1">Admin operations</h3>
+<ul>
+<li>Admin can open workspaces, users, workers, audit, support, and
+instance detail routes.</li>
+<li>Admin views present usable filters and scanable result sets.</li>
+<li>Admin authentication supports MFA setup and verification where
+configured.</li>
+</ul>
+<h3 id="operational-baseline">Operational baseline</h3>
+<ul>
+<li>Local infra can be started through Docker Compose.</li>
+<li>API health and metrics endpoints are reachable.</li>
+<li>Prometheus, Grafana, and Alertmanager configs exist in the
+repo.</li>
+<li>The schema supports sessions, tokens, messages, webhook deliveries,
+audit logs, and support cases.</li>
+</ul>
+
+        </article>
+        <p class="docs-footer">This page set is generated from the current source documents under docs/current-status.</p>
+      </main>
+    </div>
+  </body>
+</html>

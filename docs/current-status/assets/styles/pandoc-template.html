@@ -1,0 +1,29 @@
+$if(header-includes)$ $for(header-includes)$ $header-includes$ $endfor$ $endif$
+<!doctype html>
+<html
+  lang="$if(lang)$$lang$$else$en$endif$"
+  $if(direction)$dir="$direction$"
+  $endif$
+>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="generator" content="pandoc" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=yes"
+    />
+    <title>$if(title-prefix)$$title-prefix$ – $endif$$pagetitle$</title>
+    $for(css)$
+    <link rel="stylesheet" href="$css$" />
+    $endfor$
+  </head>
+  <body>
+    $for(include-before)$ $include-before$ $endfor$ $if(toc)$
+    <nav id="$idprefix$TOC" role="doc-toc">
+      $if(toc-title)$
+      <h1>$toc-title$</h1>
+      $endif$ $table-of-contents$
+    </nav>
+    $endif$ $body$ $for(include-after)$ $include-after$ $endfor$
+  </body>
+</html>

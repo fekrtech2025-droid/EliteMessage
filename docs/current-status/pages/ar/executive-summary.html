@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>الملخص التنفيذي | Elite Message</title>
+    <link rel="stylesheet" href="../../assets/styles/pages.css" />
+  </head>
+  <body>
+    <div class="docs-shell">
+      <aside class="docs-sidebar">
+        <div class="docs-brand">
+          <img src="../../assets/branding/elite-message-icon-only.png" alt="Elite Message" />
+          <div>
+            <div class="docs-brand-mark">الصفحات</div>
+            <p class="docs-brand-title">Elite Message</p>
+            <p class="docs-brand-subtitle">مركز توثيق Elite Message</p>
+          </div>
+        </div>
+
+        <div class="docs-sidebar-group">
+          <p class="docs-sidebar-label">الصفحات</p>
+          <nav class="docs-nav">
+            <a href="index.html" class="">
+                  <span>الرئيسية</span>
+                  <small>مركز توثيق Elite Message</small>
+                </a><a href="executive-summary.html" class="is-active">
+                  <span>الملخص التنفيذي</span>
+                  <small>الحالة الحالية</small>
+                </a><a href="business-planning.html" class="">
+                  <span>توثيق الأعمال والتخطيط</span>
+                  <small>الأعمال</small>
+                </a><a href="requirements.html" class="">
+                  <span>توثيق المتطلبات</span>
+                  <small>المتطلبات</small>
+                </a><a href="product-design.html" class="">
+                  <span>توثيق المنتج والتصميم</span>
+                  <small>المنتج والتصميم</small>
+                </a><a href="appendix.html" class="">
+                  <span>الملاحق والمراجع</span>
+                  <small>الملاحق</small>
+                </a>
+          </nav>
+        </div>
+      </aside>
+
+      <main class="docs-main">
+        <header class="docs-topbar">
+          <div>
+            <p class="docs-kicker">الحالة الحالية</p>
+            <h1 class="docs-page-title">الملخص التنفيذي</h1>
+            <p class="docs-page-subtitle">ملخص التنفيذ الحالي والخط التقني الأساسي والغرض من مجموعة التوثيق الحالية.</p>
+          </div>
+          <div class="docs-toolbar">
+            <a class="docs-chip primary" href="../en/executive-summary.html">English version</a>
+            <a class="docs-chip" href="../index.html">اختيار اللغة</a>
+            <a class="docs-chip" href="../../output/Elite-Message-Current-Status-AR.pdf">فتح نسخة PDF</a>
+          </div>
+        </header>
+
+        <article class="docs-article">
+          <h1 id="الملخص-التنفيذي">الملخص التنفيذي</h1>
+<p>يمثل <strong>Elite Message</strong> حالياً منصة تشغيل رسائل متعددة
+التطبيقات وليست مجرد هيكل أولي للمشروع. يتكوّن النظام من:</p>
+<ul>
+<li>تطبيق ويب للعملاء لإدارة الحسابات ومساحات العمل والـ instances
+والرسائل والإعدادات والاشتراك ووثائق الـ API</li>
+<li>تطبيق ويب للإدارة لمتابعة المستخدمين ومساحات العمل والعاملين
+والرسائل والدعم والتدقيق</li>
+<li>واجهة API مبنية على <code>NestJS</code> تخدم مسارات العملاء والإدارة
+والواجهات العامة والداخلية</li>
+<li>خدمة عامل <code>worker</code> تدير العمليات غير المتزامنة وحالة
+التشغيل وربط WhatsApp</li>
+<li>بنية تحتية محلية تشمل <code>PostgreSQL</code> و <code>Redis</code> و
+<code>MinIO</code> و <code>Prometheus</code> و <code>Grafana</code> و
+<code>Alertmanager</code></li>
+</ul>
+<h2 id="حالة-التنفيذ-الحالية">حالة التنفيذ الحالية</h2>
+<table class="status-matrix">
+<thead>
+<tr>
+<th>
+المجال
+</th>
+<th>
+التنفيذ الحالي
+</th>
+<th>
+الحالة
+</th>
+<th>
+ملاحظة حالية
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+واجهة العميل
+</td>
+<td>
+التسجيل وتسجيل الدخول ولوحة التحكم والرسائل والإعدادات والاشتراك وتفاصيل
+الـ instance ووثائق الـ API موجودة في التطبيق.
+</td>
+<td>
+<span class="status-chip implemented">منفذ</span>
+</td>
+<td>
+سطح العميل يعمل فعلياً ويمكن استخدامه محلياً بشكل متكامل.
+</td>
+</tr>
+<tr>
+<td>
+واجهة الإدارة
+</td>
+<td>
+يوجد تسجيل دخول للإدارة مع دعم MFA وصفحات تشغيلية للمستخدمين ومساحات
+العمل والعاملين والرسائل والدعم والتدقيق.
+</td>
+<td>
+<span class="status-chip implemented">منفذ</span>
+</td>
+<td>
+سطح الإدارة يدعم المتابعة التشغيلية اليومية والتحقيق والدعم.
+</td>
+</tr>
+<tr>
+<td>
+التشغيل والرسائل
+</td>
+<td>
+يوجد نموذج بيانات واضح لدورة حياة الـ instance وحالة التشغيل والرسائل
+الخارجة والداخلة وتسليمات الـ webhook.
+</td>
+<td>
+<span class="status-chip implemented">منفذ</span>
+</td>
+<td>
+المخطط والـ API يغطيان دورة التشغيل والـ queue وحركة الرسائل الأساسية.
+</td>
+</tr>
+<tr>
+<td>
+توثيق الـ API
+</td>
+<td>
+يوجد توثيق داخل واجهة العميل مع أمثلة للغات backend الشائعة ودعم لرموز
+الحساب والـ instance.
+</td>
+<td>
+<span class="status-chip implemented">منفذ</span>
+</td>
+<td>
+صفحة الوثائق أصبحت جزءاً عملياً من تجربة تفعيل الـ API لدى العميل.
+</td>
+</tr>
+<tr>
+<td>
+الجاهزية التشغيلية
+</td>
+<td>
+القياسات والتنبيهات وحدود المعدل والتوقيع على webhooks موجودة جزئياً، لكن
+الصلابة الإنتاجية ما زالت غير مكتملة.
+</td>
+<td>
+<span class="status-chip partial">جزئي</span>
+</td>
+<td>
+ما زال المشروع يحتاج إلى جولة إضافية من hardening قبل الاعتماد الإنتاجي
+الكامل.
+</td>
+</tr>
+<tr>
+<td>
+مرجعية التوثيق
+</td>
+<td>
+هذا المستند يوحّد حالة المشروع الحالية ويستبدل افتراضات المرحلة الصفرية
+السابقة.
+</td>
+<td>
+<span class="status-chip implemented">منفذ</span>
+</td>
+<td>
+يوجد الآن مرجع حديث لحالة المشروع بصيغة PDF وبصيغة صفحات قابلة للتصفح.
+</td>
+</tr>
+</tbody>
+</table>
+<h2 id="الملخص-التقني">الملخص التقني</h2>
+<table>
+<thead>
+<tr>
+<th>المجال</th>
+<th>التقنية الحالية</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Monorepo</td>
+<td><code>pnpm</code> + <code>Turborepo</code></td>
+</tr>
+<tr>
+<td>تطبيقات الويب</td>
+<td>Next.js 16 + React 19</td>
+</tr>
+<tr>
+<td>الـ API</td>
+<td>NestJS 11 + Express 5</td>
+</tr>
+<tr>
+<td>العامل</td>
+<td>BullMQ + Redis + <code>whatsapp-web.js</code></td>
+</tr>
+<tr>
+<td>قاعدة البيانات</td>
+<td>PostgreSQL + Prisma 7</td>
+</tr>
+<tr>
+<td>التخزين</td>
+<td>MinIO / S3-compatible</td>
+</tr>
+<tr>
+<td>المراقبة</td>
+<td>Prometheus + Grafana + Alertmanager</td>
+</tr>
+</tbody>
+</table>
+
+        </article>
+        <p class="docs-footer">تم إنشاء هذه النسخة من مستندات المصدر الحالية داخل docs/current-status.</p>
+      </main>
+    </div>
+  </body>
+</html>

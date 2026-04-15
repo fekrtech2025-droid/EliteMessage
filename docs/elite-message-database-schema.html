@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>elite-message-database-schema</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="/Users/apple/python_learning/EliteMessage/docs/architecture-print.css" />
+</head>
+<body>
+<h1 id="elite-message">Elite Message</h1>
+<h2 id="database-schema">Database Schema</h2>
+<p>Version: 1.0<br />
+Prepared for: Elite Message project<br />
+Target database: PostgreSQL 16+</p>
+<hr />
+<h2 id="1-purpose">1. Purpose</h2>
+<p>This document defines the recommended production database schema for
+Elite Message, a platform intended to match UltraMsg-style behavior:</p>
+<ul>
+<li>multi-tenant customer accounts</li>
+<li>multiple WhatsApp instances per account</li>
+<li>per-instance API tokens</li>
+<li>long-lived browser-backed sessions</li>
+<li>outbound and inbound message tracking</li>
+<li>webhooks with retries</li>
+<li>customer dashboard and admin dashboard</li>
+<li>subscriptions, support, audit logs, and worker orchestration</li>
+</ul>
+<p>This schema is optimized for:</p>
+<ul>
+<li>strong relational integrity</li>
+<li>high write volume on messages and events</li>
+<li>operational visibility</li>
+<li>horizontal worker orchestration</li>
+<li>future reporting and partitioning</li>
+</ul>
+<hr />
+<h2 id="2-database-choice">2. Database Choice</h2>
+<p>Recommended engine:</p>
+<ul>
+<li><code>PostgreSQL 16+</code></li>
+</ul>
+<p>Recommended extensions:</p>
+<ul>
+<li><code>pgcrypto</code> for <code>gen_random_uuid()</code></li>
+<li><code>citext</code> for case-insensitive email uniqueness</li>
+</ul>
+<p>Why PostgreSQL:</p>
+<ul>
+<li>strong transactional consistency</li>
+<li>excellent indexing and JSONB support</li>
+<li>better fit than MySQL for event-heavy systems</li>
+<li>native partitioning for very large message/event tables</li>
+</ul>
+<hr />
+<h2 id="3-schema-conventions">3. Schema Conventions</h2>
+<p>General rules:</p>
+<ul>
+<li>use <code>uuid</code> primary keys for internal entities</li>
+<li>use separate human-readable public IDs where needed</li>
+<li>store timestamps as <code>timestamptz</code></li>
+<li>keep mutable current-state tables separate from append-only event
+tables</li>
+<li>use <code>jsonb</code> only for optional or provider-specific
+payload data</li>
+<li>always index by tenant boundary where applicable</li>
+</ul>
+<p>Standard columns used frequently:</p>
+<ul>
+<li><code>id uuid primary key default gen_random_uuid()</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+<li><code>deleted_at timestamptz null</code> when soft delete is
+useful</li>
+</ul>
+<p>Recommended timestamp trigger:</p>
+<ul>
+<li>one shared trigger function to maintain <code>updated_at</code></li>
+</ul>
+<hr />
+<h2 id="4-logical-domains">4. Logical Domains</h2>
+<p>The schema is organized into these logical domains:</p>
+<ul>
+<li>Identity and access</li>
+<li>Accounts and subscriptions</li>
+<li>Instances and runtime control</li>
+<li>Workers and session orchestration</li>
+<li>Messaging</li>
+<li>Contacts, chats, and groups</li>
+<li>Media</li>
+<li>Webhooks</li>
+<li>Support and audit</li>
+</ul>
+<hr />
+<h2 id="5-enum-catalog">5. Enum Catalog</h2>
+<p>Use PostgreSQL enums or constrained text columns. PostgreSQL enums
+are recommended for stable states.</p>
+<h3 id="51-user-status">5.1 User Status</h3>
+<ul>
+<li><code>active</code></li>
+<li><code>pending_invite</code></li>
+<li><code>suspended</code></li>
+<li><code>deleted</code></li>
+</ul>
+<h3 id="52-account-status">5.2 Account Status</h3>
+<ul>
+<li><code>active</code></li>
+<li><code>trialing</code></li>
+<li><code>past_due</code></li>
+<li><code>suspended</code></li>
+<li><code>closed</code></li>
+</ul>
+<h3 id="53-membership-status">5.3 Membership Status</h3>
+<ul>
+<li><code>active</code></li>
+<li><code>pending</code></li>
+<li><code>revoked</code></li>
+</ul>
+<h3 id="54-role-scope">5.4 Role Scope</h3>
+<ul>
+<li><code>platform</code></li>
+<li><code>account</code></li>
+</ul>
+<h3 id="55-instance-status">5.5 Instance Status</h3>
+<ul>
+<li><code>qr</code></li>
+<li><code>initialize</code></li>
+<li><code>booting</code></li>
+<li><code>loading</code></li>
+<li><code>retrying</code></li>
+<li><code>authenticated</code></li>
+<li><code>disconnected</code></li>
+<li><code>standby</code></li>
+<li><code>stopped</code></li>
+<li><code>expired</code></li>
+</ul>
+<h3 id="56-assignment-status">5.6 Assignment Status</h3>
+<ul>
+<li><code>assigned</code></li>
+<li><code>releasing</code></li>
+<li><code>released</code></li>
+<li><code>reassigned</code></li>
+</ul>
+<h3 id="57-session-status">5.7 Session Status</h3>
+<ul>
+<li><code>active</code></li>
+<li><code>logged_out</code></li>
+<li><code>cleared</code></li>
+<li><code>corrupt</code></li>
+<li><code>expired</code></li>
+</ul>
+<h3 id="58-message-direction">5.8 Message Direction</h3>
+<ul>
+<li><code>inbound</code></li>
+<li><code>outbound</code></li>
+</ul>
+<h3 id="59-message-type">5.9 Message Type</h3>
+<ul>
+<li><code>chat</code></li>
+<li><code>image</code></li>
+<li><code>document</code></li>
+<li><code>video</code></li>
+<li><code>audio</code></li>
+<li><code>voice</code></li>
+<li><code>sticker</code></li>
+<li><code>contact</code></li>
+<li><code>location</code></li>
+<li><code>link</code></li>
+<li><code>reaction</code></li>
+<li><code>vcard</code></li>
+</ul>
+<h3 id="510-message-status">5.10 Message Status</h3>
+<ul>
+<li><code>queue</code></li>
+<li><code>sent</code></li>
+<li><code>unsent</code></li>
+<li><code>invalid</code></li>
+<li><code>expired</code></li>
+</ul>
+<h3 id="511-message-ack">5.11 Message ACK</h3>
+<ul>
+<li><code>pending</code></li>
+<li><code>server</code></li>
+<li><code>device</code></li>
+<li><code>read</code></li>
+<li><code>played</code></li>
+</ul>
+<h3 id="512-message-source">5.12 Message Source</h3>
+<ul>
+<li><code>api</code></li>
+<li><code>dashboard</code></li>
+<li><code>resend</code></li>
+<li><code>admin</code></li>
+<li><code>system</code></li>
+</ul>
+<h3 id="513-worker-status">5.13 Worker Status</h3>
+<ul>
+<li><code>online</code></li>
+<li><code>degraded</code></li>
+<li><code>draining</code></li>
+<li><code>offline</code></li>
+</ul>
+<h3 id="514-webhook-delivery-status">5.14 Webhook Delivery Status</h3>
+<ul>
+<li><code>pending</code></li>
+<li><code>retrying</code></li>
+<li><code>delivered</code></li>
+<li><code>failed</code></li>
+<li><code>dead</code></li>
+</ul>
+<h3 id="515-support-priority">5.15 Support Priority</h3>
+<ul>
+<li><code>low</code></li>
+<li><code>medium</code></li>
+<li><code>high</code></li>
+<li><code>urgent</code></li>
+</ul>
+<h3 id="516-support-case-status">5.16 Support Case Status</h3>
+<ul>
+<li><code>open</code></li>
+<li><code>pending_customer</code></li>
+<li><code>pending_internal</code></li>
+<li><code>resolved</code></li>
+<li><code>closed</code></li>
+</ul>
+<h3 id="517-actor-type">5.17 Actor Type</h3>
+<ul>
+<li><code>user</code></li>
+<li><code>admin</code></li>
+<li><code>system</code></li>
+<li><code>worker</code></li>
+</ul>
+<hr />
+<h2 id="6-identity-and-access-tables">6. Identity and Access Tables</h2>
+<h2 id="61-users">6.1 <code>users</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>stores all human user identities for customer and admin access</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>email citext not null unique</code></li>
+<li><code>password_hash text not null</code></li>
+<li><code>first_name varchar(120) not null</code></li>
+<li><code>last_name varchar(120) not null</code></li>
+<li><code>phone varchar(32) null</code></li>
+<li><code>avatar_url text null</code></li>
+<li><code>locale varchar(12) not null default 'en'</code></li>
+<li><code>timezone varchar(64) not null default 'UTC'</code></li>
+<li><code>status user_status not null default 'active'</code></li>
+<li><code>email_verified_at timestamptz null</code></li>
+<li><code>last_login_at timestamptz null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+<li><code>deleted_at timestamptz null</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>unique index on <code>email</code></li>
+<li>index on <code>status</code></li>
+<li>index on <code>last_login_at</code></li>
+</ul>
+<h2 id="62-roles">6.2 <code>roles</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>stores system-defined and custom roles for both account-level and
+platform-level access</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>scope role_scope not null</code></li>
+<li><code>role_key varchar(64) not null</code></li>
+<li><code>name varchar(120) not null</code></li>
+<li><code>description text null</code></li>
+<li><code>is_system boolean not null default true</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes and constraints:</p>
+<ul>
+<li>unique on <code>(scope, role_key)</code></li>
+</ul>
+<h2 id="63-permissions">6.3 <code>permissions</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>permission catalog</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>permission_key varchar(96) not null unique</code></li>
+<li><code>name varchar(120) not null</code></li>
+<li><code>description text null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+</ul>
+<h2 id="64-role_permissions">6.4 <code>role_permissions</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>many-to-many mapping between roles and permissions</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>role_id uuid fk -&gt; roles.id</code></li>
+<li><code>permission_id uuid fk -&gt; permissions.id</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+</ul>
+<p>Primary key:</p>
+<ul>
+<li>composite primary key <code>(role_id, permission_id)</code></li>
+</ul>
+<h2 id="65-user_role_bindings">6.5 <code>user_role_bindings</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>attaches a role to a user globally or within an account</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>user_id uuid fk -&gt; users.id</code></li>
+<li><code>role_id uuid fk -&gt; roles.id</code></li>
+<li><code>account_id uuid null fk -&gt; accounts.id</code></li>
+<li><code>granted_by_user_id uuid null fk -&gt; users.id</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+</ul>
+<p>Constraints:</p>
+<ul>
+<li>for <code>platform</code> roles, <code>account_id</code> must be
+null</li>
+<li>for <code>account</code> roles, <code>account_id</code> must be
+present</li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>user_id</code></li>
+<li>index on <code>account_id</code></li>
+<li>unique on <code>(user_id, role_id, account_id)</code></li>
+</ul>
+<hr />
+<h2 id="7-accounts-and-subscription-tables">7. Accounts and Subscription
+Tables</h2>
+<h2 id="71-accounts">7.1 <code>accounts</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>tenant boundary for all customer data</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>name varchar(150) not null</code></li>
+<li><code>slug varchar(80) not null unique</code></li>
+<li><code>owner_user_id uuid fk -&gt; users.id</code></li>
+<li><code>status account_status not null default 'trialing'</code></li>
+<li><code>default_locale varchar(12) not null default 'en'</code></li>
+<li><code>default_timezone varchar(64) not null default 'UTC'</code></li>
+<li><code>trial_starts_at timestamptz null</code></li>
+<li><code>trial_ends_at timestamptz null</code></li>
+<li><code>suspended_at timestamptz null</code></li>
+<li><code>closed_at timestamptz null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>unique on <code>slug</code></li>
+<li>index on <code>owner_user_id</code></li>
+<li>index on <code>status</code></li>
+</ul>
+<h2 id="72-account_members">7.2 <code>account_members</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>membership rows linking users to accounts</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>account_id uuid fk -&gt; accounts.id</code></li>
+<li><code>user_id uuid fk -&gt; users.id</code></li>
+<li><code>membership_status membership_status not null default 'active'</code></li>
+<li><code>is_owner boolean not null default false</code></li>
+<li><code>invited_at timestamptz null</code></li>
+<li><code>joined_at timestamptz null</code></li>
+<li><code>last_seen_at timestamptz null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes and constraints:</p>
+<ul>
+<li>unique on <code>(account_id, user_id)</code></li>
+<li>index on <code>membership_status</code></li>
+<li>index on <code>last_seen_at</code></li>
+</ul>
+<h2 id="73-plans">7.3 <code>plans</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>plan catalog</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>plan_code varchar(64) not null unique</code></li>
+<li><code>name varchar(120) not null</code></li>
+<li><code>billing_interval varchar(24) not null</code></li>
+<li><code>price_minor integer not null</code></li>
+<li><code>currency varchar(8) not null</code></li>
+<li><code>instance_limit integer null</code></li>
+<li><code>daily_send_limit integer null</code></li>
+<li><code>daily_contact_check_limit integer null</code></li>
+<li><code>is_active boolean not null default true</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<h2 id="74-subscriptions">7.4 <code>subscriptions</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>subscription state per account</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>account_id uuid fk -&gt; accounts.id</code></li>
+<li><code>plan_id uuid fk -&gt; plans.id</code></li>
+<li><code>status varchar(32) not null</code></li>
+<li><code>starts_at timestamptz not null</code></li>
+<li><code>ends_at timestamptz null</code></li>
+<li><code>renews_at timestamptz null</code></li>
+<li><code>cancels_at timestamptz null</code></li>
+<li><code>grace_ends_at timestamptz null</code></li>
+<li><code>is_trial boolean not null default false</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>account_id</code></li>
+<li>index on <code>status</code></li>
+<li>index on <code>renews_at</code></li>
+</ul>
+<h2 id="75-invoices">7.5 <code>invoices</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>billing records</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>account_id uuid fk -&gt; accounts.id</code></li>
+<li><code>subscription_id uuid null fk -&gt; subscriptions.id</code></li>
+<li><code>invoice_number varchar(64) not null unique</code></li>
+<li><code>status varchar(32) not null</code></li>
+<li><code>currency varchar(8) not null</code></li>
+<li><code>subtotal_minor integer not null</code></li>
+<li><code>tax_minor integer not null default 0</code></li>
+<li><code>total_minor integer not null</code></li>
+<li><code>issued_at timestamptz not null</code></li>
+<li><code>due_at timestamptz null</code></li>
+<li><code>paid_at timestamptz null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>account_id</code></li>
+<li>index on <code>status</code></li>
+<li>index on <code>issued_at</code></li>
+</ul>
+<h2 id="76-payments">7.6 <code>payments</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>payment transaction references</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>invoice_id uuid fk -&gt; invoices.id</code></li>
+<li><code>provider varchar(32) not null</code></li>
+<li><code>provider_payment_id varchar(128) not null</code></li>
+<li><code>status varchar(32) not null</code></li>
+<li><code>amount_minor integer not null</code></li>
+<li><code>currency varchar(8) not null</code></li>
+<li><code>paid_at timestamptz null</code></li>
+<li><code>raw_payload jsonb null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>unique on <code>(provider, provider_payment_id)</code></li>
+<li>index on <code>status</code></li>
+</ul>
+<hr />
+<h2 id="8-instance-and-runtime-control-tables">8. Instance and Runtime
+Control Tables</h2>
+<h2 id="81-instances">8.1 <code>instances</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>the central table for each WhatsApp instance</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>account_id uuid fk -&gt; accounts.id</code></li>
+<li><code>public_id varchar(32) not null unique</code></li>
+<li><code>display_name varchar(150) null</code></li>
+<li><code>wa_display_name varchar(150) null</code></li>
+<li><code>wa_phone varchar(32) null</code></li>
+<li><code>wa_jid varchar(160) null</code></li>
+<li><code>status instance_status not null default 'initialize'</code></li>
+<li><code>substatus varchar(64) null</code></li>
+<li><code>current_worker_id uuid null fk -&gt; workers.id</code></li>
+<li><code>current_session_id uuid null fk -&gt; instance_sessions.id</code></li>
+<li><code>expires_at timestamptz null</code></li>
+<li><code>auto_renewal boolean not null default false</code></li>
+<li><code>is_trial boolean not null default true</code></li>
+<li><code>last_qr_at timestamptz null</code></li>
+<li><code>last_authenticated_at timestamptz null</code></li>
+<li><code>last_disconnected_at timestamptz null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+<li><code>deleted_at timestamptz null</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>unique on <code>public_id</code></li>
+<li>index on <code>account_id</code></li>
+<li>index on <code>status</code></li>
+<li>index on <code>expires_at</code></li>
+<li>index on <code>(account_id, status)</code></li>
+</ul>
+<h2 id="82-instance_api_tokens">8.2
+<code>instance_api_tokens</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>stores rotatable API tokens for per-instance public API access</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>instance_id uuid fk -&gt; instances.id</code></li>
+<li><code>version integer not null</code></li>
+<li><code>token_hash text not null</code></li>
+<li><code>token_prefix varchar(12) not null</code></li>
+<li><code>created_by_user_id uuid null fk -&gt; users.id</code></li>
+<li><code>rotated_from_id uuid null fk -&gt; instance_api_tokens.id</code></li>
+<li><code>is_active boolean not null default true</code></li>
+<li><code>last_used_at timestamptz null</code></li>
+<li><code>revoked_at timestamptz null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes and constraints:</p>
+<ul>
+<li>unique on <code>(instance_id, version)</code></li>
+<li>unique partial index on <code>instance_id</code> where
+<code>is_active = true</code></li>
+<li>index on <code>last_used_at</code></li>
+</ul>
+<h2 id="83-account_api_tokens">8.3 <code>account_api_tokens</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>account-level tokens for APIs such as list/create/update instance
+actions</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>account_id uuid fk -&gt; accounts.id</code></li>
+<li><code>token_hash text not null</code></li>
+<li><code>token_prefix varchar(12) not null</code></li>
+<li><code>name varchar(120) not null</code></li>
+<li><code>is_active boolean not null default true</code></li>
+<li><code>last_used_at timestamptz null</code></li>
+<li><code>revoked_at timestamptz null</code></li>
+<li><code>created_by_user_id uuid null fk -&gt; users.id</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>account_id</code></li>
+<li>index on <code>is_active</code></li>
+</ul>
+<h2 id="84-instance_settings">8.4 <code>instance_settings</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>mutable operational settings per instance</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>instance_id uuid pk fk -&gt; instances.id</code></li>
+<li><code>send_delay_seconds integer not null default 1</code></li>
+<li><code>send_delay_max_seconds integer not null default 15</code></li>
+<li><code>webhook_url text null</code></li>
+<li><code>webhook_secret_encrypted text null</code></li>
+<li><code>webhook_retries smallint not null default 3</code></li>
+<li><code>webhook_timeout_seconds smallint not null default 10</code></li>
+<li><code>webhook_message_received boolean not null default false</code></li>
+<li><code>webhook_message_create boolean not null default false</code></li>
+<li><code>webhook_message_ack boolean not null default false</code></li>
+<li><code>webhook_message_download_media boolean not null default false</code></li>
+<li><code>webhook_message_reaction boolean not null default false</code></li>
+<li><code>max_parallel_sends smallint not null default 1</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<h2 id="85-instance_limits">8.5 <code>instance_limits</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>stores effective calculated limits per instance</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>instance_id uuid pk fk -&gt; instances.id</code></li>
+<li><code>daily_send_limit integer null</code></li>
+<li><code>daily_contact_check_limit integer null</code></li>
+<li><code>max_queue_size integer not null default 10000</code></li>
+<li><code>message_retention_days integer not null default 60</code></li>
+<li><code>media_retention_days integer not null default 120</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<h2 id="86-instance_state_events">8.6
+<code>instance_state_events</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>append-only record of instance lifecycle transitions</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id bigserial pk</code></li>
+<li><code>instance_id uuid fk -&gt; instances.id</code></li>
+<li><code>worker_id uuid null fk -&gt; workers.id</code></li>
+<li><code>status instance_status not null</code></li>
+<li><code>substatus varchar(64) null</code></li>
+<li><code>payload jsonb null</code></li>
+<li><code>occurred_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>(instance_id, occurred_at desc)</code></li>
+<li>index on <code>(status, occurred_at desc)</code></li>
+</ul>
+<hr />
+<h2 id="9-workers-and-session-orchestration-tables">9. Workers and
+Session Orchestration Tables</h2>
+<h2 id="91-workers">9.1 <code>workers</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>catalog of active worker processes or worker pods</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>worker_key varchar(96) not null unique</code></li>
+<li><code>node_name varchar(120) null</code></li>
+<li><code>pod_name varchar(120) null</code></li>
+<li><code>region varchar(32) null</code></li>
+<li><code>status worker_status not null default 'online'</code></li>
+<li><code>capacity integer not null default 1</code></li>
+<li><code>active_instance_count integer not null default 0</code></li>
+<li><code>app_version varchar(32) null</code></li>
+<li><code>last_heartbeat_at timestamptz null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>status</code></li>
+<li>index on <code>last_heartbeat_at</code></li>
+</ul>
+<h2 id="92-instance_worker_assignments">9.2
+<code>instance_worker_assignments</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>historical assignment records between instances and workers</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>instance_id uuid fk -&gt; instances.id</code></li>
+<li><code>worker_id uuid fk -&gt; workers.id</code></li>
+<li><code>assignment_status assignment_status not null default 'assigned'</code></li>
+<li><code>reason varchar(120) null</code></li>
+<li><code>assigned_at timestamptz not null default now()</code></li>
+<li><code>released_at timestamptz null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>instance_id</code></li>
+<li>index on <code>worker_id</code></li>
+<li>index on <code>assignment_status</code></li>
+<li>index on <code>(instance_id, assigned_at desc)</code></li>
+</ul>
+<h2 id="93-instance_sessions">9.3 <code>instance_sessions</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>session and browser-runtime lineage for an instance</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>instance_id uuid fk -&gt; instances.id</code></li>
+<li><code>worker_id uuid null fk -&gt; workers.id</code></li>
+<li><code>session_version integer not null</code></li>
+<li><code>status session_status not null default 'active'</code></li>
+<li><code>storage_ref text null</code></li>
+<li><code>profile_storage_key text null</code></li>
+<li><code>wa_session_key varchar(160) null</code></li>
+<li><code>qr_last_generated_at timestamptz null</code></li>
+<li><code>authenticated_at timestamptz null</code></li>
+<li><code>logged_out_at timestamptz null</code></li>
+<li><code>cleared_at timestamptz null</code></li>
+<li><code>last_connected_at timestamptz null</code></li>
+<li><code>last_screenshot_at timestamptz null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes and constraints:</p>
+<ul>
+<li>unique on <code>(instance_id, session_version)</code></li>
+<li>index on <code>worker_id</code></li>
+<li>index on <code>status</code></li>
+<li>index on <code>(instance_id, created_at desc)</code></li>
+</ul>
+<h2 id="94-worker_events">9.4 <code>worker_events</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>append-only operational events from workers for debugging and admin
+tooling</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id bigserial pk</code></li>
+<li><code>worker_id uuid fk -&gt; workers.id</code></li>
+<li><code>instance_id uuid null fk -&gt; instances.id</code></li>
+<li><code>event_type varchar(64) not null</code></li>
+<li><code>severity varchar(16) not null</code></li>
+<li><code>payload jsonb null</code></li>
+<li><code>occurred_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>(worker_id, occurred_at desc)</code></li>
+<li>index on <code>(instance_id, occurred_at desc)</code></li>
+<li>index on <code>event_type</code></li>
+</ul>
+<hr />
+<h2 id="10-messaging-tables">10. Messaging Tables</h2>
+<h2 id="101-outbound_messages">10.1 <code>outbound_messages</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>authoritative record for every outbound message request</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>account_id uuid fk -&gt; accounts.id</code></li>
+<li><code>instance_id uuid fk -&gt; instances.id</code></li>
+<li><code>provider_message_id varchar(160) null</code></li>
+<li><code>reference_id varchar(128) null</code></li>
+<li><code>chat_id varchar(160) null</code></li>
+<li><code>to_phone varchar(32) null</code></li>
+<li><code>to_jid varchar(160) null</code></li>
+<li><code>from_jid varchar(160) null</code></li>
+<li><code>message_type message_type not null</code></li>
+<li><code>body text null</code></li>
+<li><code>caption text null</code></li>
+<li><code>media_asset_id uuid null fk -&gt; media_assets.id</code></li>
+<li><code>priority smallint not null default 10</code></li>
+<li><code>status message_status not null default 'queue'</code></li>
+<li><code>ack message_ack not null default 'pending'</code></li>
+<li><code>source message_source not null default 'api'</code></li>
+<li><code>invalid_reason varchar(200) null</code></li>
+<li><code>error_code varchar(64) null</code></li>
+<li><code>error_message text null</code></li>
+<li><code>metadata jsonb not null default '{}'::jsonb</code></li>
+<li><code>queued_at timestamptz not null default now()</code></li>
+<li><code>scheduled_at timestamptz null</code></li>
+<li><code>sent_at timestamptz null</code></li>
+<li><code>failed_at timestamptz null</code></li>
+<li><code>expired_at timestamptz null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>(instance_id, created_at desc)</code></li>
+<li>index on <code>(instance_id, status, created_at desc)</code></li>
+<li>index on <code>(instance_id, ack, created_at desc)</code></li>
+<li>index on <code>(instance_id, reference_id)</code></li>
+<li>index on <code>(instance_id, to_phone)</code></li>
+<li>index on <code>provider_message_id</code></li>
+</ul>
+<p>Recommended constraints:</p>
+<ul>
+<li>unique on <code>(instance_id, provider_message_id)</code> where
+<code>provider_message_id is not null</code></li>
+</ul>
+<h2 id="102-inbound_messages">10.2 <code>inbound_messages</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>authoritative record for inbound WhatsApp messages</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>account_id uuid fk -&gt; accounts.id</code></li>
+<li><code>instance_id uuid fk -&gt; instances.id</code></li>
+<li><code>provider_message_id varchar(160) not null</code></li>
+<li><code>chat_id varchar(160) null</code></li>
+<li><code>from_jid varchar(160) not null</code></li>
+<li><code>to_jid varchar(160) null</code></li>
+<li><code>author_jid varchar(160) null</code></li>
+<li><code>push_name varchar(160) null</code></li>
+<li><code>message_type message_type not null</code></li>
+<li><code>body text null</code></li>
+<li><code>media_asset_id uuid null fk -&gt; media_assets.id</code></li>
+<li><code>quoted_provider_message_id varchar(160) null</code></li>
+<li><code>metadata jsonb not null default '{}'::jsonb</code></li>
+<li><code>sent_at timestamptz null</code></li>
+<li><code>received_at timestamptz not null default now()</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>unique on <code>(instance_id, provider_message_id)</code></li>
+<li>index on <code>(instance_id, received_at desc)</code></li>
+<li>index on <code>(instance_id, from_jid)</code></li>
+<li>index on <code>(instance_id, chat_id)</code></li>
+</ul>
+<h2 id="103-message_events">10.3 <code>message_events</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>append-only event stream for message state changes</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id bigserial pk</code></li>
+<li><code>account_id uuid fk -&gt; accounts.id</code></li>
+<li><code>instance_id uuid fk -&gt; instances.id</code></li>
+<li><code>direction message_direction not null</code></li>
+<li><code>outbound_message_id uuid null fk -&gt; outbound_messages.id</code></li>
+<li><code>inbound_message_id uuid null fk -&gt; inbound_messages.id</code></li>
+<li><code>provider_message_id varchar(160) null</code></li>
+<li><code>event_type varchar(64) not null</code></li>
+<li><code>payload jsonb not null default '{}'::jsonb</code></li>
+<li><code>occurred_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>(instance_id, occurred_at desc)</code></li>
+<li>index on <code>(outbound_message_id, occurred_at desc)</code></li>
+<li>index on <code>(inbound_message_id, occurred_at desc)</code></li>
+<li>index on <code>event_type</code></li>
+</ul>
+<h2 id="104-message_reactions">10.4 <code>message_reactions</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>reaction history, useful for webhook and analytics parity</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>instance_id uuid fk -&gt; instances.id</code></li>
+<li><code>provider_message_id varchar(160) not null</code></li>
+<li><code>reactor_jid varchar(160) not null</code></li>
+<li><code>emoji varchar(16) not null</code></li>
+<li><code>action varchar(16) not null</code></li>
+<li><code>payload jsonb not null default '{}'::jsonb</code></li>
+<li><code>occurred_at timestamptz not null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>(instance_id, provider_message_id)</code></li>
+<li>index on <code>(instance_id, occurred_at desc)</code></li>
+</ul>
+<h2 id="105-instance_daily_counters">10.5
+<code>instance_daily_counters</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>fast counters for usage limits and dashboard summaries</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>instance_id uuid fk -&gt; instances.id</code></li>
+<li><code>counter_date date not null</code></li>
+<li><code>outbound_sent_count integer not null default 0</code></li>
+<li><code>outbound_queue_count integer not null default 0</code></li>
+<li><code>outbound_unsent_count integer not null default 0</code></li>
+<li><code>invalid_count integer not null default 0</code></li>
+<li><code>expired_count integer not null default 0</code></li>
+<li><code>inbound_count integer not null default 0</code></li>
+<li><code>contact_check_count integer not null default 0</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<p>Primary key:</p>
+<ul>
+<li>composite primary key <code>(instance_id, counter_date)</code></li>
+</ul>
+<hr />
+<h2 id="11-contacts-chats-and-groups-tables">11. Contacts, Chats, and
+Groups Tables</h2>
+<h2 id="111-contacts">11.1 <code>contacts</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>cached WhatsApp contact metadata by instance</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>instance_id uuid fk -&gt; instances.id</code></li>
+<li><code>jid varchar(160) not null</code></li>
+<li><code>phone varchar(32) null</code></li>
+<li><code>display_name varchar(160) null</code></li>
+<li><code>push_name varchar(160) null</code></li>
+<li><code>short_name varchar(120) null</code></li>
+<li><code>is_business boolean not null default false</code></li>
+<li><code>is_blocked boolean not null default false</code></li>
+<li><code>profile_photo_url text null</code></li>
+<li><code>metadata jsonb not null default '{}'::jsonb</code></li>
+<li><code>last_synced_at timestamptz null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes and constraints:</p>
+<ul>
+<li>unique on <code>(instance_id, jid)</code></li>
+<li>index on <code>(instance_id, phone)</code></li>
+</ul>
+<h2 id="112-contact_check_cache">11.2
+<code>contact_check_cache</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>stores cached existence checks for phone numbers</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>instance_id uuid fk -&gt; instances.id</code></li>
+<li><code>phone varchar(32) not null</code></li>
+<li><code>wa_exists boolean not null</code></li>
+<li><code>source varchar(16) not null</code></li>
+<li><code>checked_at timestamptz not null</code></li>
+<li><code>expires_at timestamptz not null</code></li>
+<li><code>metadata jsonb not null default '{}'::jsonb</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>unique on <code>(instance_id, phone)</code></li>
+<li>index on <code>expires_at</code></li>
+</ul>
+<h2 id="113-chats">11.3 <code>chats</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>cached recent chat list and chat state</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>instance_id uuid fk -&gt; instances.id</code></li>
+<li><code>jid varchar(160) not null</code></li>
+<li><code>chat_type varchar(24) not null</code></li>
+<li><code>display_name varchar(180) null</code></li>
+<li><code>archived boolean not null default false</code></li>
+<li><code>pinned boolean not null default false</code></li>
+<li><code>is_muted boolean not null default false</code></li>
+<li><code>unread_count integer not null default 0</code></li>
+<li><code>last_message_at timestamptz null</code></li>
+<li><code>last_message_preview text null</code></li>
+<li><code>metadata jsonb not null default '{}'::jsonb</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes and constraints:</p>
+<ul>
+<li>unique on <code>(instance_id, jid)</code></li>
+<li>index on <code>(instance_id, last_message_at desc)</code></li>
+</ul>
+<h2 id="114-groups">11.4 <code>groups</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>cached group metadata</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>instance_id uuid fk -&gt; instances.id</code></li>
+<li><code>jid varchar(160) not null</code></li>
+<li><code>subject varchar(200) not null</code></li>
+<li><code>description text null</code></li>
+<li><code>owner_jid varchar(160) null</code></li>
+<li><code>participants_count integer not null default 0</code></li>
+<li><code>announce_only boolean not null default false</code></li>
+<li><code>metadata jsonb not null default '{}'::jsonb</code></li>
+<li><code>last_synced_at timestamptz null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes and constraints:</p>
+<ul>
+<li>unique on <code>(instance_id, jid)</code></li>
+<li>index on <code>(instance_id, subject)</code></li>
+</ul>
+<h2 id="115-group_members">11.5 <code>group_members</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>participant snapshots for groups</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>group_id uuid fk -&gt; groups.id</code></li>
+<li><code>member_jid varchar(160) not null</code></li>
+<li><code>display_name varchar(160) null</code></li>
+<li><code>is_admin boolean not null default false</code></li>
+<li><code>is_super_admin boolean not null default false</code></li>
+<li><code>joined_at timestamptz null</code></li>
+<li><code>left_at timestamptz null</code></li>
+<li><code>metadata jsonb not null default '{}'::jsonb</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes and constraints:</p>
+<ul>
+<li>unique on <code>(group_id, member_jid)</code></li>
+<li>index on <code>(group_id, is_admin)</code></li>
+</ul>
+<hr />
+<h2 id="12-media-tables">12. Media Tables</h2>
+<h2 id="121-media_assets">12.1 <code>media_assets</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>canonical media storage records for uploads, inbound media,
+screenshots, and exports</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>account_id uuid fk -&gt; accounts.id</code></li>
+<li><code>instance_id uuid null fk -&gt; instances.id</code></li>
+<li><code>storage_provider varchar(32) not null</code></li>
+<li><code>bucket varchar(120) not null</code></li>
+<li><code>object_key text not null</code></li>
+<li><code>mime_type varchar(120) not null</code></li>
+<li><code>original_filename varchar(255) null</code></li>
+<li><code>sha256 char(64) null</code></li>
+<li><code>size_bytes bigint not null</code></li>
+<li><code>width integer null</code></li>
+<li><code>height integer null</code></li>
+<li><code>duration_ms integer null</code></li>
+<li><code>source varchar(32) not null</code></li>
+<li><code>retention_until timestamptz null</code></li>
+<li><code>created_by_user_id uuid null fk -&gt; users.id</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>deleted_at timestamptz null</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>account_id</code></li>
+<li>index on <code>instance_id</code></li>
+<li>index on <code>sha256</code></li>
+<li>index on <code>retention_until</code></li>
+</ul>
+<h2 id="122-media_access_logs">12.2 <code>media_access_logs</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>optional but recommended for signed URL access auditing</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id bigserial pk</code></li>
+<li><code>media_asset_id uuid fk -&gt; media_assets.id</code></li>
+<li><code>viewer_user_id uuid null fk -&gt; users.id</code></li>
+<li><code>access_type varchar(32) not null</code></li>
+<li><code>ip_address inet null</code></li>
+<li><code>user_agent text null</code></li>
+<li><code>accessed_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>(media_asset_id, accessed_at desc)</code></li>
+</ul>
+<hr />
+<h2 id="13-webhook-tables">13. Webhook Tables</h2>
+<h2 id="131-webhook_endpoints">13.1 <code>webhook_endpoints</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>persistent endpoint definitions for each instance</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>instance_id uuid fk -&gt; instances.id</code></li>
+<li><code>url text not null</code></li>
+<li><code>secret_encrypted text null</code></li>
+<li><code>retries smallint not null default 3</code></li>
+<li><code>timeout_seconds smallint not null default 10</code></li>
+<li><code>on_message_received boolean not null default false</code></li>
+<li><code>on_message_create boolean not null default false</code></li>
+<li><code>on_message_ack boolean not null default false</code></li>
+<li><code>on_message_download_media boolean not null default false</code></li>
+<li><code>on_message_reaction boolean not null default false</code></li>
+<li><code>is_active boolean not null default true</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+<li><code>disabled_at timestamptz null</code></li>
+</ul>
+<p>Indexes and constraints:</p>
+<ul>
+<li>unique partial index on <code>instance_id</code> where
+<code>is_active = true</code></li>
+</ul>
+<h2 id="132-webhook_deliveries">13.2
+<code>webhook_deliveries</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>one row per webhook event delivery</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>instance_id uuid fk -&gt; instances.id</code></li>
+<li><code>account_id uuid fk -&gt; accounts.id</code></li>
+<li><code>webhook_endpoint_id uuid fk -&gt; webhook_endpoints.id</code></li>
+<li><code>event_name varchar(64) not null</code></li>
+<li><code>outbound_message_id uuid null fk -&gt; outbound_messages.id</code></li>
+<li><code>inbound_message_id uuid null fk -&gt; inbound_messages.id</code></li>
+<li><code>request_headers jsonb not null default '{}'::jsonb</code></li>
+<li><code>request_body jsonb not null default '{}'::jsonb</code></li>
+<li><code>signature varchar(255) null</code></li>
+<li><code>status webhook_delivery_status not null default 'pending'</code></li>
+<li><code>attempt_count integer not null default 0</code></li>
+<li><code>http_status integer null</code></li>
+<li><code>last_error text null</code></li>
+<li><code>next_retry_at timestamptz null</code></li>
+<li><code>last_attempt_at timestamptz null</code></li>
+<li><code>delivered_at timestamptz null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>(instance_id, created_at desc)</code></li>
+<li>index on <code>(status, next_retry_at)</code></li>
+<li>index on <code>(webhook_endpoint_id, created_at desc)</code></li>
+</ul>
+<h2 id="133-webhook_attempts">13.3 <code>webhook_attempts</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>detailed attempt log for each delivery retry</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>delivery_id uuid fk -&gt; webhook_deliveries.id</code></li>
+<li><code>attempt_number integer not null</code></li>
+<li><code>http_status integer null</code></li>
+<li><code>response_headers jsonb null</code></li>
+<li><code>response_body text null</code></li>
+<li><code>error_class varchar(120) null</code></li>
+<li><code>error_message text null</code></li>
+<li><code>duration_ms integer null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>unique on <code>(delivery_id, attempt_number)</code></li>
+<li>index on <code>(delivery_id, created_at desc)</code></li>
+</ul>
+<hr />
+<h2 id="14-support-and-audit-tables">14. Support and Audit Tables</h2>
+<h2 id="141-support_cases">14.1 <code>support_cases</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>structured support tickets tied to account and optional
+instance</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>account_id uuid fk -&gt; accounts.id</code></li>
+<li><code>instance_id uuid null fk -&gt; instances.id</code></li>
+<li><code>opened_by_user_id uuid null fk -&gt; users.id</code></li>
+<li><code>assigned_admin_user_id uuid null fk -&gt; users.id</code></li>
+<li><code>status support_case_status not null default 'open'</code></li>
+<li><code>priority support_priority not null default 'medium'</code></li>
+<li><code>subject varchar(200) not null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+<li><code>updated_at timestamptz not null default now()</code></li>
+<li><code>resolved_at timestamptz null</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>(account_id, created_at desc)</code></li>
+<li>index on <code>(assigned_admin_user_id, status)</code></li>
+<li>index on <code>(status, priority)</code></li>
+</ul>
+<h2 id="142-support_notes">14.2 <code>support_notes</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>notes and conversation log for support cases</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id uuid pk</code></li>
+<li><code>case_id uuid fk -&gt; support_cases.id</code></li>
+<li><code>author_user_id uuid fk -&gt; users.id</code></li>
+<li><code>is_internal boolean not null default true</code></li>
+<li><code>body text not null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>(case_id, created_at asc)</code></li>
+</ul>
+<h2 id="143-audit_logs">14.3 <code>audit_logs</code></h2>
+<p>Purpose:</p>
+<ul>
+<li>immutable history of customer, admin, system, and worker
+actions</li>
+</ul>
+<p>Columns:</p>
+<ul>
+<li><code>id bigserial pk</code></li>
+<li><code>actor_type actor_type not null</code></li>
+<li><code>actor_user_id uuid null fk -&gt; users.id</code></li>
+<li><code>account_id uuid null fk -&gt; accounts.id</code></li>
+<li><code>instance_id uuid null fk -&gt; instances.id</code></li>
+<li><code>entity_type varchar(80) not null</code></li>
+<li><code>entity_id varchar(120) not null</code></li>
+<li><code>action varchar(80) not null</code></li>
+<li><code>before_state jsonb null</code></li>
+<li><code>after_state jsonb null</code></li>
+<li><code>ip_address inet null</code></li>
+<li><code>user_agent text null</code></li>
+<li><code>created_at timestamptz not null default now()</code></li>
+</ul>
+<p>Indexes:</p>
+<ul>
+<li>index on <code>(account_id, created_at desc)</code></li>
+<li>index on <code>(instance_id, created_at desc)</code></li>
+<li>index on <code>(actor_user_id, created_at desc)</code></li>
+<li>index on <code>(entity_type, entity_id, created_at desc)</code></li>
+<li>index on <code>(action, created_at desc)</code></li>
+</ul>
+<hr />
+<h2 id="15-relationship-summary">15. Relationship Summary</h2>
+<p>Main relationships:</p>
+<ul>
+<li>one <code>user</code> can belong to many <code>accounts</code>
+through <code>account_members</code></li>
+<li>one <code>account</code> owns many <code>instances</code></li>
+<li>one <code>instance</code> has many <code>instance_api_tokens</code>
+over time</li>
+<li>one <code>instance</code> has one active
+<code>instance_settings</code> row</li>
+<li>one <code>instance</code> has one active
+<code>instance_limits</code> row</li>
+<li>one <code>instance</code> can have many
+<code>instance_sessions</code></li>
+<li>one <code>instance</code> can have many
+<code>instance_state_events</code></li>
+<li>one <code>worker</code> can host many instances over time, but one
+active assignment per instance</li>
+<li>one <code>instance</code> has many
+<code>outbound_messages</code></li>
+<li>one <code>instance</code> has many
+<code>inbound_messages</code></li>
+<li>messages generate many <code>message_events</code></li>
+<li>one <code>instance</code> can have many <code>contacts</code>,
+<code>chats</code>, and <code>groups</code></li>
+<li>one <code>group</code> has many <code>group_members</code></li>
+<li>one <code>instance</code> can have one active
+<code>webhook_endpoint</code></li>
+<li>one <code>webhook_delivery</code> has many
+<code>webhook_attempts</code></li>
+<li>one <code>account</code> can have many <code>support_cases</code>,
+<code>subscriptions</code>, <code>invoices</code>, and
+<code>audit_logs</code></li>
+</ul>
+<hr />
+<h2 id="16-recommended-index-strategy">16. Recommended Index
+Strategy</h2>
+<p>High-volume indexes that matter most:</p>
+<ul>
+<li><code>outbound_messages (instance_id, status, created_at desc)</code></li>
+<li><code>outbound_messages (instance_id, ack, created_at desc)</code></li>
+<li><code>inbound_messages (instance_id, received_at desc)</code></li>
+<li><code>message_events (instance_id, occurred_at desc)</code></li>
+<li><code>instance_state_events (instance_id, occurred_at desc)</code></li>
+<li><code>webhook_deliveries (status, next_retry_at)</code></li>
+<li><code>audit_logs (account_id, created_at desc)</code></li>
+</ul>
+<p>Rules:</p>
+<ul>
+<li>index by tenant key first for large shared tables</li>
+<li>avoid unnecessary indexes on huge event tables</li>
+<li>prefer partial indexes for active rows</li>
+<li>review bloat regularly on message and event tables</li>
+</ul>
+<hr />
+<h2 id="17-partitioning-recommendations">17. Partitioning
+Recommendations</h2>
+<p>These tables should be partitioned when production volume grows:</p>
+<ul>
+<li><code>outbound_messages</code></li>
+<li><code>inbound_messages</code></li>
+<li><code>message_events</code></li>
+<li><code>instance_state_events</code></li>
+<li><code>webhook_deliveries</code></li>
+<li><code>webhook_attempts</code></li>
+<li><code>audit_logs</code></li>
+</ul>
+<p>Recommended strategy:</p>
+<ul>
+<li>monthly range partitioning on <code>created_at</code> or
+<code>occurred_at</code></li>
+</ul>
+<p>Benefits:</p>
+<ul>
+<li>faster retention cleanup</li>
+<li>smaller index footprints</li>
+<li>easier archival</li>
+</ul>
+<hr />
+<h2 id="18-retention-policy-recommendations">18. Retention Policy
+Recommendations</h2>
+<p>Suggested policies:</p>
+<ul>
+<li><code>outbound_messages</code>: 60 to 120 days hot retention
+depending on plan</li>
+<li><code>inbound_messages</code>: 60 to 120 days hot retention</li>
+<li><code>message_events</code>: 30 to 90 days hot retention</li>
+<li><code>webhook_attempts</code>: 30 days</li>
+<li><code>worker_events</code>: 14 to 30 days</li>
+<li><code>audit_logs</code>: 180 to 365 days</li>
+<li><code>media_assets</code>: based on plan and storage policy</li>
+</ul>
+<p>Retention jobs should:</p>
+<ul>
+<li>run through queues</li>
+<li>archive before delete where required</li>
+<li>update counters and references safely</li>
+</ul>
+<hr />
+<h2 id="19-security-notes">19. Security Notes</h2>
+<p>Sensitive fields:</p>
+<ul>
+<li><code>password_hash</code></li>
+<li><code>token_hash</code></li>
+<li><code>webhook_secret_encrypted</code></li>
+<li><code>storage_ref</code></li>
+<li><code>profile_storage_key</code></li>
+</ul>
+<p>Rules:</p>
+<ul>
+<li>never store raw instance tokens or account API tokens after
+creation</li>
+<li>encrypt any persisted browser session artifact reference if it can
+expose session material</li>
+<li>redact tokens and message bodies from logs where possible</li>
+<li>avoid storing admin screenshots indefinitely</li>
+</ul>
+<hr />
+<h2 id="20-minimal-sql-bootstrap">20. Minimal SQL Bootstrap</h2>
+<p>Below is a compact bootstrap example for core types and two core
+tables. The full implementation should still be generated through
+migrations.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">create</span> extension <span class="cf">if</span> <span class="kw">not</span> <span class="kw">exists</span> pgcrypto;</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">create</span> extension <span class="cf">if</span> <span class="kw">not</span> <span class="kw">exists</span> citext;</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">create</span> <span class="kw">type</span> user_status <span class="kw">as</span> enum (<span class="st">&#39;active&#39;</span>, <span class="st">&#39;pending_invite&#39;</span>, <span class="st">&#39;suspended&#39;</span>, <span class="st">&#39;deleted&#39;</span>);</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">create</span> <span class="kw">type</span> account_status <span class="kw">as</span> enum (<span class="st">&#39;active&#39;</span>, <span class="st">&#39;trialing&#39;</span>, <span class="st">&#39;past_due&#39;</span>, <span class="st">&#39;suspended&#39;</span>, <span class="st">&#39;closed&#39;</span>);</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">create</span> <span class="kw">type</span> instance_status <span class="kw">as</span> enum (</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;qr&#39;</span>, <span class="st">&#39;initialize&#39;</span>, <span class="st">&#39;booting&#39;</span>, <span class="st">&#39;loading&#39;</span>, <span class="st">&#39;retrying&#39;</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;authenticated&#39;</span>, <span class="st">&#39;disconnected&#39;</span>, <span class="st">&#39;standby&#39;</span>, <span class="st">&#39;stopped&#39;</span>, <span class="st">&#39;expired&#39;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="kw">create</span> <span class="kw">table</span> users (</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">id</span> uuid <span class="kw">primary</span> <span class="kw">key</span> <span class="kw">default</span> gen_random_uuid(),</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  email citext <span class="kw">not</span> <span class="kw">null</span> <span class="kw">unique</span>,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  password_hash text <span class="kw">not</span> <span class="kw">null</span>,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  first_name <span class="dt">varchar</span>(<span class="dv">120</span>) <span class="kw">not</span> <span class="kw">null</span>,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  last_name <span class="dt">varchar</span>(<span class="dv">120</span>) <span class="kw">not</span> <span class="kw">null</span>,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  phone <span class="dt">varchar</span>(<span class="dv">32</span>),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  locale <span class="dt">varchar</span>(<span class="dv">12</span>) <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="st">&#39;en&#39;</span>,</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  timezone <span class="dt">varchar</span>(<span class="dv">64</span>) <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="st">&#39;UTC&#39;</span>,</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  status user_status <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="st">&#39;active&#39;</span>,</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  email_verified_at timestamptz,</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  last_login_at timestamptz,</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  created_at timestamptz <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> now(),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  updated_at timestamptz <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> now(),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>  deleted_at timestamptz</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a><span class="kw">create</span> <span class="kw">table</span> accounts (</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="kw">id</span> uuid <span class="kw">primary</span> <span class="kw">key</span> <span class="kw">default</span> gen_random_uuid(),</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  name <span class="dt">varchar</span>(<span class="dv">150</span>) <span class="kw">not</span> <span class="kw">null</span>,</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  slug <span class="dt">varchar</span>(<span class="dv">80</span>) <span class="kw">not</span> <span class="kw">null</span> <span class="kw">unique</span>,</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>  owner_user_id uuid <span class="kw">not</span> <span class="kw">null</span> <span class="kw">references</span> users(<span class="kw">id</span>),</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>  status account_status <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="st">&#39;trialing&#39;</span>,</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>  default_locale <span class="dt">varchar</span>(<span class="dv">12</span>) <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="st">&#39;en&#39;</span>,</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  default_timezone <span class="dt">varchar</span>(<span class="dv">64</span>) <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="st">&#39;UTC&#39;</span>,</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>  trial_starts_at timestamptz,</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  trial_ends_at timestamptz,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>  suspended_at timestamptz,</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>  closed_at timestamptz,</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>  created_at timestamptz <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> now(),</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>  updated_at timestamptz <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> now()</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a><span class="kw">create</span> <span class="kw">table</span> <span class="kw">instances</span> (</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a>  <span class="kw">id</span> uuid <span class="kw">primary</span> <span class="kw">key</span> <span class="kw">default</span> gen_random_uuid(),</span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>  account_id uuid <span class="kw">not</span> <span class="kw">null</span> <span class="kw">references</span> accounts(<span class="kw">id</span>),</span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>  public_id <span class="dt">varchar</span>(<span class="dv">32</span>) <span class="kw">not</span> <span class="kw">null</span> <span class="kw">unique</span>,</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>  display_name <span class="dt">varchar</span>(<span class="dv">150</span>),</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>  wa_display_name <span class="dt">varchar</span>(<span class="dv">150</span>),</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>  wa_phone <span class="dt">varchar</span>(<span class="dv">32</span>),</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>  wa_jid <span class="dt">varchar</span>(<span class="dv">160</span>),</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>  status instance_status <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="st">&#39;initialize&#39;</span>,</span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>  substatus <span class="dt">varchar</span>(<span class="dv">64</span>),</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>  current_worker_id uuid,</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>  current_session_id uuid,</span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>  expires_at timestamptz,</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>  auto_renewal <span class="dt">boolean</span> <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="kw">false</span>,</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>  is_trial <span class="dt">boolean</span> <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="kw">true</span>,</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>  last_qr_at timestamptz,</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a>  last_authenticated_at timestamptz,</span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a>  last_disconnected_at timestamptz,</span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a>  created_at timestamptz <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> now(),</span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>  updated_at timestamptz <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> now(),</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a>  deleted_at timestamptz</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>);</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a><span class="kw">create</span> <span class="kw">index</span> idx_instances_account_status <span class="kw">on</span> <span class="kw">instances</span> (account_id, status);</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a><span class="kw">create</span> <span class="kw">index</span> idx_instances_expires_at <span class="kw">on</span> <span class="kw">instances</span> (expires_at);</span></code></pre></div>
+<hr />
+<h2 id="21-final-recommendation">21. Final Recommendation</h2>
+<p>This schema is the right baseline for Elite Message if the project is
+intended to match UltraMsg-like behavior in production.</p>
+<p>The most important implementation choices are:</p>
+<ul>
+<li>use PostgreSQL</li>
+<li>keep instances as first-class records</li>
+<li>model workers and sessions explicitly</li>
+<li>treat messages and state changes as append-heavy event data</li>
+<li>store current settings in snapshot tables</li>
+<li>partition large message and event tables before scale forces an
+emergency migration</li>
+</ul>
+<p>This schema gives you:</p>
+<ul>
+<li>clean tenant boundaries</li>
+<li>enough operational visibility for an admin dashboard</li>
+<li>proper support for per-instance tokens, queues, and lifecycle
+states</li>
+<li>room to scale without redesigning the database after launch</li>
+</ul>
+</body>
+</html>
