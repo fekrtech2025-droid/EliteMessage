@@ -1,7 +1,6 @@
 ---
 deployment:
   tasks:
-    - corepack enable
-    - corepack prepare pnpm@10.33.0 --activate
-    - pnpm install --frozen-lockfile
-    - NODE_ENV=production ELITEMESSAGE_SKIP_DOTENV_EXAMPLE=true pnpm --filter @elite-message/admin-web build
+    - HUSKY=0 npx pnpm@10.33.0 install --frozen-lockfile
+    - NODE_ENV=production ELITEMESSAGE_SKIP_DOTENV_EXAMPLE=true npx pnpm@10.33.0 --filter @elite-message/admin-web build
+    - node -e "require('node:fs').writeFileSync('/home/levanpms/repositories/EliteMessage/.cpanel-last-deploy.txt', new Date().toISOString() + ' admin-web build ok\\n')"
