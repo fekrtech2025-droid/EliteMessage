@@ -6,9 +6,15 @@ deployment:
     - corepack prepare pnpm@10.33.0 --activate
     - pnpm install --frozen-lockfile
     - pnpm --filter @elite-message/admin-web build
-    - rm -rf apps/admin-web/runtime
-    - mkdir -p apps/admin-web/runtime
-    - cp -R apps/admin-web/.next/standalone/apps/admin-web/. apps/admin-web/runtime/
-    - mkdir -p apps/admin-web/runtime/.next
-    - cp -R apps/admin-web/.next/static apps/admin-web/runtime/.next/
+    - pnpm --filter @elite-message/customer-web build
+    - rm -rf /home/levanpms/elite-message-runtime/admin-web
+    - mkdir -p /home/levanpms/elite-message-runtime/admin-web
+    - cp -R apps/admin-web/.next/standalone/apps/admin-web/. /home/levanpms/elite-message-runtime/admin-web/
+    - mkdir -p /home/levanpms/elite-message-runtime/admin-web/.next
+    - cp -R apps/admin-web/.next/static /home/levanpms/elite-message-runtime/admin-web/.next/
+    - rm -rf /home/levanpms/elite-message-runtime/customer-web
+    - mkdir -p /home/levanpms/elite-message-runtime/customer-web
+    - cp -R apps/customer-web/.next/standalone/apps/customer-web/. /home/levanpms/elite-message-runtime/customer-web/
+    - mkdir -p /home/levanpms/elite-message-runtime/customer-web/.next
+    - cp -R apps/customer-web/.next/static /home/levanpms/elite-message-runtime/customer-web/.next/
     - rm -f /home/levanpms/repositories/EliteMessage/.env

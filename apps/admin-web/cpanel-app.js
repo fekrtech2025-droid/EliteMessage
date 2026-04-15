@@ -9,7 +9,8 @@ process.env.PORT = String(port);
 process.env.ADMIN_WEB_PORT = String(port);
 process.env.HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
 const runtimeRoot =
-  process.env.ELITEMESSAGE_RUNTIME_ROOT || path.join(__dirname, 'runtime');
+  process.env.ELITEMESSAGE_RUNTIME_ROOT ||
+  '/home/levanpms/elite-message-runtime/admin-web';
 
 const runtimeCandidates = [
   path.join(runtimeRoot, 'server.js'),
