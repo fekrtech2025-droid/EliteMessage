@@ -9,12 +9,11 @@ process.env.PORT = String(port);
 process.env.CUSTOMER_WEB_PORT = String(port);
 process.env.HOSTNAME = process.env.HOSTNAME || '0.0.0.0';
 const runtimeRoot =
-  process.env.ELITEMESSAGE_RUNTIME_ROOT ||
-  '/home/levanpms/elite-message-runtime';
+  process.env.ELITEMESSAGE_RUNTIME_ROOT || path.join(__dirname, 'runtime');
 
 const runtimeCandidates = [
-  path.join(runtimeRoot, 'customer-web', 'server.js'),
-  path.join(runtimeRoot, 'customer-web', 'apps', 'customer-web', 'server.js'),
+  path.join(runtimeRoot, 'server.js'),
+  path.join(runtimeRoot, 'apps', 'customer-web', 'server.js'),
   path.join(__dirname, '.next', 'standalone', 'server.js'),
   path.join(
     __dirname,
