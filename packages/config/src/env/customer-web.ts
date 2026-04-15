@@ -2,8 +2,8 @@ import { z } from 'zod';
 import { sharedEnvSchema } from './shared';
 
 export const customerWebEnvSchema = sharedEnvSchema.extend({
-  CUSTOMER_WEB_APP_NAME: z.string().min(1),
-  CUSTOMER_WEB_PORT: z.coerce.number().int().positive(),
+  CUSTOMER_WEB_APP_NAME: z.string().min(1).default('Elite Message Customer'),
+  CUSTOMER_WEB_PORT: z.coerce.number().int().positive().default(3000),
   CUSTOMER_WEB_PUBLIC_BASE_URL: z
     .string()
     .url()

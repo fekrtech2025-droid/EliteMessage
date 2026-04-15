@@ -28,8 +28,13 @@ export function findWorkspaceRoot(startDir: string): string {
 export function loadWorkspaceEnv(startDir = process.cwd()): string[] {
   const workspaceRoot = findWorkspaceRoot(startDir);
   const loadedFiles: string[] = [];
+  const skipExampleEnv =
+    process.env.ELITEMESSAGE_SKIP_DOTENV_EXAMPLE === 'true';
 
-  for (const fileName of ['.env', '.env.example']) {
+  for (const fileName of [
+    '.env',
+    ...(skipExampleEnv ? [] : ['.env.example']),
+  ]) {
     const filePath = resolve(workspaceRoot, fileName);
     if (!existsSync(filePath)) {
       continue;

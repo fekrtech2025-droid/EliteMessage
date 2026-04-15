@@ -4,8 +4,8 @@ deployment:
     - corepack enable
     - corepack prepare pnpm@10.33.0 --activate
     - pnpm install --frozen-lockfile
-    - pnpm --filter @elite-message/admin-web build
-    - pnpm --filter @elite-message/customer-web build
+    - NODE_ENV=production ELITEMESSAGE_SKIP_DOTENV_EXAMPLE=true pnpm --filter @elite-message/admin-web build
+    - NODE_ENV=production ELITEMESSAGE_SKIP_DOTENV_EXAMPLE=true pnpm --filter @elite-message/customer-web build
     - rm -rf /home/levanpms/elite-message-runtime/admin-web
     - mkdir -p /home/levanpms/elite-message-runtime/admin-web
     - cp -R apps/admin-web/.next/standalone/apps/admin-web/. /home/levanpms/elite-message-runtime/admin-web/
