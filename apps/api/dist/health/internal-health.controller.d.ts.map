@@ -1,0 +1,1 @@
+{"version":3,"file":"internal-health.controller.d.ts","sourceRoot":"","sources":["../../src/health/internal-health.controller.ts"],"names":[],"mappings":"AAGA,OAAO,EAAE,aAAa,EAAE,MAAM,kBAAkB,CAAC;AAEjD,qBAEa,wBAAwB;IACvB,OAAO,CAAC,QAAQ,CAAC,aAAa;gBAAb,aAAa,EAAE,aAAa;IAGzD,SAAS;;;;IAMH,UAAU;CAGjB"}

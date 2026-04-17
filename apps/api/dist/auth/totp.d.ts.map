@@ -1,0 +1,1 @@
+{"version":3,"file":"totp.d.ts","sourceRoot":"","sources":["../../src/auth/totp.ts"],"names":[],"mappings":"AAqEA,wBAAgB,gBAAgB,WAE/B;AAED,wBAAgB,gBAAgB,CAAC,MAAM,EAAE,MAAM,EAAE,GAAG,SAAa,UAGhE;AAED,wBAAgB,eAAe,CAC7B,MAAM,EAAE,MAAM,EACd,YAAY,EAAE,MAAM,EACpB,MAAM,EAAE,MAAM,UAIf;AAED,wBAAgB,UAAU,CACxB,MAAM,EAAE,MAAM,EACd,IAAI,EAAE,MAAM,EACZ,GAAG,SAAa,EAChB,MAAM,SAAI,WAmBX"}

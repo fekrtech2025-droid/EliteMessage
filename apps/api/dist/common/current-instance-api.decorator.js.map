@@ -1,0 +1,1 @@
+{"version":3,"file":"current-instance-api.decorator.js","sourceRoot":"","sources":["../../src/common/current-instance-api.decorator.ts"],"names":[],"mappings":";;;AAAA,2CAA6E;AAGhE,QAAA,kBAAkB,GAAG,IAAA,6BAAoB,EACpD,CAAC,CAAU,EAAE,OAAyB,EAAE,EAAE;IACxC,MAAM,OAAO,GAAG,OAAO,CAAC,YAAY,EAAE,CAAC,UAAU,EAAc,CAAC;IAChE,OAAO,OAAO,CAAC,WAAW,CAAC;AAC7B,CAAC,CACF,CAAC"}
