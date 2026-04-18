@@ -1,4 +1,108 @@
-module.exports=[425,(a,b,c)=>{"use strict";Object.defineProperty(c,"__esModule",{value:!0}),Object.defineProperty(c,"useMergedRef",{enumerable:!0,get:function(){return e}});let d=a.r(26670);function e(a,b){let c=(0,d.useRef)(null),e=(0,d.useRef)(null);return(0,d.useCallback)(d=>{if(null===d){let a=c.current;a&&(c.current=null,a());let b=e.current;b&&(e.current=null,b())}else a&&(c.current=f(a,d)),b&&(e.current=f(b,d))},[a,b])}function f(a,b){if("function"!=typeof a)return a.current=b,()=>{a.current=null};{let c=a(b);return"function"==typeof c?c:()=>a(null)}}("function"==typeof c.default||"object"==typeof c.default&&null!==c.default)&&void 0===c.default.__esModule&&(Object.defineProperty(c.default,"__esModule",{value:!0}),Object.assign(c.default,c),b.exports=c.default)},19441,(a,b,c)=>{"use strict";Object.defineProperty(c,"__esModule",{value:!0}),Object.defineProperty(c,"warnOnce",{enumerable:!0,get:function(){return d}});let d=a=>{}},65455,(a,b,c)=>{"use strict";let d;Object.defineProperty(c,"__esModule",{value:!0});var e={getAssetToken:function(){return i},getAssetTokenQuery:function(){return j},getDeploymentId:function(){return g},getDeploymentIdQuery:function(){return h}};for(var f in e)Object.defineProperty(c,f,{enumerable:!0,get:e[f]});function g(){return d}function h(a=!1){return d?`${a?"&":"?"}dpl=${d}`:""}function i(){return!1}function j(a=!1){return""}d=void 0},56120,76989,34910,10246,97263,19827,5790,a=>{"use strict";var b=a.i(89272);let c={narrow:760,normal:1160,wide:1360},d=`
+module.exports = [
+  425,
+  (a, b, c) => {
+    'use strict';
+    (Object.defineProperty(c, '__esModule', { value: !0 }),
+      Object.defineProperty(c, 'useMergedRef', {
+        enumerable: !0,
+        get: function () {
+          return e;
+        },
+      }));
+    let d = a.r(26670);
+    function e(a, b) {
+      let c = (0, d.useRef)(null),
+        e = (0, d.useRef)(null);
+      return (0, d.useCallback)(
+        (d) => {
+          if (null === d) {
+            let a = c.current;
+            a && ((c.current = null), a());
+            let b = e.current;
+            b && ((e.current = null), b());
+          } else (a && (c.current = f(a, d)), b && (e.current = f(b, d)));
+        },
+        [a, b],
+      );
+    }
+    function f(a, b) {
+      if ('function' != typeof a)
+        return (
+          (a.current = b),
+          () => {
+            a.current = null;
+          }
+        );
+      {
+        let c = a(b);
+        return 'function' == typeof c ? c : () => a(null);
+      }
+    }
+    ('function' == typeof c.default ||
+      ('object' == typeof c.default && null !== c.default)) &&
+      void 0 === c.default.__esModule &&
+      (Object.defineProperty(c.default, '__esModule', { value: !0 }),
+      Object.assign(c.default, c),
+      (b.exports = c.default));
+  },
+  19441,
+  (a, b, c) => {
+    'use strict';
+    (Object.defineProperty(c, '__esModule', { value: !0 }),
+      Object.defineProperty(c, 'warnOnce', {
+        enumerable: !0,
+        get: function () {
+          return d;
+        },
+      }));
+    let d = (a) => {};
+  },
+  65455,
+  (a, b, c) => {
+    'use strict';
+    let d;
+    Object.defineProperty(c, '__esModule', { value: !0 });
+    var e = {
+      getAssetToken: function () {
+        return i;
+      },
+      getAssetTokenQuery: function () {
+        return j;
+      },
+      getDeploymentId: function () {
+        return g;
+      },
+      getDeploymentIdQuery: function () {
+        return h;
+      },
+    };
+    for (var f in e) Object.defineProperty(c, f, { enumerable: !0, get: e[f] });
+    function g() {
+      return d;
+    }
+    function h(a = !1) {
+      return d ? `${a ? '&' : '?'}dpl=${d}` : '';
+    }
+    function i() {
+      return !1;
+    }
+    function j(a = !1) {
+      return '';
+    }
+    d = void 0;
+  },
+  56120,
+  76989,
+  34910,
+  10246,
+  97263,
+  19827,
+  5790,
+  (a) => {
+    'use strict';
+    var b = a.i(89272);
+    let c = { narrow: 760, normal: 1160, wide: 1360 },
+      d = `
 main[data-elite-shell] {
   --elite-ink: #111827;
   --elite-ink-soft: #334155;
@@ -3811,6 +3915,1125 @@ html[data-elite-theme="dark"] main[data-elite-shell][data-nav-collapsed="true"] 
     display: none;
   }
 }
-`;function e({label:a,variant:c="topbar",markSrc:d,markAlt:f="",launcherControlsId:g,launcherButtonLabel:h,launcherExpandLabel:i,onLauncherClick:j}){let k="topbar"===c,l=(0,b.jsxs)("svg",{viewBox:"0 0 24 24",fill:"none","aria-hidden":"true",children:[(0,b.jsx)("rect",{x:"4",y:"4",width:"4.5",height:"4.5",rx:"1.1"}),(0,b.jsx)("rect",{x:"9.75",y:"4",width:"4.5",height:"4.5",rx:"1.1"}),(0,b.jsx)("rect",{x:"15.5",y:"4",width:"4.5",height:"4.5",rx:"1.1"}),(0,b.jsx)("rect",{x:"4",y:"9.75",width:"4.5",height:"4.5",rx:"1.1"}),(0,b.jsx)("rect",{x:"9.75",y:"9.75",width:"4.5",height:"4.5",rx:"1.1"}),(0,b.jsx)("rect",{x:"15.5",y:"9.75",width:"4.5",height:"4.5",rx:"1.1"}),(0,b.jsx)("rect",{x:"4",y:"15.5",width:"4.5",height:"4.5",rx:"1.1"}),(0,b.jsx)("rect",{x:"9.75",y:"15.5",width:"4.5",height:"4.5",rx:"1.1"}),(0,b.jsx)("rect",{x:"15.5",y:"15.5",width:"4.5",height:"4.5",rx:"1.1"})]}),m=k?j?(0,b.jsx)("button",{type:"button",className:"elite-shell-topbar-brand-launcher","data-unstyled-button":!0,"data-state":"expanded","data-collapse-label":h,"data-expand-label":i,"aria-label":h,"aria-controls":g,"aria-expanded":"true",onClick:j,children:l}):(0,b.jsx)("span",{className:"elite-shell-topbar-brand-launcher","aria-hidden":"true",children:l}):null;return(0,b.jsxs)("div",{className:k?"elite-shell-topbar-brand":"elite-rail-brand","data-variant":c,children:[(0,b.jsx)("span",{className:k?"elite-shell-topbar-brand-mark":"elite-rail-brand-mark","aria-hidden":"true","data-has-image":d?"true":"false",children:d?(0,b.jsx)("img",{className:"elite-shell-topbar-brand-mark-image",src:d,alt:f}):null}),(0,b.jsxs)("div",{className:k?"elite-shell-topbar-brand-copy":"elite-rail-brand-copy",children:[(0,b.jsx)("span",{className:k?"elite-shell-topbar-brand-name":"elite-rail-brand-name",children:"Elite Message"}),(0,b.jsx)("span",{className:k?"elite-shell-topbar-brand-subtitle":"elite-rail-brand-subtitle",children:a})]}),m]})}a.s(["AppShell",0,function({title:a,subtitle:f,breadcrumbLabel:g,children:h,footer:i,meta:j,nav:k,headerActions:l,secondaryNav:m,surface:n="neutral",density:o="comfortable",contentWidth:p="wide",headerMode:q="default",topbarBrandMarkAlt:r,labels:s}){let t=k?`elite-shell-nav-${n}`:void 0,u="full"===p?void 0:c[p],v=("customer"===n||"admin"===n)&&!!k&&"hidden"!==q,w=g??a,x=!!f.trim(),y=!!k&&("customer"===n||"admin"===n),z=s?.surfaceLabel??function(a){switch(a){case"customer":return"Customer Surface";case"admin":return"Admin Console";default:return"Elite Message"}}(n),A=s?.breadcrumbAriaLabel??"Breadcrumb",B=s?.breadcrumbHomeLabel??"Dashboard",C=s?.customerTopbarLabel??`${z} topbar`,D=s?.mobileNavigationLabel??"Navigation",E=s?.mobileNavigationOpenLabel??"Open",F=s?.collapseSidebarLabel??"Collapse sidebar menu",G=s?.expandSidebarLabel??"Expand sidebar menu",H=s?.brandMarkAlt??r??"Elite Message logo";return(0,b.jsxs)("main",{"data-elite-shell":!0,"data-surface":n,"data-density":o,"data-header-mode":q,style:{minHeight:"100vh",background:"var(--elite-shell-bg)",padding:"hidden"===q||v?0:"clamp(18px, 2vw, 26px)",color:"var(--elite-ink)"},children:[(0,b.jsx)("style",{children:d}),(0,b.jsxs)("div",{className:"elite-shell-frame","data-has-nav":k?"true":"false",children:[v?(0,b.jsxs)("div",{className:"elite-shell-topbar","aria-label":C,children:[(0,b.jsx)(e,{label:z,variant:"topbar",markSrc:"customer"===n?"/images/EliteMessage_Icon_Only.png":void 0,markAlt:H,launcherControlsId:t,launcherButtonLabel:F,launcherExpandLabel:G,onLauncherClick:y?a=>{let b=a.currentTarget.closest("[data-elite-shell]");if(!b)return;let c="true"===b.getAttribute("data-nav-collapsed");!function(a,b,c){b?a.setAttribute("data-nav-collapsed","true"):a.removeAttribute("data-nav-collapsed");let d=a.querySelector(".elite-shell-frame");d&&(b?d.setAttribute("data-nav-collapsed","true"):d.removeAttribute("data-nav-collapsed"));let e=c?a.querySelector(`#${c}`):a.querySelector(".elite-shell-aside");e&&(e.hidden=!1,e.removeAttribute("aria-hidden"));let f=a.querySelector(".elite-shell-mobile-nav");f&&(f.hidden=b);let g=a.querySelector(".elite-shell-topbar-brand-launcher");if(g){let a=g.dataset.collapseLabel??"Collapse sidebar menu",c=g.dataset.expandLabel??"Expand sidebar menu";g.dataset.state=b?"collapsed":"expanded",g.setAttribute("aria-expanded",b?"false":"true"),g.setAttribute("aria-label",b?c:a)}}(b,!c,t)}:void 0}),(0,b.jsx)("div",{className:"elite-shell-topbar-center",children:j}),(0,b.jsx)("div",{className:"elite-shell-topbar-actions",children:l})]}):null,k?(0,b.jsxs)(b.Fragment,{children:[(0,b.jsx)("div",{className:"elite-shell-mobile-nav",children:(0,b.jsxs)("details",{children:[(0,b.jsxs)("summary",{children:[(0,b.jsx)("span",{children:D}),(0,b.jsx)("span",{"aria-hidden":"true",children:E})]}),(0,b.jsx)("div",{className:"elite-shell-mobile-nav-body",children:k})]})}),(0,b.jsx)("aside",{id:t,className:"elite-shell-aside",children:k})]}):null,(0,b.jsx)("div",{className:"elite-shell-main",children:(0,b.jsxs)("div",{className:"elite-shell-content",style:{maxWidth:u,margin:k?void 0:"0 auto"},children:["hidden"===q?null:(0,b.jsxs)("header",{className:`elite-page-header${"customer"===n?" elite-page-header-customer":""}`,children:[v?null:(0,b.jsxs)("div",{className:"elite-page-header-top",children:[(0,b.jsxs)("span",{className:"elite-page-brand",children:[(0,b.jsx)("span",{className:"elite-page-brand-mark","aria-hidden":"true"}),z]}),(0,b.jsxs)("div",{className:"elite-toolbar",children:[j,l]})]}),"customer"===n?(0,b.jsxs)("div",{className:"elite-page-header-body elite-page-header-body-customer",children:[(0,b.jsxs)("div",{className:"elite-page-header-row",children:[(0,b.jsx)("h1",{className:"elite-page-title",children:a}),(0,b.jsxs)("nav",{className:"elite-page-breadcrumbs","aria-label":A,children:[(0,b.jsx)("a",{href:"/",children:B}),(0,b.jsx)("span",{"aria-hidden":"true",children:"/"}),(0,b.jsx)("span",{children:w})]})]}),x?(0,b.jsx)("p",{className:"elite-page-subtitle",children:f}):null]}):(0,b.jsxs)("div",{className:"elite-page-header-body",children:[(0,b.jsx)("h1",{className:"elite-page-title",children:a}),x?(0,b.jsx)("p",{className:"elite-page-subtitle",children:f}):null]})]}),m?(0,b.jsx)("div",{className:"elite-page-secondary-nav",children:m}):null,(0,b.jsx)("div",{className:"elite-page-stack",children:h}),i?(0,b.jsx)("footer",{className:"elite-page-footer",children:i}):null]})})]})]})}],76989),a.i(73127);a.s(["ActionButton",0,function({tone:a="primary",size:c="default",stretch:d=!1,children:e,...f}){return(0,b.jsx)("button",{...f,"data-elite-button":!0,"data-tone":a,"data-size":c,"data-stretch":d?"true":"false",children:e})},"AnchorNav",0,function({items:a}){return(0,b.jsx)("nav",{className:"elite-anchor-nav","aria-label":"Section navigation",children:a.map(a=>(0,b.jsx)("a",{href:a.href,children:a.label},a.href))})},"CheckboxField",0,function({label:a,hint:c,...d}){return(0,b.jsxs)("label",{className:"elite-checkbox-row",children:[(0,b.jsx)("input",{...d,type:"checkbox"}),(0,b.jsxs)("span",{children:[(0,b.jsx)("span",{className:"elite-checkbox-label",children:a}),c?(0,b.jsx)("span",{className:"elite-field-hint",children:c}):null]})]})},"DefinitionGrid",0,function({items:a,minItemWidth:c=170,emphasis:d="soft"}){return(0,b.jsx)("div",{className:"elite-definition-grid",style:{"--elite-grid-min":`${c}px`},children:a.map(a=>(0,b.jsxs)("div",{className:"elite-definition-item","data-tone":a.tone??"neutral","data-emphasis":d,children:[(0,b.jsx)("div",{className:"elite-definition-label",children:a.label}),(0,b.jsx)("div",{className:"elite-definition-value",children:a.value})]},`${a.label}-${String(a.value)}`))})},"Field",0,function({label:a,hint:c,tone:d="neutral",children:e}){return(0,b.jsxs)("label",{className:"elite-field","data-tone":d,children:[(0,b.jsx)("span",{className:"elite-field-label",children:a}),e,c?(0,b.jsx)("span",{className:"elite-field-hint",children:c}):null]})},"MetricCard",0,function({label:a,value:c,hint:d,tone:e="neutral",emphasis:f="soft"}){return(0,b.jsxs)("div",{className:"elite-metric-card","data-tone":e,"data-emphasis":f,children:[(0,b.jsx)("div",{className:"elite-metric-label",children:a}),(0,b.jsx)("div",{className:"elite-metric-value",children:c}),d?(0,b.jsx)("div",{className:"elite-metric-hint",children:d}):null]})},"MetricGrid",0,function({children:a,minItemWidth:c=170}){return(0,b.jsx)("div",{className:"elite-metric-grid",style:{"--elite-grid-min":`${c}px`},children:a})},"NoticeBanner",0,function({title:a,tone:c="info",emphasis:d="soft",surface:e,children:f}){return(0,b.jsxs)("div",{className:"elite-notice","data-tone":c,"data-emphasis":d,"data-surface":e,children:[(0,b.jsx)("div",{className:"elite-notice-title",children:a}),(0,b.jsx)("div",{children:f})]})},"SectionGrid",0,function({children:a,minItemWidth:c=280}){return(0,b.jsx)("div",{className:"elite-section-grid",style:{"--elite-grid-min":`${c}px`},children:a})},"SelectInput",0,function(a){return(0,b.jsx)("select",{...a,"data-elite-control":!0})},"StatusBadge",0,function({children:a,tone:c="neutral"}){return(0,b.jsx)("span",{className:"elite-status-badge","data-tone":c,children:a})},"TextAreaInput",0,function(a){return(0,b.jsx)("textarea",{...a,"data-elite-control":!0})},"TextInput",0,function(a){return(0,b.jsx)("input",{...a,"data-elite-control":!0})}],34910),a.s(["InfoCard",0,function({eyebrow:a,title:c,subtitle:d,action:e,children:f,className:g,tone:h="neutral",density:i="comfortable",surface:j,id:k,...l}){return(0,b.jsxs)("section",{...l,id:k,"data-elite-card":!0,"data-tone":h,"data-density":i,"data-surface":j,className:g,style:l.style,children:[(0,b.jsxs)("div",{className:"elite-card-header",children:[(0,b.jsxs)("div",{className:"elite-card-copy",children:[a?(0,b.jsx)("p",{className:"elite-card-eyebrow",children:a}):null,(0,b.jsx)("h2",{className:"elite-card-title",children:c}),d?(0,b.jsx)("p",{className:"elite-card-subtitle",children:d}):null]}),e?(0,b.jsx)("div",{className:"elite-card-action",children:e}):null]}),(0,b.jsx)("div",{className:"elite-card-body",children:f})]})}],10246),a.i(5221),a.i(10674),a.s([],56120);var f=a.i(26670);let g=process.env.NEXT_PUBLIC_API_BASE_URL??"http://localhost:3002";function h(a){}function i(a){window.location.assign(`${g}/api/v1/auth/google/authorize?mode=${encodeURIComponent(a)}`)}function j(a,b="en"){let c=a.trim();return c?/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c)?null:"ar"===b?"استخدم عنوان بريد إلكتروني صالحًا مثل name@company.com.":"Use a valid email address like name@company.com.":"ar"===b?"أدخل عنوان البريد الإلكتروني لهذا الحساب.":"Enter the email address for this account."}function k(a,b="en"){let c=a.trim();return c?c.length<2?"ar"===b?"يجب أن يتكون الاسم الظاهر من حرفين على الأقل.":"Display name must be at least 2 characters.":null:"ar"===b?"أدخل الاسم الذي يجب أن يظهر في مساحة العمل.":"Enter the name that should appear across the workspace."}function l(a,b="en"){let c=a.trim();return c&&c.length<2?"ar"===b?"يجب أن يتكون اسم مساحة العمل من حرفين على الأقل عند إدخاله.":"Workspace name must be at least 2 characters when provided.":null}function m(a,b="en"){return a?null:"ar"===b?"أدخل كلمة المرور.":"Enter your password."}function n(a,b="en"){return!a||a.length<8?"ar"===b?"يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.":"Password must be at least 8 characters.":null}function o(a){window.location.assign(a)}a.s(["apiBaseUrl",0,g,"clearStoredToken",0,function(){},"readStoredToken",0,function(){return null},"writeStoredToken",0,h],97263),a.s(["beginGoogleAuthorization",0,i,"parseGoogleAuthCallbackHash",0,function(a){let b=new URLSearchParams(a.startsWith("#")?a.slice(1):a),c="signup"===b.get("mode")?"signup":"login",d=b.get("access_token");return d?{kind:"success",mode:c,accessToken:d}:{kind:"error",mode:c,errorCode:b.get("error_code")??"google_callback_invalid",errorMessage:b.get("error_message")??"Google authentication could not be completed."}}],19827),a.s(["redirectToCustomerRoute",0,o,"useCustomerAuthForm",0,function({locale:a,initialMode:b="login",redirectTo:c="/dashboard"}){let d="ar"===a?{alreadyHaveAccess:"لديك حساب بالفعل؟",continueWithGoogle:"تابع باستخدام Google",createAccount:"إنشاء الحساب",creatingAccount:"جارٍ إنشاء الحساب...",displayName:"الاسم الظاهر",displayNameHint:"يظهر هذا الاسم في لوحة التحكم وشاشات الدعم.",emailAddress:"البريد الإلكتروني",existingAccount:"يوجد حساب بهذا البريد الإلكتروني بالفعل.",fixHighlightedFields:"أصلح الحقول المميزة ثم حاول مرة أخرى.",needNewWorkspace:"ليس لديك حساب؟",password:"كلمة المرور",passwordHint:"استخدم 8 أحرف على الأقل. كلما زاد الطول وتنوعت الأحرف كانت أقوى.",passwordHide:"إخفاء",passwordHideAria:"إخفاء كلمة المرور",passwordShow:"إظهار",passwordShowAria:"إظهار كلمة المرور",setCustomWorkspaceName:"تعيين اسم مخصص لمساحة العمل (اختياري)",signin:"تسجيل الدخول",signinFailed:"فشل تسجيل الدخول",signinGoogle:"تسجيل الدخول عبر Google",signinSubmitting:"جارٍ تسجيل الدخول...",signinSuccess:a=>`تم تسجيل الدخول باسم ${a}.`,signup:"إنشاء حساب",signupFailed:"فشل التسجيل",signupSuccess:a=>`تم إنشاء الحساب للمستخدم ${a}.`,signInAction:"تسجيل الدخول",signInInstead:"سجّل الدخول بدلًا من ذلك",workspaceHint:"اترك هذا الحقل فارغًا لإنشاء اسم مساحة العمل من الاسم الظاهر.",workspaceName:"اسم مساحة العمل"}:{alreadyHaveAccess:"Already have access?",continueWithGoogle:"Continue with Google",createAccount:"Create account",creatingAccount:"Creating account...",displayName:"Display name",displayNameHint:"This name appears in the dashboard and support views.",emailAddress:"Email address",existingAccount:"An account with this email already exists.",fixHighlightedFields:"Fix the highlighted fields and try again.",needNewWorkspace:"Need a new workspace?",password:"Password",passwordHint:"Use at least 8 characters. Longer passwords with mixed characters are stronger.",passwordHide:"Hide",passwordHideAria:"Hide password",passwordShow:"Show",passwordShowAria:"Show password",setCustomWorkspaceName:"Set a custom workspace name (optional)",signin:"Sign in",signinFailed:"Signin failed",signinGoogle:"Sign in with Google",signinSubmitting:"Signing in...",signinSuccess:a=>`Signed in as ${a}.`,signup:"Sign up",signupFailed:"Signup failed",signupSuccess:a=>`Created account for ${a}.`,signInAction:"Sign in",signInInstead:"Sign in instead",workspaceHint:"Leave this empty to generate the workspace name from your display name.",workspaceName:"Workspace name"},[e,p]=(0,f.useState)(b),[q,r]=(0,f.useState)(""),[s,t]=(0,f.useState)(""),[u,v]=(0,f.useState)(""),[w,x]=(0,f.useState)(""),[y,z]=(0,f.useState)(!1),[A,B]=(0,f.useState)(!1),[C,D]=(0,f.useState)(null),[E,F]=(0,f.useState)(null),[G,H]=(0,f.useState)({email:!1,password:!1,displayName:!1,workspaceName:!1}),I=G.email||q.length>0?j(q,a):null,J=G.password||s.length>0?m(s,a):null,K=G.email||q.length>0?j(q,a):null,L=G.password||s.length>0?n(s,a):null,M=G.displayName||u.length>0?k(u,a):null,N=G.workspaceName||w.length>0?l(w,a):null,O=function(a,b="en"){if(!a)return"ar"===b?{score:0,label:"قوة كلمة المرور",help:"استخدم 8 أحرف على الأقل. ويكون المزيج من الحروف والأرقام والرموز أقوى."}:{score:0,label:"Password strength",help:"Use at least 8 characters. A mix of letters, numbers, and symbols is stronger."};let c=[/[a-z]/.test(a),/[A-Z]/.test(a),/\d/.test(a),/[^A-Za-z0-9]/.test(a)].filter(Boolean).length;return a.length<8||c<=1?"ar"===b?{score:1,label:"ضعيفة",help:"أضف طولاً أكبر ومزيجًا من أنواع الأحرف قبل استخدام كلمة المرور هذه."}:{score:1,label:"Weak",help:"Add length and a mix of character types before using this password."}:a.length>=12&&c>=3?"ar"===b?{score:3,label:"قوية",help:"تغطية جيدة. هذه مناسبة لحساب مالك طويل الأمد."}:{score:3,label:"Strong",help:"Good coverage. This is appropriate for a long-lived owner account."}:"ar"===b?{score:2,label:"جيدة",help:"أضف طولًا أكبر أو نوعًا إضافيًا من الأحرف للحصول على كلمة مرور أقوى."}:{score:2,label:"Good",help:"Add either more length or one more character type for a stronger password."}}(s,a);function P(){H({email:!1,password:!1,displayName:!1,workspaceName:!1})}async function Q(b){if(b.preventDefault(),D(null),F(null),H(a=>({...a,email:!0,password:!0})),j(q,a)||m(s,a))return void D(d.fixHighlightedFields);B(!0);try{let a=await fetch(`${g}/api/v1/auth/login`,{method:"POST",headers:{"content-type":"application/json"},credentials:"include",body:JSON.stringify({email:q,password:s})});if(!a.ok){let b=await a.json().catch(()=>null);D(function(a){if(!a||"object"!=typeof a)return null;let b=a.message;return Array.isArray(b)?b[0]??null:"string"==typeof b?b:null}(b)??d.signinFailed);return}let b=await a.json();h(b.accessToken),F(d.signinSuccess(b.user.displayName)),o(c)}finally{B(!1)}}async function R(b){if(b.preventDefault(),D(null),F(null),H({email:!0,password:!0,displayName:!0,workspaceName:!0}),k(u,a)||l(w,a)||j(q,a)||n(s,a))return void D(d.fixHighlightedFields);B(!0);try{let a=await fetch(`${g}/api/v1/auth/signup`,{method:"POST",headers:{"content-type":"application/json"},credentials:"include",body:JSON.stringify({email:q,password:s,displayName:u,workspaceName:w.trim()||void 0})});if(!a.ok)return void D(409===a.status?d.existingAccount:d.signupFailed);let b=await a.json();h(b.accessToken),F(d.signupSuccess(b.user.displayName)),P(),o(c)}finally{B(!1)}}return{mode:e,setMode:function(a){p(a),D(null),F(null),z(!1)},copy:d,email:q,setEmail:r,password:s,setPassword:t,displayName:u,setDisplayName:v,workspaceName:w,setWorkspaceName:x,passwordVisible:y,setPasswordVisible:z,touched:G,markTouched:function(a){H(b=>b[a]?b:{...b,[a]:!0})},resetTouched:P,loginEmailError:I,loginPasswordError:J,signupEmailError:K,signupPasswordError:L,signupDisplayNameError:M,signupWorkspaceNameError:N,signupPasswordStrength:O,submitting:A,errorMessage:C,statusMessage:E,submitLogin:Q,submitSignup:R,continueWithGoogle:function(a){D(null),F(null),i(a)}}}],5790)}];
+`;
+    function e({
+      label: a,
+      variant: c = 'topbar',
+      markSrc: d,
+      markAlt: f = '',
+      launcherControlsId: g,
+      launcherButtonLabel: h,
+      launcherExpandLabel: i,
+      onLauncherClick: j,
+    }) {
+      let k = 'topbar' === c,
+        l = (0, b.jsxs)('svg', {
+          viewBox: '0 0 24 24',
+          fill: 'none',
+          'aria-hidden': 'true',
+          children: [
+            (0, b.jsx)('rect', {
+              x: '4',
+              y: '4',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, b.jsx)('rect', {
+              x: '9.75',
+              y: '4',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, b.jsx)('rect', {
+              x: '15.5',
+              y: '4',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, b.jsx)('rect', {
+              x: '4',
+              y: '9.75',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, b.jsx)('rect', {
+              x: '9.75',
+              y: '9.75',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, b.jsx)('rect', {
+              x: '15.5',
+              y: '9.75',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, b.jsx)('rect', {
+              x: '4',
+              y: '15.5',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, b.jsx)('rect', {
+              x: '9.75',
+              y: '15.5',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, b.jsx)('rect', {
+              x: '15.5',
+              y: '15.5',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+          ],
+        }),
+        m = k
+          ? j
+            ? (0, b.jsx)('button', {
+                type: 'button',
+                className: 'elite-shell-topbar-brand-launcher',
+                'data-unstyled-button': !0,
+                'data-state': 'expanded',
+                'data-collapse-label': h,
+                'data-expand-label': i,
+                'aria-label': h,
+                'aria-controls': g,
+                'aria-expanded': 'true',
+                onClick: j,
+                children: l,
+              })
+            : (0, b.jsx)('span', {
+                className: 'elite-shell-topbar-brand-launcher',
+                'aria-hidden': 'true',
+                children: l,
+              })
+          : null;
+      return (0, b.jsxs)('div', {
+        className: k ? 'elite-shell-topbar-brand' : 'elite-rail-brand',
+        'data-variant': c,
+        children: [
+          (0, b.jsx)('span', {
+            className: k
+              ? 'elite-shell-topbar-brand-mark'
+              : 'elite-rail-brand-mark',
+            'aria-hidden': 'true',
+            'data-has-image': d ? 'true' : 'false',
+            children: d
+              ? (0, b.jsx)('img', {
+                  className: 'elite-shell-topbar-brand-mark-image',
+                  src: d,
+                  alt: f,
+                })
+              : null,
+          }),
+          (0, b.jsxs)('div', {
+            className: k
+              ? 'elite-shell-topbar-brand-copy'
+              : 'elite-rail-brand-copy',
+            children: [
+              (0, b.jsx)('span', {
+                className: k
+                  ? 'elite-shell-topbar-brand-name'
+                  : 'elite-rail-brand-name',
+                children: 'Elite Message',
+              }),
+              (0, b.jsx)('span', {
+                className: k
+                  ? 'elite-shell-topbar-brand-subtitle'
+                  : 'elite-rail-brand-subtitle',
+                children: a,
+              }),
+            ],
+          }),
+          m,
+        ],
+      });
+    }
+    (a.s(
+      [
+        'AppShell',
+        0,
+        function ({
+          title: a,
+          subtitle: f,
+          breadcrumbLabel: g,
+          children: h,
+          footer: i,
+          meta: j,
+          nav: k,
+          headerActions: l,
+          secondaryNav: m,
+          surface: n = 'neutral',
+          density: o = 'comfortable',
+          contentWidth: p = 'wide',
+          headerMode: q = 'default',
+          topbarBrandMarkAlt: r,
+          labels: s,
+        }) {
+          let t = k ? `elite-shell-nav-${n}` : void 0,
+            u = 'full' === p ? void 0 : c[p],
+            v = ('customer' === n || 'admin' === n) && !!k && 'hidden' !== q,
+            w = g ?? a,
+            x = !!f.trim(),
+            y = !!k && ('customer' === n || 'admin' === n),
+            z =
+              s?.surfaceLabel ??
+              (function (a) {
+                switch (a) {
+                  case 'customer':
+                    return 'Customer Surface';
+                  case 'admin':
+                    return 'Admin Console';
+                  default:
+                    return 'Elite Message';
+                }
+              })(n),
+            A = s?.breadcrumbAriaLabel ?? 'Breadcrumb',
+            B = s?.breadcrumbHomeLabel ?? 'Dashboard',
+            C = s?.customerTopbarLabel ?? `${z} topbar`,
+            D = s?.mobileNavigationLabel ?? 'Navigation',
+            E = s?.mobileNavigationOpenLabel ?? 'Open',
+            F = s?.collapseSidebarLabel ?? 'Collapse sidebar menu',
+            G = s?.expandSidebarLabel ?? 'Expand sidebar menu',
+            H = s?.brandMarkAlt ?? r ?? 'Elite Message logo';
+          return (0, b.jsxs)('main', {
+            'data-elite-shell': !0,
+            'data-surface': n,
+            'data-density': o,
+            'data-header-mode': q,
+            style: {
+              minHeight: '100vh',
+              background: 'var(--elite-shell-bg)',
+              padding: 'hidden' === q || v ? 0 : 'clamp(18px, 2vw, 26px)',
+              color: 'var(--elite-ink)',
+            },
+            children: [
+              (0, b.jsx)('style', { children: d }),
+              (0, b.jsxs)('div', {
+                className: 'elite-shell-frame',
+                'data-has-nav': k ? 'true' : 'false',
+                children: [
+                  v
+                    ? (0, b.jsxs)('div', {
+                        className: 'elite-shell-topbar',
+                        'aria-label': C,
+                        children: [
+                          (0, b.jsx)(e, {
+                            label: z,
+                            variant: 'topbar',
+                            markSrc:
+                              'customer' === n
+                                ? '/images/EliteMessage_Icon_Only.png'
+                                : void 0,
+                            markAlt: H,
+                            launcherControlsId: t,
+                            launcherButtonLabel: F,
+                            launcherExpandLabel: G,
+                            onLauncherClick: y
+                              ? (a) => {
+                                  let b =
+                                    a.currentTarget.closest(
+                                      '[data-elite-shell]',
+                                    );
+                                  if (!b) return;
+                                  let c =
+                                    'true' ===
+                                    b.getAttribute('data-nav-collapsed');
+                                  !(function (a, b, c) {
+                                    b
+                                      ? a.setAttribute(
+                                          'data-nav-collapsed',
+                                          'true',
+                                        )
+                                      : a.removeAttribute('data-nav-collapsed');
+                                    let d =
+                                      a.querySelector('.elite-shell-frame');
+                                    d &&
+                                      (b
+                                        ? d.setAttribute(
+                                            'data-nav-collapsed',
+                                            'true',
+                                          )
+                                        : d.removeAttribute(
+                                            'data-nav-collapsed',
+                                          ));
+                                    let e = c
+                                      ? a.querySelector(`#${c}`)
+                                      : a.querySelector('.elite-shell-aside');
+                                    e &&
+                                      ((e.hidden = !1),
+                                      e.removeAttribute('aria-hidden'));
+                                    let f = a.querySelector(
+                                      '.elite-shell-mobile-nav',
+                                    );
+                                    f && (f.hidden = b);
+                                    let g = a.querySelector(
+                                      '.elite-shell-topbar-brand-launcher',
+                                    );
+                                    if (g) {
+                                      let a =
+                                          g.dataset.collapseLabel ??
+                                          'Collapse sidebar menu',
+                                        c =
+                                          g.dataset.expandLabel ??
+                                          'Expand sidebar menu';
+                                      ((g.dataset.state = b
+                                        ? 'collapsed'
+                                        : 'expanded'),
+                                        g.setAttribute(
+                                          'aria-expanded',
+                                          b ? 'false' : 'true',
+                                        ),
+                                        g.setAttribute(
+                                          'aria-label',
+                                          b ? c : a,
+                                        ));
+                                    }
+                                  })(b, !c, t);
+                                }
+                              : void 0,
+                          }),
+                          (0, b.jsx)('div', {
+                            className: 'elite-shell-topbar-center',
+                            children: j,
+                          }),
+                          (0, b.jsx)('div', {
+                            className: 'elite-shell-topbar-actions',
+                            children: l,
+                          }),
+                        ],
+                      })
+                    : null,
+                  k
+                    ? (0, b.jsxs)(b.Fragment, {
+                        children: [
+                          (0, b.jsx)('div', {
+                            className: 'elite-shell-mobile-nav',
+                            children: (0, b.jsxs)('details', {
+                              children: [
+                                (0, b.jsxs)('summary', {
+                                  children: [
+                                    (0, b.jsx)('span', { children: D }),
+                                    (0, b.jsx)('span', {
+                                      'aria-hidden': 'true',
+                                      children: E,
+                                    }),
+                                  ],
+                                }),
+                                (0, b.jsx)('div', {
+                                  className: 'elite-shell-mobile-nav-body',
+                                  children: k,
+                                }),
+                              ],
+                            }),
+                          }),
+                          (0, b.jsx)('aside', {
+                            id: t,
+                            className: 'elite-shell-aside',
+                            children: k,
+                          }),
+                        ],
+                      })
+                    : null,
+                  (0, b.jsx)('div', {
+                    className: 'elite-shell-main',
+                    children: (0, b.jsxs)('div', {
+                      className: 'elite-shell-content',
+                      style: { maxWidth: u, margin: k ? void 0 : '0 auto' },
+                      children: [
+                        'hidden' === q
+                          ? null
+                          : (0, b.jsxs)('header', {
+                              className: `elite-page-header${'customer' === n ? ' elite-page-header-customer' : ''}`,
+                              children: [
+                                v
+                                  ? null
+                                  : (0, b.jsxs)('div', {
+                                      className: 'elite-page-header-top',
+                                      children: [
+                                        (0, b.jsxs)('span', {
+                                          className: 'elite-page-brand',
+                                          children: [
+                                            (0, b.jsx)('span', {
+                                              className:
+                                                'elite-page-brand-mark',
+                                              'aria-hidden': 'true',
+                                            }),
+                                            z,
+                                          ],
+                                        }),
+                                        (0, b.jsxs)('div', {
+                                          className: 'elite-toolbar',
+                                          children: [j, l],
+                                        }),
+                                      ],
+                                    }),
+                                'customer' === n
+                                  ? (0, b.jsxs)('div', {
+                                      className:
+                                        'elite-page-header-body elite-page-header-body-customer',
+                                      children: [
+                                        (0, b.jsxs)('div', {
+                                          className: 'elite-page-header-row',
+                                          children: [
+                                            (0, b.jsx)('h1', {
+                                              className: 'elite-page-title',
+                                              children: a,
+                                            }),
+                                            (0, b.jsxs)('nav', {
+                                              className:
+                                                'elite-page-breadcrumbs',
+                                              'aria-label': A,
+                                              children: [
+                                                (0, b.jsx)('a', {
+                                                  href: '/',
+                                                  children: B,
+                                                }),
+                                                (0, b.jsx)('span', {
+                                                  'aria-hidden': 'true',
+                                                  children: '/',
+                                                }),
+                                                (0, b.jsx)('span', {
+                                                  children: w,
+                                                }),
+                                              ],
+                                            }),
+                                          ],
+                                        }),
+                                        x
+                                          ? (0, b.jsx)('p', {
+                                              className: 'elite-page-subtitle',
+                                              children: f,
+                                            })
+                                          : null,
+                                      ],
+                                    })
+                                  : (0, b.jsxs)('div', {
+                                      className: 'elite-page-header-body',
+                                      children: [
+                                        (0, b.jsx)('h1', {
+                                          className: 'elite-page-title',
+                                          children: a,
+                                        }),
+                                        x
+                                          ? (0, b.jsx)('p', {
+                                              className: 'elite-page-subtitle',
+                                              children: f,
+                                            })
+                                          : null,
+                                      ],
+                                    }),
+                              ],
+                            }),
+                        m
+                          ? (0, b.jsx)('div', {
+                              className: 'elite-page-secondary-nav',
+                              children: m,
+                            })
+                          : null,
+                        (0, b.jsx)('div', {
+                          className: 'elite-page-stack',
+                          children: h,
+                        }),
+                        i
+                          ? (0, b.jsx)('footer', {
+                              className: 'elite-page-footer',
+                              children: i,
+                            })
+                          : null,
+                      ],
+                    }),
+                  }),
+                ],
+              }),
+            ],
+          });
+        },
+      ],
+      76989,
+    ),
+      a.i(73127));
+    (a.s(
+      [
+        'ActionButton',
+        0,
+        function ({
+          tone: a = 'primary',
+          size: c = 'default',
+          stretch: d = !1,
+          children: e,
+          ...f
+        }) {
+          return (0, b.jsx)('button', {
+            ...f,
+            'data-elite-button': !0,
+            'data-tone': a,
+            'data-size': c,
+            'data-stretch': d ? 'true' : 'false',
+            children: e,
+          });
+        },
+        'AnchorNav',
+        0,
+        function ({ items: a }) {
+          return (0, b.jsx)('nav', {
+            className: 'elite-anchor-nav',
+            'aria-label': 'Section navigation',
+            children: a.map((a) =>
+              (0, b.jsx)('a', { href: a.href, children: a.label }, a.href),
+            ),
+          });
+        },
+        'CheckboxField',
+        0,
+        function ({ label: a, hint: c, ...d }) {
+          return (0, b.jsxs)('label', {
+            className: 'elite-checkbox-row',
+            children: [
+              (0, b.jsx)('input', { ...d, type: 'checkbox' }),
+              (0, b.jsxs)('span', {
+                children: [
+                  (0, b.jsx)('span', {
+                    className: 'elite-checkbox-label',
+                    children: a,
+                  }),
+                  c
+                    ? (0, b.jsx)('span', {
+                        className: 'elite-field-hint',
+                        children: c,
+                      })
+                    : null,
+                ],
+              }),
+            ],
+          });
+        },
+        'DefinitionGrid',
+        0,
+        function ({ items: a, minItemWidth: c = 170, emphasis: d = 'soft' }) {
+          return (0, b.jsx)('div', {
+            className: 'elite-definition-grid',
+            style: { '--elite-grid-min': `${c}px` },
+            children: a.map((a) =>
+              (0, b.jsxs)(
+                'div',
+                {
+                  className: 'elite-definition-item',
+                  'data-tone': a.tone ?? 'neutral',
+                  'data-emphasis': d,
+                  children: [
+                    (0, b.jsx)('div', {
+                      className: 'elite-definition-label',
+                      children: a.label,
+                    }),
+                    (0, b.jsx)('div', {
+                      className: 'elite-definition-value',
+                      children: a.value,
+                    }),
+                  ],
+                },
+                `${a.label}-${String(a.value)}`,
+              ),
+            ),
+          });
+        },
+        'Field',
+        0,
+        function ({ label: a, hint: c, tone: d = 'neutral', children: e }) {
+          return (0, b.jsxs)('label', {
+            className: 'elite-field',
+            'data-tone': d,
+            children: [
+              (0, b.jsx)('span', {
+                className: 'elite-field-label',
+                children: a,
+              }),
+              e,
+              c
+                ? (0, b.jsx)('span', {
+                    className: 'elite-field-hint',
+                    children: c,
+                  })
+                : null,
+            ],
+          });
+        },
+        'MetricCard',
+        0,
+        function ({
+          label: a,
+          value: c,
+          hint: d,
+          tone: e = 'neutral',
+          emphasis: f = 'soft',
+        }) {
+          return (0, b.jsxs)('div', {
+            className: 'elite-metric-card',
+            'data-tone': e,
+            'data-emphasis': f,
+            children: [
+              (0, b.jsx)('div', {
+                className: 'elite-metric-label',
+                children: a,
+              }),
+              (0, b.jsx)('div', {
+                className: 'elite-metric-value',
+                children: c,
+              }),
+              d
+                ? (0, b.jsx)('div', {
+                    className: 'elite-metric-hint',
+                    children: d,
+                  })
+                : null,
+            ],
+          });
+        },
+        'MetricGrid',
+        0,
+        function ({ children: a, minItemWidth: c = 170 }) {
+          return (0, b.jsx)('div', {
+            className: 'elite-metric-grid',
+            style: { '--elite-grid-min': `${c}px` },
+            children: a,
+          });
+        },
+        'NoticeBanner',
+        0,
+        function ({
+          title: a,
+          tone: c = 'info',
+          emphasis: d = 'soft',
+          surface: e,
+          children: f,
+        }) {
+          return (0, b.jsxs)('div', {
+            className: 'elite-notice',
+            'data-tone': c,
+            'data-emphasis': d,
+            'data-surface': e,
+            children: [
+              (0, b.jsx)('div', {
+                className: 'elite-notice-title',
+                children: a,
+              }),
+              (0, b.jsx)('div', { children: f }),
+            ],
+          });
+        },
+        'SectionGrid',
+        0,
+        function ({ children: a, minItemWidth: c = 280 }) {
+          return (0, b.jsx)('div', {
+            className: 'elite-section-grid',
+            style: { '--elite-grid-min': `${c}px` },
+            children: a,
+          });
+        },
+        'SelectInput',
+        0,
+        function (a) {
+          return (0, b.jsx)('select', { ...a, 'data-elite-control': !0 });
+        },
+        'StatusBadge',
+        0,
+        function ({ children: a, tone: c = 'neutral' }) {
+          return (0, b.jsx)('span', {
+            className: 'elite-status-badge',
+            'data-tone': c,
+            children: a,
+          });
+        },
+        'TextAreaInput',
+        0,
+        function (a) {
+          return (0, b.jsx)('textarea', { ...a, 'data-elite-control': !0 });
+        },
+        'TextInput',
+        0,
+        function (a) {
+          return (0, b.jsx)('input', { ...a, 'data-elite-control': !0 });
+        },
+      ],
+      34910,
+    ),
+      a.s(
+        [
+          'InfoCard',
+          0,
+          function ({
+            eyebrow: a,
+            title: c,
+            subtitle: d,
+            action: e,
+            children: f,
+            className: g,
+            tone: h = 'neutral',
+            density: i = 'comfortable',
+            surface: j,
+            id: k,
+            ...l
+          }) {
+            return (0, b.jsxs)('section', {
+              ...l,
+              id: k,
+              'data-elite-card': !0,
+              'data-tone': h,
+              'data-density': i,
+              'data-surface': j,
+              className: g,
+              style: l.style,
+              children: [
+                (0, b.jsxs)('div', {
+                  className: 'elite-card-header',
+                  children: [
+                    (0, b.jsxs)('div', {
+                      className: 'elite-card-copy',
+                      children: [
+                        a
+                          ? (0, b.jsx)('p', {
+                              className: 'elite-card-eyebrow',
+                              children: a,
+                            })
+                          : null,
+                        (0, b.jsx)('h2', {
+                          className: 'elite-card-title',
+                          children: c,
+                        }),
+                        d
+                          ? (0, b.jsx)('p', {
+                              className: 'elite-card-subtitle',
+                              children: d,
+                            })
+                          : null,
+                      ],
+                    }),
+                    e
+                      ? (0, b.jsx)('div', {
+                          className: 'elite-card-action',
+                          children: e,
+                        })
+                      : null,
+                  ],
+                }),
+                (0, b.jsx)('div', {
+                  className: 'elite-card-body',
+                  children: f,
+                }),
+              ],
+            });
+          },
+        ],
+        10246,
+      ),
+      a.i(5221),
+      a.i(10674),
+      a.s([], 56120));
+    var f = a.i(26670);
+    let g = 'https://api.levan-pms.com';
+    function h(a) {}
+    function i(a) {
+      window.location.assign(
+        `${g}/api/v1/auth/google/authorize?mode=${encodeURIComponent(a)}`,
+      );
+    }
+    function j(a, b = 'en') {
+      let c = a.trim();
+      return c
+        ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(c)
+          ? null
+          : 'ar' === b
+            ? 'استخدم عنوان بريد إلكتروني صالحًا مثل name@company.com.'
+            : 'Use a valid email address like name@company.com.'
+        : 'ar' === b
+          ? 'أدخل عنوان البريد الإلكتروني لهذا الحساب.'
+          : 'Enter the email address for this account.';
+    }
+    function k(a, b = 'en') {
+      let c = a.trim();
+      return c
+        ? c.length < 2
+          ? 'ar' === b
+            ? 'يجب أن يتكون الاسم الظاهر من حرفين على الأقل.'
+            : 'Display name must be at least 2 characters.'
+          : null
+        : 'ar' === b
+          ? 'أدخل الاسم الذي يجب أن يظهر في مساحة العمل.'
+          : 'Enter the name that should appear across the workspace.';
+    }
+    function l(a, b = 'en') {
+      let c = a.trim();
+      return c && c.length < 2
+        ? 'ar' === b
+          ? 'يجب أن يتكون اسم مساحة العمل من حرفين على الأقل عند إدخاله.'
+          : 'Workspace name must be at least 2 characters when provided.'
+        : null;
+    }
+    function m(a, b = 'en') {
+      return a
+        ? null
+        : 'ar' === b
+          ? 'أدخل كلمة المرور.'
+          : 'Enter your password.';
+    }
+    function n(a, b = 'en') {
+      return !a || a.length < 8
+        ? 'ar' === b
+          ? 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.'
+          : 'Password must be at least 8 characters.'
+        : null;
+    }
+    function o(a) {
+      window.location.assign(a);
+    }
+    (a.s(
+      [
+        'apiBaseUrl',
+        0,
+        g,
+        'clearStoredToken',
+        0,
+        function () {},
+        'readStoredToken',
+        0,
+        function () {
+          return null;
+        },
+        'writeStoredToken',
+        0,
+        h,
+      ],
+      97263,
+    ),
+      a.s(
+        [
+          'beginGoogleAuthorization',
+          0,
+          i,
+          'parseGoogleAuthCallbackHash',
+          0,
+          function (a) {
+            let b = new URLSearchParams(a.startsWith('#') ? a.slice(1) : a),
+              c = 'signup' === b.get('mode') ? 'signup' : 'login',
+              d = b.get('access_token');
+            return d
+              ? { kind: 'success', mode: c, accessToken: d }
+              : {
+                  kind: 'error',
+                  mode: c,
+                  errorCode: b.get('error_code') ?? 'google_callback_invalid',
+                  errorMessage:
+                    b.get('error_message') ??
+                    'Google authentication could not be completed.',
+                };
+          },
+        ],
+        19827,
+      ),
+      a.s(
+        [
+          'redirectToCustomerRoute',
+          0,
+          o,
+          'useCustomerAuthForm',
+          0,
+          function ({
+            locale: a,
+            initialMode: b = 'login',
+            redirectTo: c = '/dashboard',
+          }) {
+            let d =
+                'ar' === a
+                  ? {
+                      alreadyHaveAccess: 'لديك حساب بالفعل؟',
+                      continueWithGoogle: 'تابع باستخدام Google',
+                      createAccount: 'إنشاء الحساب',
+                      creatingAccount: 'جارٍ إنشاء الحساب...',
+                      displayName: 'الاسم الظاهر',
+                      displayNameHint:
+                        'يظهر هذا الاسم في لوحة التحكم وشاشات الدعم.',
+                      emailAddress: 'البريد الإلكتروني',
+                      existingAccount:
+                        'يوجد حساب بهذا البريد الإلكتروني بالفعل.',
+                      fixHighlightedFields:
+                        'أصلح الحقول المميزة ثم حاول مرة أخرى.',
+                      needNewWorkspace: 'ليس لديك حساب؟',
+                      password: 'كلمة المرور',
+                      passwordHint:
+                        'استخدم 8 أحرف على الأقل. كلما زاد الطول وتنوعت الأحرف كانت أقوى.',
+                      passwordHide: 'إخفاء',
+                      passwordHideAria: 'إخفاء كلمة المرور',
+                      passwordShow: 'إظهار',
+                      passwordShowAria: 'إظهار كلمة المرور',
+                      setCustomWorkspaceName:
+                        'تعيين اسم مخصص لمساحة العمل (اختياري)',
+                      signin: 'تسجيل الدخول',
+                      signinFailed: 'فشل تسجيل الدخول',
+                      signinGoogle: 'تسجيل الدخول عبر Google',
+                      signinSubmitting: 'جارٍ تسجيل الدخول...',
+                      signinSuccess: (a) => `تم تسجيل الدخول باسم ${a}.`,
+                      signup: 'إنشاء حساب',
+                      signupFailed: 'فشل التسجيل',
+                      signupSuccess: (a) => `تم إنشاء الحساب للمستخدم ${a}.`,
+                      signInAction: 'تسجيل الدخول',
+                      signInInstead: 'سجّل الدخول بدلًا من ذلك',
+                      workspaceHint:
+                        'اترك هذا الحقل فارغًا لإنشاء اسم مساحة العمل من الاسم الظاهر.',
+                      workspaceName: 'اسم مساحة العمل',
+                    }
+                  : {
+                      alreadyHaveAccess: 'Already have access?',
+                      continueWithGoogle: 'Continue with Google',
+                      createAccount: 'Create account',
+                      creatingAccount: 'Creating account...',
+                      displayName: 'Display name',
+                      displayNameHint:
+                        'This name appears in the dashboard and support views.',
+                      emailAddress: 'Email address',
+                      existingAccount:
+                        'An account with this email already exists.',
+                      fixHighlightedFields:
+                        'Fix the highlighted fields and try again.',
+                      needNewWorkspace: 'Need a new workspace?',
+                      password: 'Password',
+                      passwordHint:
+                        'Use at least 8 characters. Longer passwords with mixed characters are stronger.',
+                      passwordHide: 'Hide',
+                      passwordHideAria: 'Hide password',
+                      passwordShow: 'Show',
+                      passwordShowAria: 'Show password',
+                      setCustomWorkspaceName:
+                        'Set a custom workspace name (optional)',
+                      signin: 'Sign in',
+                      signinFailed: 'Signin failed',
+                      signinGoogle: 'Sign in with Google',
+                      signinSubmitting: 'Signing in...',
+                      signinSuccess: (a) => `Signed in as ${a}.`,
+                      signup: 'Sign up',
+                      signupFailed: 'Signup failed',
+                      signupSuccess: (a) => `Created account for ${a}.`,
+                      signInAction: 'Sign in',
+                      signInInstead: 'Sign in instead',
+                      workspaceHint:
+                        'Leave this empty to generate the workspace name from your display name.',
+                      workspaceName: 'Workspace name',
+                    },
+              [e, p] = (0, f.useState)(b),
+              [q, r] = (0, f.useState)(''),
+              [s, t] = (0, f.useState)(''),
+              [u, v] = (0, f.useState)(''),
+              [w, x] = (0, f.useState)(''),
+              [y, z] = (0, f.useState)(!1),
+              [A, B] = (0, f.useState)(!1),
+              [C, D] = (0, f.useState)(null),
+              [E, F] = (0, f.useState)(null),
+              [G, H] = (0, f.useState)({
+                email: !1,
+                password: !1,
+                displayName: !1,
+                workspaceName: !1,
+              }),
+              I = G.email || q.length > 0 ? j(q, a) : null,
+              J = G.password || s.length > 0 ? m(s, a) : null,
+              K = G.email || q.length > 0 ? j(q, a) : null,
+              L = G.password || s.length > 0 ? n(s, a) : null,
+              M = G.displayName || u.length > 0 ? k(u, a) : null,
+              N = G.workspaceName || w.length > 0 ? l(w, a) : null,
+              O = (function (a, b = 'en') {
+                if (!a)
+                  return 'ar' === b
+                    ? {
+                        score: 0,
+                        label: 'قوة كلمة المرور',
+                        help: 'استخدم 8 أحرف على الأقل. ويكون المزيج من الحروف والأرقام والرموز أقوى.',
+                      }
+                    : {
+                        score: 0,
+                        label: 'Password strength',
+                        help: 'Use at least 8 characters. A mix of letters, numbers, and symbols is stronger.',
+                      };
+                let c = [
+                  /[a-z]/.test(a),
+                  /[A-Z]/.test(a),
+                  /\d/.test(a),
+                  /[^A-Za-z0-9]/.test(a),
+                ].filter(Boolean).length;
+                return a.length < 8 || c <= 1
+                  ? 'ar' === b
+                    ? {
+                        score: 1,
+                        label: 'ضعيفة',
+                        help: 'أضف طولاً أكبر ومزيجًا من أنواع الأحرف قبل استخدام كلمة المرور هذه.',
+                      }
+                    : {
+                        score: 1,
+                        label: 'Weak',
+                        help: 'Add length and a mix of character types before using this password.',
+                      }
+                  : a.length >= 12 && c >= 3
+                    ? 'ar' === b
+                      ? {
+                          score: 3,
+                          label: 'قوية',
+                          help: 'تغطية جيدة. هذه مناسبة لحساب مالك طويل الأمد.',
+                        }
+                      : {
+                          score: 3,
+                          label: 'Strong',
+                          help: 'Good coverage. This is appropriate for a long-lived owner account.',
+                        }
+                    : 'ar' === b
+                      ? {
+                          score: 2,
+                          label: 'جيدة',
+                          help: 'أضف طولًا أكبر أو نوعًا إضافيًا من الأحرف للحصول على كلمة مرور أقوى.',
+                        }
+                      : {
+                          score: 2,
+                          label: 'Good',
+                          help: 'Add either more length or one more character type for a stronger password.',
+                        };
+              })(s, a);
+            function P() {
+              H({
+                email: !1,
+                password: !1,
+                displayName: !1,
+                workspaceName: !1,
+              });
+            }
+            async function Q(b) {
+              if (
+                (b.preventDefault(),
+                D(null),
+                F(null),
+                H((a) => ({ ...a, email: !0, password: !0 })),
+                j(q, a) || m(s, a))
+              )
+                return void D(d.fixHighlightedFields);
+              B(!0);
+              try {
+                let a = await fetch(`${g}/api/v1/auth/login`, {
+                  method: 'POST',
+                  headers: { 'content-type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ email: q, password: s }),
+                });
+                if (!a.ok) {
+                  let b = await a.json().catch(() => null);
+                  D(
+                    (function (a) {
+                      if (!a || 'object' != typeof a) return null;
+                      let b = a.message;
+                      return Array.isArray(b)
+                        ? (b[0] ?? null)
+                        : 'string' == typeof b
+                          ? b
+                          : null;
+                    })(b) ?? d.signinFailed,
+                  );
+                  return;
+                }
+                let b = await a.json();
+                (h(b.accessToken),
+                  F(d.signinSuccess(b.user.displayName)),
+                  o(c));
+              } finally {
+                B(!1);
+              }
+            }
+            async function R(b) {
+              if (
+                (b.preventDefault(),
+                D(null),
+                F(null),
+                H({
+                  email: !0,
+                  password: !0,
+                  displayName: !0,
+                  workspaceName: !0,
+                }),
+                k(u, a) || l(w, a) || j(q, a) || n(s, a))
+              )
+                return void D(d.fixHighlightedFields);
+              B(!0);
+              try {
+                let a = await fetch(`${g}/api/v1/auth/signup`, {
+                  method: 'POST',
+                  headers: { 'content-type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({
+                    email: q,
+                    password: s,
+                    displayName: u,
+                    workspaceName: w.trim() || void 0,
+                  }),
+                });
+                if (!a.ok)
+                  return void D(
+                    409 === a.status ? d.existingAccount : d.signupFailed,
+                  );
+                let b = await a.json();
+                (h(b.accessToken),
+                  F(d.signupSuccess(b.user.displayName)),
+                  P(),
+                  o(c));
+              } finally {
+                B(!1);
+              }
+            }
+            return {
+              mode: e,
+              setMode: function (a) {
+                (p(a), D(null), F(null), z(!1));
+              },
+              copy: d,
+              email: q,
+              setEmail: r,
+              password: s,
+              setPassword: t,
+              displayName: u,
+              setDisplayName: v,
+              workspaceName: w,
+              setWorkspaceName: x,
+              passwordVisible: y,
+              setPasswordVisible: z,
+              touched: G,
+              markTouched: function (a) {
+                H((b) => (b[a] ? b : { ...b, [a]: !0 }));
+              },
+              resetTouched: P,
+              loginEmailError: I,
+              loginPasswordError: J,
+              signupEmailError: K,
+              signupPasswordError: L,
+              signupDisplayNameError: M,
+              signupWorkspaceNameError: N,
+              signupPasswordStrength: O,
+              submitting: A,
+              errorMessage: C,
+              statusMessage: E,
+              submitLogin: Q,
+              submitSignup: R,
+              continueWithGoogle: function (a) {
+                (D(null), F(null), i(a));
+              },
+            };
+          },
+        ],
+        5790,
+      ));
+  },
+];
 
 //# sourceMappingURL=_0y2f9tq._.js.map

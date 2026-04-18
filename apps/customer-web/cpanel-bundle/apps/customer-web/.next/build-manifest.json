@@ -3,13 +3,11 @@
     "/_app": []
   },
   "devFiles": [],
-  "polyfillFiles": [
-    "static/chunks/03~yq9q893hmn.js"
-  ],
+  "polyfillFiles": ["static/chunks/03~yq9q893hmn.js"],
   "lowPriorityFiles": [
-    "static/NypkEQsu2PH1gFAnzVdct/_buildManifest.js",
-    "static/NypkEQsu2PH1gFAnzVdct/_ssgManifest.js",
-    "static/NypkEQsu2PH1gFAnzVdct/_clientMiddlewareManifest.js"
+    "static/NNV5ZWUV9ahvStdYMzsze/_buildManifest.js",
+    "static/NNV5ZWUV9ahvStdYMzsze/_ssgManifest.js",
+    "static/NNV5ZWUV9ahvStdYMzsze/_clientMiddlewareManifest.js"
   ],
   "rootMainFiles": [
     "static/chunks/0rqpndaxx_3dv.js",

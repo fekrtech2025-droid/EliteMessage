@@ -1,8 +1,13 @@
 'use client';
 
 export const storageKey = 'elite-message.admin.access-token';
-export const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3002';
+export const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+if (!apiBaseUrl) {
+  throw new Error(
+    'NEXT_PUBLIC_API_BASE_URL is required for admin-web. Build the app with the production API URL.',
+  );
+}
 
 export function readStoredToken() {
   return typeof window === 'undefined'

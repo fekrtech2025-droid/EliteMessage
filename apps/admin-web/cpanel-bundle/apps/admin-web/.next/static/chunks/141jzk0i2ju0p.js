@@ -1,0 +1,2272 @@
+(globalThis.TURBOPACK || (globalThis.TURBOPACK = [])).push([
+  'object' == typeof document ? document.currentScript : void 0,
+  25762,
+  (e) => {
+    'use strict';
+    var t = e.i(52759),
+      r = e.i(28223);
+    e.s([
+      'AuthHelpDialog',
+      0,
+      function ({
+        open: e,
+        title: n,
+        intro: i,
+        sections: o,
+        footer: a,
+        kickerLabel: l = 'Help',
+        closeLabel: s = 'Close help',
+        onClose: u,
+      }) {
+        if (!e) return null;
+        let c = (0, t.jsx)('div', {
+          className: 'elite-help-dialog-backdrop',
+          onClick: u,
+          children: (0, t.jsxs)('div', {
+            className: 'elite-help-dialog',
+            role: 'dialog',
+            'aria-modal': 'true',
+            'aria-label': n,
+            onClick: (e) => {
+              e.stopPropagation();
+            },
+            children: [
+              (0, t.jsxs)('div', {
+                className: 'elite-help-dialog-header',
+                children: [
+                  (0, t.jsxs)('div', {
+                    className: 'elite-help-dialog-copy',
+                    children: [
+                      (0, t.jsx)('div', {
+                        className: 'elite-auth-kicker',
+                        children: l,
+                      }),
+                      (0, t.jsx)('h2', {
+                        className: 'elite-help-dialog-title',
+                        children: n,
+                      }),
+                      (0, t.jsx)('div', {
+                        className: 'elite-help-dialog-intro',
+                        children: i,
+                      }),
+                    ],
+                  }),
+                  (0, t.jsx)('button', {
+                    type: 'button',
+                    'data-unstyled-button': !0,
+                    className: 'elite-help-dialog-close',
+                    'aria-label': s,
+                    onClick: u,
+                    children: (0, t.jsx)('span', {
+                      'aria-hidden': 'true',
+                      children: '×',
+                    }),
+                  }),
+                ],
+              }),
+              (0, t.jsxs)('div', {
+                className: 'elite-help-dialog-body',
+                children: [
+                  o.map((e) =>
+                    (0, t.jsxs)(
+                      'section',
+                      {
+                        className: 'elite-help-dialog-section',
+                        children: [
+                          (0, t.jsx)('h3', { children: e.title }),
+                          e.description
+                            ? (0, t.jsx)('p', { children: e.description })
+                            : null,
+                          e.items?.length
+                            ? (0, t.jsx)('ul', {
+                                className: 'elite-help-dialog-list',
+                                children: e.items.map((e) =>
+                                  (0, t.jsx)('li', { children: e }, e),
+                                ),
+                              })
+                            : null,
+                        ],
+                      },
+                      e.title,
+                    ),
+                  ),
+                  a
+                    ? (0, t.jsx)('div', {
+                        className: 'elite-help-dialog-footer',
+                        children: a,
+                      })
+                    : null,
+                ],
+              }),
+            ],
+          }),
+        });
+        return 'u' < typeof document
+          ? c
+          : (0, r.createPortal)(c, document.body);
+      },
+      'AuthSegmentedControl',
+      0,
+      function ({ options: e, ariaLabel: r = 'Authentication mode' }) {
+        return (0, t.jsx)('div', {
+          className: 'elite-auth-segmented',
+          role: 'tablist',
+          'aria-label': r,
+          children: e.map((e) =>
+            (0, t.jsx)(
+              'button',
+              {
+                type: 'button',
+                role: 'tab',
+                'data-unstyled-button': !0,
+                className: 'elite-auth-segment',
+                'data-active': e.active ? 'true' : 'false',
+                'aria-selected': e.active,
+                onClick: e.onSelect,
+                children: e.label,
+              },
+              e.id,
+            ),
+          ),
+        });
+      },
+      'AuthSplitLayout',
+      0,
+      function ({
+        className: e,
+        surface: r = 'neutral',
+        variant: n = 'default',
+        heroEyebrow: i,
+        heroTitle: o,
+        heroDescription: a,
+        heroMediaOnly: l = !1,
+        heroMedia: s,
+        heroHighlights: u,
+        heroChecklist: c,
+        heroFootnote: d,
+        panelEyebrow: h,
+        panelTitle: f,
+        panelSubtitle: g,
+        panelAction: m,
+        children: p,
+      }) {
+        return (0, t.jsxs)('div', {
+          className: e ? `elite-auth-layout ${e}` : 'elite-auth-layout',
+          'data-surface': r,
+          'data-variant': n,
+          children: [
+            (0, t.jsxs)('section', {
+              className: 'elite-auth-hero',
+              'data-media-only': l ? 'true' : 'false',
+              children: [
+                i
+                  ? (0, t.jsx)('div', {
+                      className: 'elite-auth-kicker',
+                      children: i,
+                    })
+                  : null,
+                o
+                  ? (0, t.jsx)('h2', {
+                      className: 'elite-auth-hero-title',
+                      children: o,
+                    })
+                  : null,
+                a
+                  ? (0, t.jsx)('div', {
+                      className: 'elite-auth-hero-copy',
+                      children: a,
+                    })
+                  : null,
+                u?.length
+                  ? (0, t.jsx)('div', {
+                      className: 'elite-auth-highlight-grid',
+                      children: u.map((e) =>
+                        (0, t.jsxs)(
+                          'article',
+                          {
+                            className: 'elite-auth-highlight',
+                            'data-tone': e.tone ?? 'neutral',
+                            children: [
+                              (0, t.jsx)('div', {
+                                className: 'elite-auth-highlight-label',
+                                children: e.label,
+                              }),
+                              (0, t.jsx)('div', {
+                                className: 'elite-auth-highlight-value',
+                                children: e.value,
+                              }),
+                              e.detail
+                                ? (0, t.jsx)('div', {
+                                    className: 'elite-auth-highlight-detail',
+                                    children: e.detail,
+                                  })
+                                : null,
+                            ],
+                          },
+                          e.label,
+                        ),
+                      ),
+                    })
+                  : null,
+                c
+                  ? (0, t.jsx)('div', {
+                      className: 'elite-auth-checklist',
+                      children: c,
+                    })
+                  : null,
+                s
+                  ? (0, t.jsx)('div', {
+                      className: 'elite-auth-hero-media',
+                      children: s,
+                    })
+                  : null,
+                d
+                  ? (0, t.jsx)('div', {
+                      className: 'elite-auth-footnote',
+                      children: d,
+                    })
+                  : null,
+              ],
+            }),
+            (0, t.jsxs)('section', {
+              className: 'elite-auth-panel',
+              children: [
+                (0, t.jsxs)('div', {
+                  className: 'elite-auth-panel-top',
+                  children: [
+                    (0, t.jsxs)('div', {
+                      className: 'elite-auth-panel-copy',
+                      children: [
+                        (0, t.jsx)('div', {
+                          className: 'elite-auth-kicker',
+                          children: h,
+                        }),
+                        (0, t.jsx)('h2', {
+                          className: 'elite-auth-panel-title',
+                          children: f,
+                        }),
+                        g
+                          ? (0, t.jsx)('div', {
+                              className: 'elite-auth-panel-subtitle',
+                              children: g,
+                            })
+                          : null,
+                      ],
+                    }),
+                    m
+                      ? (0, t.jsx)('div', {
+                          className: 'elite-auth-panel-action',
+                          children: m,
+                        })
+                      : null,
+                  ],
+                }),
+                (0, t.jsx)('div', {
+                  className: 'elite-auth-panel-body',
+                  children: p,
+                }),
+              ],
+            }),
+          ],
+        });
+      },
+      'HelpIconButton',
+      0,
+      function ({ label: e, onClick: r }) {
+        return (0, t.jsx)('button', {
+          type: 'button',
+          'data-unstyled-button': !0,
+          className: 'elite-help-icon-button',
+          'aria-label': e,
+          onClick: r,
+          children: (0, t.jsx)('span', {
+            'aria-hidden': 'true',
+            children: '?',
+          }),
+        });
+      },
+      'PasswordInput',
+      0,
+      function ({
+        showLabel: e = 'Show',
+        hideLabel: r = 'Hide',
+        showAriaLabel: n = 'Show password',
+        hideAriaLabel: i = 'Hide password',
+        revealed: o = !1,
+        onToggleVisibility: a,
+        ...l
+      }) {
+        return (0, t.jsxs)('div', {
+          className: 'elite-control-shell elite-control-shell-password',
+          children: [
+            (0, t.jsx)('input', {
+              ...l,
+              type: o ? 'text' : 'password',
+              'data-elite-control': !0,
+            }),
+            (0, t.jsx)('button', {
+              type: 'button',
+              'data-unstyled-button': !0,
+              className: 'elite-control-toggle',
+              'aria-label': o ? i : n,
+              onClick: a,
+              children: o ? r : e,
+            }),
+          ],
+        });
+      },
+      'PasswordStrengthMeter',
+      0,
+      function ({ score: e, label: r, help: n }) {
+        return (0, t.jsxs)('div', {
+          className: 'elite-password-strength',
+          'data-score': e,
+          children: [
+            (0, t.jsx)('div', {
+              className: 'elite-password-strength-bars',
+              'aria-hidden': 'true',
+              children: [0, 1, 2].map((r) =>
+                (0, t.jsx)(
+                  'span',
+                  {
+                    className: 'elite-password-strength-bar',
+                    'data-active': e > r ? 'true' : 'false',
+                  },
+                  r,
+                ),
+              ),
+            }),
+            (0, t.jsxs)('div', {
+              className: 'elite-password-strength-copy',
+              children: [
+                (0, t.jsx)('strong', { children: r }),
+                n ? (0, t.jsx)('span', { children: n }) : null,
+              ],
+            }),
+          ],
+        });
+      },
+    ]);
+  },
+  30689,
+  (e, t, r) => {
+    t.exports = function () {
+      return (
+        'function' == typeof Promise &&
+        Promise.prototype &&
+        Promise.prototype.then
+      );
+    };
+  },
+  28151,
+  (e, t, r) => {
+    let n,
+      i = [
+        0, 26, 44, 70, 100, 134, 172, 196, 242, 292, 346, 404, 466, 532, 581,
+        655, 733, 815, 901, 991, 1085, 1156, 1258, 1364, 1474, 1588, 1706, 1828,
+        1921, 2051, 2185, 2323, 2465, 2611, 2761, 2876, 3034, 3196, 3362, 3532,
+        3706,
+      ];
+    ((r.getSymbolSize = function (e) {
+      if (!e) throw Error('"version" cannot be null or undefined');
+      if (e < 1 || e > 40)
+        throw Error('"version" should be in range from 1 to 40');
+      return 4 * e + 17;
+    }),
+      (r.getSymbolTotalCodewords = function (e) {
+        return i[e];
+      }),
+      (r.getBCHDigit = function (e) {
+        let t = 0;
+        for (; 0 !== e; ) (t++, (e >>>= 1));
+        return t;
+      }),
+      (r.setToSJISFunction = function (e) {
+        if ('function' != typeof e)
+          throw Error('"toSJISFunc" is not a valid function.');
+        n = e;
+      }),
+      (r.isKanjiModeEnabled = function () {
+        return void 0 !== n;
+      }),
+      (r.toSJIS = function (e) {
+        return n(e);
+      }));
+  },
+  31351,
+  (e, t, r) => {
+    ((r.L = { bit: 1 }),
+      (r.M = { bit: 0 }),
+      (r.Q = { bit: 3 }),
+      (r.H = { bit: 2 }),
+      (r.isValid = function (e) {
+        return e && void 0 !== e.bit && e.bit >= 0 && e.bit < 4;
+      }),
+      (r.from = function (e, t) {
+        if (r.isValid(e)) return e;
+        try {
+          if ('string' != typeof e) throw Error('Param is not a string');
+          switch (e.toLowerCase()) {
+            case 'l':
+            case 'low':
+              return r.L;
+            case 'm':
+            case 'medium':
+              return r.M;
+            case 'q':
+            case 'quartile':
+              return r.Q;
+            case 'h':
+            case 'high':
+              return r.H;
+            default:
+              throw Error('Unknown EC Level: ' + e);
+          }
+        } catch (e) {
+          return t;
+        }
+      }));
+  },
+  99931,
+  (e, t, r) => {
+    function n() {
+      ((this.buffer = []), (this.length = 0));
+    }
+    ((n.prototype = {
+      get: function (e) {
+        let t = Math.floor(e / 8);
+        return ((this.buffer[t] >>> (7 - (e % 8))) & 1) == 1;
+      },
+      put: function (e, t) {
+        for (let r = 0; r < t; r++) this.putBit(((e >>> (t - r - 1)) & 1) == 1);
+      },
+      getLengthInBits: function () {
+        return this.length;
+      },
+      putBit: function (e) {
+        let t = Math.floor(this.length / 8);
+        (this.buffer.length <= t && this.buffer.push(0),
+          e && (this.buffer[t] |= 128 >>> (this.length % 8)),
+          this.length++);
+      },
+    }),
+      (t.exports = n));
+  },
+  62091,
+  (e, t, r) => {
+    function n(e) {
+      if (!e || e < 1)
+        throw Error('BitMatrix size must be defined and greater than 0');
+      ((this.size = e),
+        (this.data = new Uint8Array(e * e)),
+        (this.reservedBit = new Uint8Array(e * e)));
+    }
+    ((n.prototype.set = function (e, t, r, n) {
+      let i = e * this.size + t;
+      ((this.data[i] = r), n && (this.reservedBit[i] = !0));
+    }),
+      (n.prototype.get = function (e, t) {
+        return this.data[e * this.size + t];
+      }),
+      (n.prototype.xor = function (e, t, r) {
+        this.data[e * this.size + t] ^= r;
+      }),
+      (n.prototype.isReserved = function (e, t) {
+        return this.reservedBit[e * this.size + t];
+      }),
+      (t.exports = n));
+  },
+  71112,
+  (e, t, r) => {
+    let n = e.r(28151).getSymbolSize;
+    ((r.getRowColCoords = function (e) {
+      if (1 === e) return [];
+      let t = Math.floor(e / 7) + 2,
+        r = n(e),
+        i = 145 === r ? 26 : 2 * Math.ceil((r - 13) / (2 * t - 2)),
+        o = [r - 7];
+      for (let e = 1; e < t - 1; e++) o[e] = o[e - 1] - i;
+      return (o.push(6), o.reverse());
+    }),
+      (r.getPositions = function (e) {
+        let t = [],
+          n = r.getRowColCoords(e),
+          i = n.length;
+        for (let e = 0; e < i; e++)
+          for (let r = 0; r < i; r++)
+            (0 !== e || 0 !== r) &&
+              (0 !== e || r !== i - 1) &&
+              (e !== i - 1 || 0 !== r) &&
+              t.push([n[e], n[r]]);
+        return t;
+      }));
+  },
+  53658,
+  (e, t, r) => {
+    let n = e.r(28151).getSymbolSize;
+    r.getPositions = function (e) {
+      let t = n(e);
+      return [
+        [0, 0],
+        [t - 7, 0],
+        [0, t - 7],
+      ];
+    };
+  },
+  46711,
+  (e, t, r) => {
+    r.Patterns = {
+      PATTERN000: 0,
+      PATTERN001: 1,
+      PATTERN010: 2,
+      PATTERN011: 3,
+      PATTERN100: 4,
+      PATTERN101: 5,
+      PATTERN110: 6,
+      PATTERN111: 7,
+    };
+    ((r.isValid = function (e) {
+      return null != e && '' !== e && !isNaN(e) && e >= 0 && e <= 7;
+    }),
+      (r.from = function (e) {
+        return r.isValid(e) ? parseInt(e, 10) : void 0;
+      }),
+      (r.getPenaltyN1 = function (e) {
+        let t = e.size,
+          r = 0,
+          n = 0,
+          i = 0,
+          o = null,
+          a = null;
+        for (let l = 0; l < t; l++) {
+          ((n = i = 0), (o = a = null));
+          for (let s = 0; s < t; s++) {
+            let t = e.get(l, s);
+            (t === o ? n++ : (n >= 5 && (r += 3 + (n - 5)), (o = t), (n = 1)),
+              (t = e.get(s, l)) === a
+                ? i++
+                : (i >= 5 && (r += 3 + (i - 5)), (a = t), (i = 1)));
+          }
+          (n >= 5 && (r += 3 + (n - 5)), i >= 5 && (r += 3 + (i - 5)));
+        }
+        return r;
+      }),
+      (r.getPenaltyN2 = function (e) {
+        let t = e.size,
+          r = 0;
+        for (let n = 0; n < t - 1; n++)
+          for (let i = 0; i < t - 1; i++) {
+            let t =
+              e.get(n, i) +
+              e.get(n, i + 1) +
+              e.get(n + 1, i) +
+              e.get(n + 1, i + 1);
+            (4 === t || 0 === t) && r++;
+          }
+        return 3 * r;
+      }),
+      (r.getPenaltyN3 = function (e) {
+        let t = e.size,
+          r = 0,
+          n = 0,
+          i = 0;
+        for (let o = 0; o < t; o++) {
+          n = i = 0;
+          for (let a = 0; a < t; a++)
+            ((n = ((n << 1) & 2047) | e.get(o, a)),
+              a >= 10 && (1488 === n || 93 === n) && r++,
+              (i = ((i << 1) & 2047) | e.get(a, o)),
+              a >= 10 && (1488 === i || 93 === i) && r++);
+        }
+        return 40 * r;
+      }),
+      (r.getPenaltyN4 = function (e) {
+        let t = 0,
+          r = e.data.length;
+        for (let n = 0; n < r; n++) t += e.data[n];
+        return 10 * Math.abs(Math.ceil((100 * t) / r / 5) - 10);
+      }),
+      (r.applyMask = function (e, t) {
+        let n = t.size;
+        for (let i = 0; i < n; i++)
+          for (let o = 0; o < n; o++)
+            t.isReserved(o, i) ||
+              t.xor(
+                o,
+                i,
+                (function (e, t, n) {
+                  switch (e) {
+                    case r.Patterns.PATTERN000:
+                      return (t + n) % 2 == 0;
+                    case r.Patterns.PATTERN001:
+                      return t % 2 == 0;
+                    case r.Patterns.PATTERN010:
+                      return n % 3 == 0;
+                    case r.Patterns.PATTERN011:
+                      return (t + n) % 3 == 0;
+                    case r.Patterns.PATTERN100:
+                      return (Math.floor(t / 2) + Math.floor(n / 3)) % 2 == 0;
+                    case r.Patterns.PATTERN101:
+                      return ((t * n) % 2) + ((t * n) % 3) == 0;
+                    case r.Patterns.PATTERN110:
+                      return (((t * n) % 2) + ((t * n) % 3)) % 2 == 0;
+                    case r.Patterns.PATTERN111:
+                      return (((t * n) % 3) + ((t + n) % 2)) % 2 == 0;
+                    default:
+                      throw Error('bad maskPattern:' + e);
+                  }
+                })(e, o, i),
+              );
+      }),
+      (r.getBestMask = function (e, t) {
+        let n = Object.keys(r.Patterns).length,
+          i = 0,
+          o = 1 / 0;
+        for (let a = 0; a < n; a++) {
+          (t(a), r.applyMask(a, e));
+          let n =
+            r.getPenaltyN1(e) +
+            r.getPenaltyN2(e) +
+            r.getPenaltyN3(e) +
+            r.getPenaltyN4(e);
+          (r.applyMask(a, e), n < o && ((o = n), (i = a)));
+        }
+        return i;
+      }));
+  },
+  5693,
+  (e, t, r) => {
+    let n = e.r(31351),
+      i = [
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 2, 2, 4, 1, 2, 4, 4, 2, 4, 4, 4,
+        2, 4, 6, 5, 2, 4, 6, 6, 2, 5, 8, 8, 4, 5, 8, 8, 4, 5, 8, 11, 4, 8, 10,
+        11, 4, 9, 12, 16, 4, 9, 16, 16, 6, 10, 12, 18, 6, 10, 17, 16, 6, 11, 16,
+        19, 6, 13, 18, 21, 7, 14, 21, 25, 8, 16, 20, 25, 8, 17, 23, 25, 9, 17,
+        23, 34, 9, 18, 25, 30, 10, 20, 27, 32, 12, 21, 29, 35, 12, 23, 34, 37,
+        12, 25, 34, 40, 13, 26, 35, 42, 14, 28, 38, 45, 15, 29, 40, 48, 16, 31,
+        43, 51, 17, 33, 45, 54, 18, 35, 48, 57, 19, 37, 51, 60, 19, 38, 53, 63,
+        20, 40, 56, 66, 21, 43, 59, 70, 22, 45, 62, 74, 24, 47, 65, 77, 25, 49,
+        68, 81,
+      ],
+      o = [
+        7, 10, 13, 17, 10, 16, 22, 28, 15, 26, 36, 44, 20, 36, 52, 64, 26, 48,
+        72, 88, 36, 64, 96, 112, 40, 72, 108, 130, 48, 88, 132, 156, 60, 110,
+        160, 192, 72, 130, 192, 224, 80, 150, 224, 264, 96, 176, 260, 308, 104,
+        198, 288, 352, 120, 216, 320, 384, 132, 240, 360, 432, 144, 280, 408,
+        480, 168, 308, 448, 532, 180, 338, 504, 588, 196, 364, 546, 650, 224,
+        416, 600, 700, 224, 442, 644, 750, 252, 476, 690, 816, 270, 504, 750,
+        900, 300, 560, 810, 960, 312, 588, 870, 1050, 336, 644, 952, 1110, 360,
+        700, 1020, 1200, 390, 728, 1050, 1260, 420, 784, 1140, 1350, 450, 812,
+        1200, 1440, 480, 868, 1290, 1530, 510, 924, 1350, 1620, 540, 980, 1440,
+        1710, 570, 1036, 1530, 1800, 570, 1064, 1590, 1890, 600, 1120, 1680,
+        1980, 630, 1204, 1770, 2100, 660, 1260, 1860, 2220, 720, 1316, 1950,
+        2310, 750, 1372, 2040, 2430,
+      ];
+    ((r.getBlocksCount = function (e, t) {
+      switch (t) {
+        case n.L:
+          return i[(e - 1) * 4 + 0];
+        case n.M:
+          return i[(e - 1) * 4 + 1];
+        case n.Q:
+          return i[(e - 1) * 4 + 2];
+        case n.H:
+          return i[(e - 1) * 4 + 3];
+        default:
+          return;
+      }
+    }),
+      (r.getTotalCodewordsCount = function (e, t) {
+        switch (t) {
+          case n.L:
+            return o[(e - 1) * 4 + 0];
+          case n.M:
+            return o[(e - 1) * 4 + 1];
+          case n.Q:
+            return o[(e - 1) * 4 + 2];
+          case n.H:
+            return o[(e - 1) * 4 + 3];
+          default:
+            return;
+        }
+      }));
+  },
+  73398,
+  (e, t, r) => {
+    let n = new Uint8Array(512),
+      i = new Uint8Array(256),
+      o = 1;
+    for (let e = 0; e < 255; e++)
+      ((n[e] = o), (i[o] = e), 256 & (o <<= 1) && (o ^= 285));
+    for (let e = 255; e < 512; e++) n[e] = n[e - 255];
+    ((r.log = function (e) {
+      if (e < 1) throw Error('log(' + e + ')');
+      return i[e];
+    }),
+      (r.exp = function (e) {
+        return n[e];
+      }),
+      (r.mul = function (e, t) {
+        return 0 === e || 0 === t ? 0 : n[i[e] + i[t]];
+      }));
+  },
+  76093,
+  (e, t, r) => {
+    let n = e.r(73398);
+    ((r.mul = function (e, t) {
+      let r = new Uint8Array(e.length + t.length - 1);
+      for (let i = 0; i < e.length; i++)
+        for (let o = 0; o < t.length; o++) r[i + o] ^= n.mul(e[i], t[o]);
+      return r;
+    }),
+      (r.mod = function (e, t) {
+        let r = new Uint8Array(e);
+        for (; r.length - t.length >= 0; ) {
+          let e = r[0];
+          for (let i = 0; i < t.length; i++) r[i] ^= n.mul(t[i], e);
+          let i = 0;
+          for (; i < r.length && 0 === r[i]; ) i++;
+          r = r.slice(i);
+        }
+        return r;
+      }),
+      (r.generateECPolynomial = function (e) {
+        let t = new Uint8Array([1]);
+        for (let i = 0; i < e; i++) t = r.mul(t, new Uint8Array([1, n.exp(i)]));
+        return t;
+      }));
+  },
+  1763,
+  (e, t, r) => {
+    let n = e.r(76093);
+    function i(e) {
+      ((this.genPoly = void 0),
+        (this.degree = e),
+        this.degree && this.initialize(this.degree));
+    }
+    ((i.prototype.initialize = function (e) {
+      ((this.degree = e), (this.genPoly = n.generateECPolynomial(this.degree)));
+    }),
+      (i.prototype.encode = function (e) {
+        if (!this.genPoly) throw Error('Encoder not initialized');
+        let t = new Uint8Array(e.length + this.degree);
+        t.set(e);
+        let r = n.mod(t, this.genPoly),
+          i = this.degree - r.length;
+        if (i > 0) {
+          let e = new Uint8Array(this.degree);
+          return (e.set(r, i), e);
+        }
+        return r;
+      }),
+      (t.exports = i));
+  },
+  11735,
+  (e, t, r) => {
+    r.isValid = function (e) {
+      return !isNaN(e) && e >= 1 && e <= 40;
+    };
+  },
+  14477,
+  (e, t, r) => {
+    let n = '[0-9]+',
+      i =
+        '(?:[u3000-u303F]|[u3040-u309F]|[u30A0-u30FF]|[uFF00-uFFEF]|[u4E00-u9FAF]|[u2605-u2606]|[u2190-u2195]|u203B|[u2010u2015u2018u2019u2025u2026u201Cu201Du2225u2260]|[u0391-u0451]|[u00A7u00A8u00B1u00B4u00D7u00F7])+',
+      o =
+        '(?:(?![A-Z0-9 $%*+\\-./:]|' +
+        (i = i.replace(/u/g, '\\u')) +
+        ')(?:.|[\r\n]))+';
+    ((r.KANJI = RegExp(i, 'g')),
+      (r.BYTE_KANJI = RegExp('[^A-Z0-9 $%*+\\-./:]+', 'g')),
+      (r.BYTE = RegExp(o, 'g')),
+      (r.NUMERIC = RegExp(n, 'g')),
+      (r.ALPHANUMERIC = RegExp('[A-Z $%*+\\-./:]+', 'g')));
+    let a = RegExp('^' + i + '$'),
+      l = RegExp('^' + n + '$'),
+      s = RegExp('^[A-Z0-9 $%*+\\-./:]+$');
+    ((r.testKanji = function (e) {
+      return a.test(e);
+    }),
+      (r.testNumeric = function (e) {
+        return l.test(e);
+      }),
+      (r.testAlphanumeric = function (e) {
+        return s.test(e);
+      }));
+  },
+  10413,
+  (e, t, r) => {
+    let n = e.r(11735),
+      i = e.r(14477);
+    ((r.NUMERIC = { id: 'Numeric', bit: 1, ccBits: [10, 12, 14] }),
+      (r.ALPHANUMERIC = { id: 'Alphanumeric', bit: 2, ccBits: [9, 11, 13] }),
+      (r.BYTE = { id: 'Byte', bit: 4, ccBits: [8, 16, 16] }),
+      (r.KANJI = { id: 'Kanji', bit: 8, ccBits: [8, 10, 12] }),
+      (r.MIXED = { bit: -1 }),
+      (r.getCharCountIndicator = function (e, t) {
+        if (!e.ccBits) throw Error('Invalid mode: ' + e);
+        if (!n.isValid(t)) throw Error('Invalid version: ' + t);
+        return t >= 1 && t < 10
+          ? e.ccBits[0]
+          : t < 27
+            ? e.ccBits[1]
+            : e.ccBits[2];
+      }),
+      (r.getBestModeForData = function (e) {
+        return i.testNumeric(e)
+          ? r.NUMERIC
+          : i.testAlphanumeric(e)
+            ? r.ALPHANUMERIC
+            : i.testKanji(e)
+              ? r.KANJI
+              : r.BYTE;
+      }),
+      (r.toString = function (e) {
+        if (e && e.id) return e.id;
+        throw Error('Invalid mode');
+      }),
+      (r.isValid = function (e) {
+        return e && e.bit && e.ccBits;
+      }),
+      (r.from = function (e, t) {
+        if (r.isValid(e)) return e;
+        try {
+          if ('string' != typeof e) throw Error('Param is not a string');
+          switch (e.toLowerCase()) {
+            case 'numeric':
+              return r.NUMERIC;
+            case 'alphanumeric':
+              return r.ALPHANUMERIC;
+            case 'kanji':
+              return r.KANJI;
+            case 'byte':
+              return r.BYTE;
+            default:
+              throw Error('Unknown mode: ' + e);
+          }
+        } catch (e) {
+          return t;
+        }
+      }));
+  },
+  25510,
+  (e, t, r) => {
+    let n = e.r(28151),
+      i = e.r(5693),
+      o = e.r(31351),
+      a = e.r(10413),
+      l = e.r(11735),
+      s = n.getBCHDigit(7973);
+    function u(e, t) {
+      return a.getCharCountIndicator(e, t) + 4;
+    }
+    ((r.from = function (e, t) {
+      return l.isValid(e) ? parseInt(e, 10) : t;
+    }),
+      (r.getCapacity = function (e, t, r) {
+        if (!l.isValid(e)) throw Error('Invalid QR Code version');
+        void 0 === r && (r = a.BYTE);
+        let o =
+          (n.getSymbolTotalCodewords(e) - i.getTotalCodewordsCount(e, t)) * 8;
+        if (r === a.MIXED) return o;
+        let s = o - u(r, e);
+        switch (r) {
+          case a.NUMERIC:
+            return Math.floor((s / 10) * 3);
+          case a.ALPHANUMERIC:
+            return Math.floor((s / 11) * 2);
+          case a.KANJI:
+            return Math.floor(s / 13);
+          case a.BYTE:
+          default:
+            return Math.floor(s / 8);
+        }
+      }),
+      (r.getBestVersionForData = function (e, t) {
+        let n,
+          i = o.from(t, o.M);
+        if (Array.isArray(e)) {
+          if (e.length > 1) {
+            for (let t = 1; t <= 40; t++)
+              if (
+                (function (e, t) {
+                  let r = 0;
+                  return (
+                    e.forEach(function (e) {
+                      let n = u(e.mode, t);
+                      r += n + e.getBitsLength();
+                    }),
+                    r
+                  );
+                })(e, t) <= r.getCapacity(t, i, a.MIXED)
+              )
+                return t;
+            return;
+          }
+          if (0 === e.length) return 1;
+          n = e[0];
+        } else n = e;
+        return (function (e, t, n) {
+          for (let i = 1; i <= 40; i++)
+            if (t <= r.getCapacity(i, n, e)) return i;
+        })(n.mode, n.getLength(), i);
+      }),
+      (r.getEncodedBits = function (e) {
+        if (!l.isValid(e) || e < 7) throw Error('Invalid QR Code version');
+        let t = e << 12;
+        for (; n.getBCHDigit(t) - s >= 0; ) t ^= 7973 << (n.getBCHDigit(t) - s);
+        return (e << 12) | t;
+      }));
+  },
+  46103,
+  (e, t, r) => {
+    let n = e.r(28151),
+      i = n.getBCHDigit(1335);
+    r.getEncodedBits = function (e, t) {
+      let r = (e.bit << 3) | t,
+        o = r << 10;
+      for (; n.getBCHDigit(o) - i >= 0; ) o ^= 1335 << (n.getBCHDigit(o) - i);
+      return ((r << 10) | o) ^ 21522;
+    };
+  },
+  38983,
+  (e, t, r) => {
+    let n = e.r(10413);
+    function i(e) {
+      ((this.mode = n.NUMERIC), (this.data = e.toString()));
+    }
+    ((i.getBitsLength = function (e) {
+      return 10 * Math.floor(e / 3) + (e % 3 ? (e % 3) * 3 + 1 : 0);
+    }),
+      (i.prototype.getLength = function () {
+        return this.data.length;
+      }),
+      (i.prototype.getBitsLength = function () {
+        return i.getBitsLength(this.data.length);
+      }),
+      (i.prototype.write = function (e) {
+        let t, r;
+        for (t = 0; t + 3 <= this.data.length; t += 3)
+          ((r = parseInt(this.data.substr(t, 3), 10)), e.put(r, 10));
+        let n = this.data.length - t;
+        n > 0 && ((r = parseInt(this.data.substr(t), 10)), e.put(r, 3 * n + 1));
+      }),
+      (t.exports = i));
+  },
+  88440,
+  (e, t, r) => {
+    let n = e.r(10413),
+      i = [
+        '0',
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        'A',
+        'B',
+        'C',
+        'D',
+        'E',
+        'F',
+        'G',
+        'H',
+        'I',
+        'J',
+        'K',
+        'L',
+        'M',
+        'N',
+        'O',
+        'P',
+        'Q',
+        'R',
+        'S',
+        'T',
+        'U',
+        'V',
+        'W',
+        'X',
+        'Y',
+        'Z',
+        ' ',
+        '$',
+        '%',
+        '*',
+        '+',
+        '-',
+        '.',
+        '/',
+        ':',
+      ];
+    function o(e) {
+      ((this.mode = n.ALPHANUMERIC), (this.data = e));
+    }
+    ((o.getBitsLength = function (e) {
+      return 11 * Math.floor(e / 2) + (e % 2) * 6;
+    }),
+      (o.prototype.getLength = function () {
+        return this.data.length;
+      }),
+      (o.prototype.getBitsLength = function () {
+        return o.getBitsLength(this.data.length);
+      }),
+      (o.prototype.write = function (e) {
+        let t;
+        for (t = 0; t + 2 <= this.data.length; t += 2) {
+          let r = 45 * i.indexOf(this.data[t]);
+          ((r += i.indexOf(this.data[t + 1])), e.put(r, 11));
+        }
+        this.data.length % 2 && e.put(i.indexOf(this.data[t]), 6);
+      }),
+      (t.exports = o));
+  },
+  20648,
+  (e, t, r) => {
+    let n = e.r(10413);
+    function i(e) {
+      ((this.mode = n.BYTE),
+        'string' == typeof e
+          ? (this.data = new TextEncoder().encode(e))
+          : (this.data = new Uint8Array(e)));
+    }
+    ((i.getBitsLength = function (e) {
+      return 8 * e;
+    }),
+      (i.prototype.getLength = function () {
+        return this.data.length;
+      }),
+      (i.prototype.getBitsLength = function () {
+        return i.getBitsLength(this.data.length);
+      }),
+      (i.prototype.write = function (e) {
+        for (let t = 0, r = this.data.length; t < r; t++)
+          e.put(this.data[t], 8);
+      }),
+      (t.exports = i));
+  },
+  73784,
+  (e, t, r) => {
+    let n = e.r(10413),
+      i = e.r(28151);
+    function o(e) {
+      ((this.mode = n.KANJI), (this.data = e));
+    }
+    ((o.getBitsLength = function (e) {
+      return 13 * e;
+    }),
+      (o.prototype.getLength = function () {
+        return this.data.length;
+      }),
+      (o.prototype.getBitsLength = function () {
+        return o.getBitsLength(this.data.length);
+      }),
+      (o.prototype.write = function (e) {
+        let t;
+        for (t = 0; t < this.data.length; t++) {
+          let r = i.toSJIS(this.data[t]);
+          if (r >= 33088 && r <= 40956) r -= 33088;
+          else if (r >= 57408 && r <= 60351) r -= 49472;
+          else
+            throw Error(
+              'Invalid SJIS character: ' +
+                this.data[t] +
+                '\nMake sure your charset is UTF-8',
+            );
+          ((r = ((r >>> 8) & 255) * 192 + (255 & r)), e.put(r, 13));
+        }
+      }),
+      (t.exports = o));
+  },
+  45759,
+  (e, t, r) => {
+    'use strict';
+    var n = {
+      single_source_shortest_paths: function (e, t, r) {
+        var i,
+          o,
+          a,
+          l,
+          s,
+          u,
+          c,
+          d = {},
+          h = {};
+        h[t] = 0;
+        var f = n.PriorityQueue.make();
+        for (f.push(t, 0); !f.empty(); )
+          for (a in ((o = (i = f.pop()).value), (l = i.cost), (s = e[o] || {})))
+            s.hasOwnProperty(a) &&
+              ((u = l + s[a]),
+              (c = h[a]),
+              (void 0 === h[a] || c > u) &&
+                ((h[a] = u), f.push(a, u), (d[a] = o)));
+        if (void 0 !== r && void 0 === h[r])
+          throw Error('Could not find a path from ' + t + ' to ' + r + '.');
+        return d;
+      },
+      extract_shortest_path_from_predecessor_list: function (e, t) {
+        for (var r = [], n = t; n; ) (r.push(n), e[n], (n = e[n]));
+        return (r.reverse(), r);
+      },
+      find_path: function (e, t, r) {
+        var i = n.single_source_shortest_paths(e, t, r);
+        return n.extract_shortest_path_from_predecessor_list(i, r);
+      },
+      PriorityQueue: {
+        make: function (e) {
+          var t,
+            r = n.PriorityQueue,
+            i = {};
+          for (t in ((e = e || {}), r)) r.hasOwnProperty(t) && (i[t] = r[t]);
+          return ((i.queue = []), (i.sorter = e.sorter || r.default_sorter), i);
+        },
+        default_sorter: function (e, t) {
+          return e.cost - t.cost;
+        },
+        push: function (e, t) {
+          (this.queue.push({ value: e, cost: t }),
+            this.queue.sort(this.sorter));
+        },
+        pop: function () {
+          return this.queue.shift();
+        },
+        empty: function () {
+          return 0 === this.queue.length;
+        },
+      },
+    };
+    t.exports = n;
+  },
+  58931,
+  (e, t, r) => {
+    let n = e.r(10413),
+      i = e.r(38983),
+      o = e.r(88440),
+      a = e.r(20648),
+      l = e.r(73784),
+      s = e.r(14477),
+      u = e.r(28151),
+      c = e.r(45759);
+    function d(e) {
+      return unescape(encodeURIComponent(e)).length;
+    }
+    function h(e, t, r) {
+      let n,
+        i = [];
+      for (; null !== (n = e.exec(r)); )
+        i.push({ data: n[0], index: n.index, mode: t, length: n[0].length });
+      return i;
+    }
+    function f(e) {
+      let t,
+        r,
+        i = h(s.NUMERIC, n.NUMERIC, e),
+        o = h(s.ALPHANUMERIC, n.ALPHANUMERIC, e);
+      return (
+        u.isKanjiModeEnabled()
+          ? ((t = h(s.BYTE, n.BYTE, e)), (r = h(s.KANJI, n.KANJI, e)))
+          : ((t = h(s.BYTE_KANJI, n.BYTE, e)), (r = [])),
+        i
+          .concat(o, t, r)
+          .sort(function (e, t) {
+            return e.index - t.index;
+          })
+          .map(function (e) {
+            return { data: e.data, mode: e.mode, length: e.length };
+          })
+      );
+    }
+    function g(e, t) {
+      switch (t) {
+        case n.NUMERIC:
+          return i.getBitsLength(e);
+        case n.ALPHANUMERIC:
+          return o.getBitsLength(e);
+        case n.KANJI:
+          return l.getBitsLength(e);
+        case n.BYTE:
+          return a.getBitsLength(e);
+      }
+    }
+    function m(e, t) {
+      let r,
+        s = n.getBestModeForData(e);
+      if ((r = n.from(t, s)) !== n.BYTE && r.bit < s.bit)
+        throw Error(
+          '"' +
+            e +
+            '" cannot be encoded with mode ' +
+            n.toString(r) +
+            '.\n Suggested mode is: ' +
+            n.toString(s),
+        );
+      switch ((r === n.KANJI && !u.isKanjiModeEnabled() && (r = n.BYTE), r)) {
+        case n.NUMERIC:
+          return new i(e);
+        case n.ALPHANUMERIC:
+          return new o(e);
+        case n.KANJI:
+          return new l(e);
+        case n.BYTE:
+          return new a(e);
+      }
+    }
+    ((r.fromArray = function (e) {
+      return e.reduce(function (e, t) {
+        return (
+          'string' == typeof t
+            ? e.push(m(t, null))
+            : t.data && e.push(m(t.data, t.mode)),
+          e
+        );
+      }, []);
+    }),
+      (r.fromString = function (e, t) {
+        let i = (function (e, t) {
+            let r = {},
+              i = { start: {} },
+              o = ['start'];
+            for (let a = 0; a < e.length; a++) {
+              let l = e[a],
+                s = [];
+              for (let e = 0; e < l.length; e++) {
+                let u = l[e],
+                  c = '' + a + e;
+                (s.push(c), (r[c] = { node: u, lastCount: 0 }), (i[c] = {}));
+                for (let e = 0; e < o.length; e++) {
+                  let a = o[e];
+                  r[a] && r[a].node.mode === u.mode
+                    ? ((i[a][c] =
+                        g(r[a].lastCount + u.length, u.mode) -
+                        g(r[a].lastCount, u.mode)),
+                      (r[a].lastCount += u.length))
+                    : (r[a] && (r[a].lastCount = u.length),
+                      (i[a][c] =
+                        g(u.length, u.mode) +
+                        4 +
+                        n.getCharCountIndicator(u.mode, t)));
+                }
+              }
+              o = s;
+            }
+            for (let e = 0; e < o.length; e++) i[o[e]].end = 0;
+            return { map: i, table: r };
+          })(
+            (function (e) {
+              let t = [];
+              for (let r = 0; r < e.length; r++) {
+                let i = e[r];
+                switch (i.mode) {
+                  case n.NUMERIC:
+                    t.push([
+                      i,
+                      { data: i.data, mode: n.ALPHANUMERIC, length: i.length },
+                      { data: i.data, mode: n.BYTE, length: i.length },
+                    ]);
+                    break;
+                  case n.ALPHANUMERIC:
+                    t.push([
+                      i,
+                      { data: i.data, mode: n.BYTE, length: i.length },
+                    ]);
+                    break;
+                  case n.KANJI:
+                    t.push([
+                      i,
+                      { data: i.data, mode: n.BYTE, length: d(i.data) },
+                    ]);
+                    break;
+                  case n.BYTE:
+                    t.push([{ data: i.data, mode: n.BYTE, length: d(i.data) }]);
+                }
+              }
+              return t;
+            })(f(e, u.isKanjiModeEnabled())),
+            t,
+          ),
+          o = c.find_path(i.map, 'start', 'end'),
+          a = [];
+        for (let e = 1; e < o.length - 1; e++) a.push(i.table[o[e]].node);
+        return r.fromArray(
+          a.reduce(function (e, t) {
+            let r = e.length - 1 >= 0 ? e[e.length - 1] : null;
+            return (
+              r && r.mode === t.mode
+                ? (e[e.length - 1].data += t.data)
+                : e.push(t),
+              e
+            );
+          }, []),
+        );
+      }),
+      (r.rawSplit = function (e) {
+        return r.fromArray(f(e, u.isKanjiModeEnabled()));
+      }));
+  },
+  64367,
+  (e, t, r) => {
+    let n = e.r(28151),
+      i = e.r(31351),
+      o = e.r(99931),
+      a = e.r(62091),
+      l = e.r(71112),
+      s = e.r(53658),
+      u = e.r(46711),
+      c = e.r(5693),
+      d = e.r(1763),
+      h = e.r(25510),
+      f = e.r(46103),
+      g = e.r(10413),
+      m = e.r(58931);
+    function p(e, t, r) {
+      let n,
+        i,
+        o = e.size,
+        a = f.getEncodedBits(t, r);
+      for (n = 0; n < 15; n++)
+        ((i = ((a >> n) & 1) == 1),
+          n < 6
+            ? e.set(n, 8, i, !0)
+            : n < 8
+              ? e.set(n + 1, 8, i, !0)
+              : e.set(o - 15 + n, 8, i, !0),
+          n < 8
+            ? e.set(8, o - n - 1, i, !0)
+            : n < 9
+              ? e.set(8, 15 - n - 1 + 1, i, !0)
+              : e.set(8, 15 - n - 1, i, !0));
+      e.set(o - 8, 8, 1, !0);
+    }
+    r.create = function (e, t) {
+      let r, f;
+      if (void 0 === e || '' === e) throw Error('No input text');
+      let y = i.M;
+      return (
+        void 0 !== t &&
+          ((y = i.from(t.errorCorrectionLevel, i.M)),
+          (r = h.from(t.version)),
+          (f = u.from(t.maskPattern)),
+          t.toSJISFunc && n.setToSJISFunction(t.toSJISFunc)),
+        (function (e, t, r, i) {
+          let f;
+          if (Array.isArray(e)) f = m.fromArray(e);
+          else if ('string' == typeof e) {
+            let n = t;
+            if (!n) {
+              let t = m.rawSplit(e);
+              n = h.getBestVersionForData(t, r);
+            }
+            f = m.fromString(e, n || 40);
+          } else throw Error('Invalid data');
+          let y = h.getBestVersionForData(f, r);
+          if (!y)
+            throw Error(
+              'The amount of data is too big to be stored in a QR Code',
+            );
+          if (t) {
+            if (t < y)
+              throw Error(
+                '\nThe chosen QR Code version cannot contain this amount of data.\nMinimum version required to store current data is: ' +
+                  y +
+                  '.\n',
+              );
+          } else t = y;
+          let x = (function (e, t, r) {
+              let i = new o();
+              r.forEach(function (t) {
+                (i.put(t.mode.bit, 4),
+                  i.put(t.getLength(), g.getCharCountIndicator(t.mode, e)),
+                  t.write(i));
+              });
+              let a =
+                (n.getSymbolTotalCodewords(e) -
+                  c.getTotalCodewordsCount(e, t)) *
+                8;
+              for (
+                i.getLengthInBits() + 4 <= a && i.put(0, 4);
+                i.getLengthInBits() % 8 != 0;
+              )
+                i.putBit(0);
+              let l = (a - i.getLengthInBits()) / 8;
+              for (let e = 0; e < l; e++) i.put(e % 2 ? 17 : 236, 8);
+              return (function (e, t, r) {
+                let i,
+                  o,
+                  a = n.getSymbolTotalCodewords(t),
+                  l = a - c.getTotalCodewordsCount(t, r),
+                  s = c.getBlocksCount(t, r),
+                  u = a % s,
+                  h = s - u,
+                  f = Math.floor(a / s),
+                  g = Math.floor(l / s),
+                  m = g + 1,
+                  p = f - g,
+                  y = new d(p),
+                  x = 0,
+                  w = Array(s),
+                  v = Array(s),
+                  E = 0,
+                  b = new Uint8Array(e.buffer);
+                for (let e = 0; e < s; e++) {
+                  let t = e < h ? g : m;
+                  ((w[e] = b.slice(x, x + t)),
+                    (v[e] = y.encode(w[e])),
+                    (x += t),
+                    (E = Math.max(E, t)));
+                }
+                let N = new Uint8Array(a),
+                  T = 0;
+                for (i = 0; i < E; i++)
+                  for (o = 0; o < s; o++) i < w[o].length && (N[T++] = w[o][i]);
+                for (i = 0; i < p; i++)
+                  for (o = 0; o < s; o++) N[T++] = v[o][i];
+                return N;
+              })(i, e, t);
+            })(t, r, f),
+            w = new a(n.getSymbolSize(t));
+          !(function (e, t) {
+            let r = e.size,
+              n = s.getPositions(t);
+            for (let t = 0; t < n.length; t++) {
+              let i = n[t][0],
+                o = n[t][1];
+              for (let t = -1; t <= 7; t++)
+                if (!(i + t <= -1) && !(r <= i + t))
+                  for (let n = -1; n <= 7; n++)
+                    o + n <= -1 ||
+                      r <= o + n ||
+                      ((t >= 0 && t <= 6 && (0 === n || 6 === n)) ||
+                      (n >= 0 && n <= 6 && (0 === t || 6 === t)) ||
+                      (t >= 2 && t <= 4 && n >= 2 && n <= 4)
+                        ? e.set(i + t, o + n, !0, !0)
+                        : e.set(i + t, o + n, !1, !0));
+            }
+          })(w, t);
+          let v = w.size;
+          for (let e = 8; e < v - 8; e++) {
+            let t = e % 2 == 0;
+            (w.set(e, 6, t, !0), w.set(6, e, t, !0));
+          }
+          return (
+            !(function (e, t) {
+              let r = l.getPositions(t);
+              for (let t = 0; t < r.length; t++) {
+                let n = r[t][0],
+                  i = r[t][1];
+                for (let t = -2; t <= 2; t++)
+                  for (let r = -2; r <= 2; r++)
+                    -2 === t ||
+                    2 === t ||
+                    -2 === r ||
+                    2 === r ||
+                    (0 === t && 0 === r)
+                      ? e.set(n + t, i + r, !0, !0)
+                      : e.set(n + t, i + r, !1, !0);
+              }
+            })(w, t),
+            p(w, r, 0),
+            t >= 7 &&
+              (function (e, t) {
+                let r,
+                  n,
+                  i,
+                  o = e.size,
+                  a = h.getEncodedBits(t);
+                for (let t = 0; t < 18; t++)
+                  ((r = Math.floor(t / 3)),
+                    (n = (t % 3) + o - 8 - 3),
+                    (i = ((a >> t) & 1) == 1),
+                    e.set(r, n, i, !0),
+                    e.set(n, r, i, !0));
+              })(w, t),
+            !(function (e, t) {
+              let r = e.size,
+                n = -1,
+                i = r - 1,
+                o = 7,
+                a = 0;
+              for (let l = r - 1; l > 0; l -= 2)
+                for (6 === l && l--; ; ) {
+                  for (let r = 0; r < 2; r++)
+                    if (!e.isReserved(i, l - r)) {
+                      let n = !1;
+                      (a < t.length && (n = ((t[a] >>> o) & 1) == 1),
+                        e.set(i, l - r, n),
+                        -1 == --o && (a++, (o = 7)));
+                    }
+                  if ((i += n) < 0 || r <= i) {
+                    ((i -= n), (n = -n));
+                    break;
+                  }
+                }
+            })(w, x),
+            isNaN(i) && (i = u.getBestMask(w, p.bind(null, w, r))),
+            u.applyMask(i, w),
+            p(w, r, i),
+            {
+              modules: w,
+              version: t,
+              errorCorrectionLevel: r,
+              maskPattern: i,
+              segments: f,
+            }
+          );
+        })(e, r, y, f)
+      );
+    };
+  },
+  83195,
+  (e, t, r) => {
+    function n(e) {
+      if (('number' == typeof e && (e = e.toString()), 'string' != typeof e))
+        throw Error('Color should be defined as hex string');
+      let t = e.slice().replace('#', '').split('');
+      if (t.length < 3 || 5 === t.length || t.length > 8)
+        throw Error('Invalid hex color: ' + e);
+      ((3 === t.length || 4 === t.length) &&
+        (t = Array.prototype.concat.apply(
+          [],
+          t.map(function (e) {
+            return [e, e];
+          }),
+        )),
+        6 === t.length && t.push('F', 'F'));
+      let r = parseInt(t.join(''), 16);
+      return {
+        r: (r >> 24) & 255,
+        g: (r >> 16) & 255,
+        b: (r >> 8) & 255,
+        a: 255 & r,
+        hex: '#' + t.slice(0, 6).join(''),
+      };
+    }
+    ((r.getOptions = function (e) {
+      (e || (e = {}), e.color || (e.color = {}));
+      let t =
+          void 0 === e.margin || null === e.margin || e.margin < 0
+            ? 4
+            : e.margin,
+        r = e.width && e.width >= 21 ? e.width : void 0,
+        i = e.scale || 4;
+      return {
+        width: r,
+        scale: r ? 4 : i,
+        margin: t,
+        color: {
+          dark: n(e.color.dark || '#000000ff'),
+          light: n(e.color.light || '#ffffffff'),
+        },
+        type: e.type,
+        rendererOpts: e.rendererOpts || {},
+      };
+    }),
+      (r.getScale = function (e, t) {
+        return t.width && t.width >= e + 2 * t.margin
+          ? t.width / (e + 2 * t.margin)
+          : t.scale;
+      }),
+      (r.getImageWidth = function (e, t) {
+        let n = r.getScale(e, t);
+        return Math.floor((e + 2 * t.margin) * n);
+      }),
+      (r.qrToImageData = function (e, t, n) {
+        let i = t.modules.size,
+          o = t.modules.data,
+          a = r.getScale(i, n),
+          l = Math.floor((i + 2 * n.margin) * a),
+          s = n.margin * a,
+          u = [n.color.light, n.color.dark];
+        for (let t = 0; t < l; t++)
+          for (let r = 0; r < l; r++) {
+            let c = (t * l + r) * 4,
+              d = n.color.light;
+            (t >= s &&
+              r >= s &&
+              t < l - s &&
+              r < l - s &&
+              (d =
+                u[+!!o[Math.floor((t - s) / a) * i + Math.floor((r - s) / a)]]),
+              (e[c++] = d.r),
+              (e[c++] = d.g),
+              (e[c++] = d.b),
+              (e[c] = d.a));
+          }
+      }));
+  },
+  61494,
+  (e, t, r) => {
+    let n = e.r(83195);
+    ((r.render = function (e, t, r) {
+      var i;
+      let o = r,
+        a = t;
+      (void 0 !== o || (t && t.getContext) || ((o = t), (t = void 0)),
+        t ||
+          (a = (function () {
+            try {
+              return document.createElement('canvas');
+            } catch (e) {
+              throw Error('You need to specify a canvas element');
+            }
+          })()),
+        (o = n.getOptions(o)));
+      let l = n.getImageWidth(e.modules.size, o),
+        s = a.getContext('2d'),
+        u = s.createImageData(l, l);
+      return (
+        n.qrToImageData(u.data, e, o),
+        (i = a),
+        s.clearRect(0, 0, i.width, i.height),
+        i.style || (i.style = {}),
+        (i.height = l),
+        (i.width = l),
+        (i.style.height = l + 'px'),
+        (i.style.width = l + 'px'),
+        s.putImageData(u, 0, 0),
+        a
+      );
+    }),
+      (r.renderToDataURL = function (e, t, n) {
+        let i = n;
+        (void 0 !== i || (t && t.getContext) || ((i = t), (t = void 0)),
+          i || (i = {}));
+        let o = r.render(e, t, i),
+          a = i.type || 'image/png',
+          l = i.rendererOpts || {};
+        return o.toDataURL(a, l.quality);
+      }));
+  },
+  3442,
+  (e, t, r) => {
+    let n = e.r(83195);
+    function i(e, t) {
+      let r = e.a / 255,
+        n = t + '="' + e.hex + '"';
+      return r < 1
+        ? n + ' ' + t + '-opacity="' + r.toFixed(2).slice(1) + '"'
+        : n;
+    }
+    function o(e, t, r) {
+      let n = e + t;
+      return (void 0 !== r && (n += ' ' + r), n);
+    }
+    r.render = function (e, t, r) {
+      let a = n.getOptions(t),
+        l = e.modules.size,
+        s = e.modules.data,
+        u = l + 2 * a.margin,
+        c = a.color.light.a
+          ? '<path ' +
+            i(a.color.light, 'fill') +
+            ' d="M0 0h' +
+            u +
+            'v' +
+            u +
+            'H0z"/>'
+          : '',
+        d =
+          '<path ' +
+          i(a.color.dark, 'stroke') +
+          ' d="' +
+          (function (e, t, r) {
+            let n = '',
+              i = 0,
+              a = !1,
+              l = 0;
+            for (let s = 0; s < e.length; s++) {
+              let u = Math.floor(s % t),
+                c = Math.floor(s / t);
+              (u || a || (a = !0),
+                e[s]
+                  ? (l++,
+                    (s > 0 && u > 0 && e[s - 1]) ||
+                      ((n += a ? o('M', u + r, 0.5 + c + r) : o('m', i, 0)),
+                      (i = 0),
+                      (a = !1)),
+                    (u + 1 < t && e[s + 1]) || ((n += o('h', l)), (l = 0)))
+                  : i++);
+            }
+            return n;
+          })(s, l, a.margin) +
+          '"/>',
+        h =
+          '<svg xmlns="http://www.w3.org/2000/svg" ' +
+          (a.width ? 'width="' + a.width + '" height="' + a.width + '" ' : '') +
+          ('viewBox="0 0 ' + u + ' ') +
+          u +
+          '" shape-rendering="crispEdges">' +
+          c +
+          d +
+          '</svg>\n';
+      return ('function' == typeof r && r(null, h), h);
+    };
+  },
+  98870,
+  (e, t, r) => {
+    let n = e.r(30689),
+      i = e.r(64367),
+      o = e.r(61494),
+      a = e.r(3442);
+    function l(e, t, r, o, a) {
+      let l = [].slice.call(arguments, 1),
+        s = l.length,
+        u = 'function' == typeof l[s - 1];
+      if (!u && !n()) throw Error('Callback required as last argument');
+      if (u) {
+        if (s < 2) throw Error('Too few arguments provided');
+        2 === s
+          ? ((a = r), (r = t), (t = o = void 0))
+          : 3 === s &&
+            (t.getContext && void 0 === a
+              ? ((a = o), (o = void 0))
+              : ((a = o), (o = r), (r = t), (t = void 0)));
+      } else {
+        if (s < 1) throw Error('Too few arguments provided');
+        return (
+          1 === s
+            ? ((r = t), (t = o = void 0))
+            : 2 !== s || t.getContext || ((o = r), (r = t), (t = void 0)),
+          new Promise(function (n, a) {
+            try {
+              let a = i.create(r, o);
+              n(e(a, t, o));
+            } catch (e) {
+              a(e);
+            }
+          })
+        );
+      }
+      try {
+        let n = i.create(r, o);
+        a(null, e(n, t, o));
+      } catch (e) {
+        a(e);
+      }
+    }
+    ((r.create = i.create),
+      (r.toCanvas = l.bind(null, o.render)),
+      (r.toDataURL = l.bind(null, o.renderToDataURL)),
+      (r.toString = l.bind(null, function (e, t, r) {
+        return a.render(e, r);
+      })));
+  },
+  9194,
+  (e) => {
+    'use strict';
+    var t = e.i(52759),
+      r = e.i(11501),
+      n = e.i(98870);
+    e.s([
+      'QrPayloadView',
+      0,
+      function ({ payload: e, alt: i, expiresAt: o }) {
+        let [a, l] = (0, r.useState)(null),
+          [s, u] = (0, r.useState)(null),
+          [c, d] = (0, r.useState)(() => Date.now());
+        (0, r.useEffect)(() => {
+          if (!o) return;
+          let e = setInterval(() => {
+            d(Date.now());
+          }, 1e3);
+          return () => {
+            clearInterval(e);
+          };
+        }, [o]);
+        let h = (0, r.useMemo)(() => {
+          if (!o) return !1;
+          let e = Date.parse(o);
+          return !Number.isNaN(e) && e <= c;
+        }, [o, c]);
+        return (
+          (0, r.useEffect)(() => {
+            let t = !1;
+            return (l(null), u(null), h)
+              ? () => {
+                  t = !0;
+                }
+              : (n.default
+                  .toDataURL(e, {
+                    errorCorrectionLevel: 'M',
+                    margin: 1,
+                    width: 320,
+                  })
+                  .then((e) => {
+                    t || l(e);
+                  })
+                  .catch((e) => {
+                    t ||
+                      u(
+                        e instanceof Error ? e.message : 'QR rendering failed.',
+                      );
+                  }),
+                () => {
+                  t = !0;
+                });
+          }, [h, e]),
+          (0, t.jsxs)('div', {
+            style: { display: 'grid', gap: 14, marginTop: 18 },
+            children: [
+              o
+                ? (0, t.jsxs)('div', {
+                    style: {
+                      padding: '10px 12px',
+                      borderRadius: 12,
+                      border: h
+                        ? '1px solid rgba(248, 113, 113, 0.3)'
+                        : '1px solid var(--elite-line)',
+                      background: h
+                        ? 'rgba(185, 28, 28, 0.12)'
+                        : 'var(--elite-card)',
+                      color: h
+                        ? 'var(--elite-danger)'
+                        : 'var(--elite-ink-soft)',
+                      fontWeight: 600,
+                    },
+                    children: [
+                      'QR status: ',
+                      (function (e) {
+                        let t = Date.parse(e);
+                        if (Number.isNaN(t)) return 'Unknown';
+                        let r = t - Date.now();
+                        if (r <= 0) return 'Expired';
+                        let n = Math.max(1, Math.ceil(r / 1e3));
+                        return `${n}s remaining`;
+                      })(o),
+                    ],
+                  })
+                : null,
+              (0, t.jsx)('div', {
+                style: {
+                  width: 'fit-content',
+                  padding: 16,
+                  borderRadius: 18,
+                  background: 'var(--elite-card-strong)',
+                  border: '1px solid var(--elite-line)',
+                  boxShadow: 'var(--elite-shadow-sm)',
+                },
+                children: h
+                  ? (0, t.jsx)('div', {
+                      style: {
+                        display: 'grid',
+                        placeItems: 'center',
+                        width: 320,
+                        maxWidth: '100%',
+                        aspectRatio: '1 / 1',
+                        borderRadius: 12,
+                        background: 'rgba(185, 28, 28, 0.12)',
+                        color: 'var(--elite-danger)',
+                        textAlign: 'center',
+                        padding: 16,
+                        fontWeight: 600,
+                      },
+                      children:
+                        'This QR code expired. Restart the instance to generate a fresh code.',
+                    })
+                  : a
+                    ? (0, t.jsx)('img', {
+                        src: a,
+                        alt: i,
+                        style: {
+                          display: 'block',
+                          width: 320,
+                          maxWidth: '100%',
+                          height: 'auto',
+                          borderRadius: 12,
+                        },
+                      })
+                    : (0, t.jsx)('div', {
+                        style: {
+                          display: 'grid',
+                          placeItems: 'center',
+                          width: 320,
+                          maxWidth: '100%',
+                          aspectRatio: '1 / 1',
+                          borderRadius: 12,
+                          background: 'var(--elite-paper)',
+                          color: 'var(--elite-muted)',
+                          textAlign: 'center',
+                          padding: 16,
+                        },
+                        children: s
+                          ? `QR render failed: ${s}`
+                          : 'Generating QR image...',
+                      }),
+              }),
+              (0, t.jsxs)('details', {
+                children: [
+                  (0, t.jsx)('summary', {
+                    style: { cursor: 'pointer', fontWeight: 600 },
+                    children: 'Show raw QR payload',
+                  }),
+                  (0, t.jsx)('pre', {
+                    style: {
+                      marginBottom: 0,
+                      marginTop: 12,
+                      padding: 16,
+                      borderRadius: 14,
+                      background: 'rgba(2, 6, 23, 0.92)',
+                      color: '#f8fafc',
+                      overflowX: 'auto',
+                      whiteSpace: 'pre-wrap',
+                    },
+                    children: e,
+                  }),
+                ],
+              }),
+            ],
+          })
+        );
+      },
+    ]);
+  },
+  49153,
+  (e) => {
+    'use strict';
+    var t = e.i(52759),
+      r = e.i(11501);
+    let n = 'elite-message.theme',
+      i = 'elite-message.theme';
+    function o(e) {
+      return 'light' === e || 'dark' === e || 'system' === e ? e : 'light';
+    }
+    function a(e, t) {
+      return 'system' === e ? t : e;
+    }
+    let l = {
+        darkLabel: 'Dark',
+        lightLabel: 'Light',
+        menuLabel: 'Theme menu',
+        systemLabel: 'System',
+        themeButtonLabel: 'Theme preference',
+      },
+      s = new Set(),
+      u = {
+        effectiveTheme: 'light',
+        initialized: !1,
+        preference: 'light',
+        systemTheme: 'light',
+      },
+      c = null,
+      d = !1;
+    function h() {
+      s.forEach((e) => e());
+    }
+    function f() {
+      return 'function' != typeof window.matchMedia
+        ? 'light'
+        : window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light';
+    }
+    function g() {
+      return 'u' < typeof document
+        ? 'light'
+        : o(
+            document.cookie
+              .split(';')
+              .map((e) => e.trim())
+              .find((e) => e.startsWith(`${i}=`))
+              ?.slice(i.length + 1),
+          );
+    }
+    function m(e, t = !0) {
+      if ('u' < typeof document) return;
+      let r = f(),
+        o = a(e, r);
+      ((u = {
+        effectiveTheme: o,
+        initialized: !0,
+        preference: e,
+        systemTheme: r,
+      }),
+        (document.documentElement.dataset.eliteTheme = o),
+        (document.documentElement.dataset.eliteThemePreference = e),
+        (document.documentElement.style.colorScheme = o),
+        t &&
+          (function (e) {
+            if ('u' > typeof document) {
+              try {
+                window.localStorage.setItem(n, e);
+              } catch {}
+              document.cookie = `${i}=${e}; path=/; max-age=31536000; samesite=lax`;
+            }
+          })(e));
+    }
+    function p() {
+      if (!u.initialized) return;
+      let e = f(),
+        t = a(u.preference, e);
+      (u.systemTheme !== e || u.effectiveTheme !== t) &&
+        ((u = {
+          effectiveTheme: t,
+          initialized: !0,
+          preference: u.preference,
+          systemTheme: e,
+        }),
+        'u' > typeof document &&
+          ((document.documentElement.dataset.eliteTheme = t),
+          (document.documentElement.style.colorScheme = t)),
+        h());
+    }
+    function y() {
+      d ||
+        'function' != typeof window.matchMedia ||
+        ('function' ==
+        typeof (c = window.matchMedia('(prefers-color-scheme: dark)'))
+          .addEventListener
+          ? c.addEventListener('change', p)
+          : c.addListener?.(p),
+        (d = !0));
+    }
+    function x(e) {
+      y();
+      let t = (function (e) {
+        if ('u' < typeof document) return e;
+        let t = document.documentElement.dataset.eliteThemePreference;
+        try {
+          return o(window.localStorage.getItem(n) ?? t ?? g() ?? e);
+        } catch {
+          return o(t ?? g() ?? e);
+        }
+      })(e);
+      (u.initialized &&
+        u.preference === t &&
+        document.documentElement.dataset.eliteThemePreference === t) ||
+        m(t);
+    }
+    function w(e) {
+      return (
+        x('light'),
+        s.add(e),
+        () => {
+          s.delete(e);
+        }
+      );
+    }
+    function v() {
+      return (x('light'), u);
+    }
+    function E(e) {
+      (x(e), h());
+    }
+    function b(e) {
+      (y(), m(e), h());
+    }
+    function N() {
+      let e = (0, r.useSyncExternalStore)(w, v, () => u);
+      return {
+        effectiveTheme: e.effectiveTheme,
+        isDark: 'dark' === e.effectiveTheme,
+        setThemePreference: b,
+        themePreference: e.preference,
+      };
+    }
+    function T() {
+      return (0, t.jsxs)('svg', {
+        viewBox: '0 0 20 20',
+        fill: 'none',
+        'aria-hidden': 'true',
+        children: [
+          (0, t.jsx)('rect', {
+            x: '3.2',
+            y: '4.1',
+            width: '13.6',
+            height: '9.8',
+            rx: '2.2',
+          }),
+          (0, t.jsx)('path', { d: 'M7.2 15.9h5.6' }),
+          (0, t.jsx)('path', { d: 'M10 13.9v2' }),
+        ],
+      });
+    }
+    function j() {
+      return (0, t.jsxs)('svg', {
+        viewBox: '0 0 20 20',
+        fill: 'none',
+        'aria-hidden': 'true',
+        children: [
+          (0, t.jsx)('circle', { cx: '10', cy: '10', r: '3.1' }),
+          (0, t.jsx)('path', { d: 'M10 1.9V3.9' }),
+          (0, t.jsx)('path', { d: 'M10 16.1V18.1' }),
+          (0, t.jsx)('path', { d: 'M1.9 10H3.9' }),
+          (0, t.jsx)('path', { d: 'M16.1 10H18.1' }),
+          (0, t.jsx)('path', { d: 'M4.2 4.2 5.65 5.65' }),
+          (0, t.jsx)('path', { d: 'M14.35 14.35 15.8 15.8' }),
+          (0, t.jsx)('path', { d: 'M14.35 5.65 15.8 4.2' }),
+          (0, t.jsx)('path', { d: 'M4.2 15.8 5.65 14.35' }),
+        ],
+      });
+    }
+    function C() {
+      return (0, t.jsx)('svg', {
+        viewBox: '0 0 20 20',
+        fill: 'none',
+        'aria-hidden': 'true',
+        children: (0, t.jsx)('path', {
+          d: 'M13.9 2.9a6.85 6.85 0 1 0 3.2 12.9A7.35 7.35 0 1 1 13.9 2.9Z',
+        }),
+      });
+    }
+    function A({ effectiveTheme: e, preference: r }) {
+      return 'system' === r
+        ? (0, t.jsx)(T, {})
+        : 'dark' === e
+          ? (0, t.jsx)(C, {})
+          : (0, t.jsx)(j, {});
+    }
+    function M(e, t) {
+      switch (e) {
+        case 'light':
+          return t.lightLabel;
+        case 'dark':
+          return t.darkLabel;
+        default:
+          return t.systemLabel;
+      }
+    }
+    e.s(
+      [
+        'ThemePreferenceMenuButton',
+        0,
+        function ({ labels: e, onPreferenceChange: n, options: i }) {
+          let o = { ...l, ...e },
+            {
+              effectiveTheme: a,
+              setThemePreference: s,
+              themePreference: u,
+            } = N(),
+            [c, d] = (0, r.useState)(!1),
+            h = (0, r.useRef)(null),
+            f = M(u, o),
+            g = i && i.length > 0 ? i : ['system', 'light', 'dark'];
+          return (
+            (0, r.useEffect)(() => {
+              if (c)
+                return (
+                  document.addEventListener('mousedown', e),
+                  document.addEventListener('keydown', t),
+                  () => {
+                    (document.removeEventListener('mousedown', e),
+                      document.removeEventListener('keydown', t));
+                  }
+                );
+              function e(e) {
+                h.current?.contains(e.target) || d(!1);
+              }
+              function t(e) {
+                'Escape' === e.key && d(!1);
+              }
+            }, [c]),
+            (0, t.jsxs)('div', {
+              ref: h,
+              className: 'elite-theme-menu',
+              'data-open': c ? 'true' : 'false',
+              children: [
+                (0, t.jsx)('button', {
+                  type: 'button',
+                  'data-unstyled-button': !0,
+                  className: 'elite-theme-menu-trigger',
+                  'aria-expanded': c,
+                  'aria-haspopup': 'menu',
+                  'aria-label': `${o.themeButtonLabel}, ${f}`,
+                  onClick: () => {
+                    d((e) => !e);
+                  },
+                  children: (0, t.jsx)('span', {
+                    className: 'elite-theme-menu-trigger-icon',
+                    'aria-hidden': 'true',
+                    children: (0, t.jsx)(A, {
+                      effectiveTheme: a,
+                      preference: u,
+                    }),
+                  }),
+                }),
+                c
+                  ? (0, t.jsx)('div', {
+                      className: 'elite-theme-menu-panel',
+                      role: 'menu',
+                      'aria-label': o.menuLabel,
+                      children: g.map((e) => {
+                        let r = e === u;
+                        return (0, t.jsxs)(
+                          'button',
+                          {
+                            type: 'button',
+                            'data-unstyled-button': !0,
+                            role: 'menuitemradio',
+                            'aria-checked': r,
+                            className: 'elite-theme-menu-item',
+                            'data-active': r ? 'true' : 'false',
+                            onClick: (t) => {
+                              (s(e),
+                                d(!1),
+                                n?.(e),
+                                t.currentTarget instanceof HTMLElement &&
+                                  t.currentTarget.blur());
+                            },
+                            children: [
+                              (0, t.jsx)('span', {
+                                className: 'elite-theme-menu-item-icon',
+                                'aria-hidden': 'true',
+                                children:
+                                  'system' === e
+                                    ? (0, t.jsx)(T, {})
+                                    : 'light' === e
+                                      ? (0, t.jsx)(j, {})
+                                      : (0, t.jsx)(C, {}),
+                              }),
+                              (0, t.jsxs)('span', {
+                                className: 'elite-theme-menu-item-copy',
+                                children: [
+                                  (0, t.jsx)('strong', { children: M(e, o) }),
+                                  (0, t.jsx)('span', {
+                                    children:
+                                      'system' === e ? M(a, o) : M(e, o),
+                                  }),
+                                ],
+                              }),
+                              (0, t.jsx)('span', {
+                                className: 'elite-theme-menu-item-check',
+                                'aria-hidden': 'true',
+                                children: r ? '●' : '○',
+                              }),
+                            ],
+                          },
+                          e,
+                        );
+                      }),
+                    })
+                  : null,
+              ],
+            })
+          );
+        },
+        'ThemePreferenceProvider',
+        0,
+        function ({ initialPreference: e, children: t }) {
+          return (
+            (0, r.useEffect)(() => {
+              E(o(e));
+            }, [e]),
+            t
+          );
+        },
+        'initializeThemePreference',
+        0,
+        E,
+        'setGlobalThemePreference',
+        0,
+        b,
+        'useThemePreference',
+        0,
+        N,
+      ],
+      49153,
+    );
+  },
+]);

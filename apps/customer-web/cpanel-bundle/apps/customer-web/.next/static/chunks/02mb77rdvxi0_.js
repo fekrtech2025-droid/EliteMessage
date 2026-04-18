@@ -1,4 +1,63 @@
-(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,87428,(e,a,t)=>{"use strict";Object.defineProperty(t,"__esModule",{value:!0});var l={formatUrl:function(){return o},formatWithValidation:function(){return s},urlObjectKeys:function(){return d}};for(var i in l)Object.defineProperty(t,i,{enumerable:!0,get:l[i]});let r=e.r(44066)._(e.r(12892)),n=/https?|ftp|gopher|file/;function o(e){let{auth:a,hostname:t}=e,l=e.protocol||"",i=e.pathname||"",o=e.hash||"",d=e.query||"",s=!1;a=a?encodeURIComponent(a).replace(/%3A/i,":")+"@":"",e.host?s=a+e.host:t&&(s=a+(~t.indexOf(":")?`[${t}]`:t),e.port&&(s+=":"+e.port)),d&&"object"==typeof d&&(d=String(r.urlQueryToSearchParams(d)));let m=e.search||d&&`?${d}`||"";return l&&!l.endsWith(":")&&(l+=":"),e.slashes||(!l||n.test(l))&&!1!==s?(s="//"+(s||""),i&&"/"!==i[0]&&(i="/"+i)):s||(s=""),o&&"#"!==o[0]&&(o="#"+o),m&&"?"!==m[0]&&(m="?"+m),i=i.replace(/[?#]/g,encodeURIComponent),m=m.replace("#","%23"),`${l}${s}${i}${m}${o}`}let d=["auth","hash","host","hostname","href","path","pathname","port","protocol","query","search","slashes"];function s(e){return o(e)}},95379,(e,a,t)=>{"use strict";Object.defineProperty(t,"__esModule",{value:!0}),Object.defineProperty(t,"useMergedRef",{enumerable:!0,get:function(){return i}});let l=e.r(11501);function i(e,a){let t=(0,l.useRef)(null),i=(0,l.useRef)(null);return(0,l.useCallback)(l=>{if(null===l){let e=t.current;e&&(t.current=null,e());let a=i.current;a&&(i.current=null,a())}else e&&(t.current=r(e,l)),a&&(i.current=r(a,l))},[e,a])}function r(e,a){if("function"!=typeof e)return e.current=a,()=>{e.current=null};{let t=e(a);return"function"==typeof t?t:()=>e(null)}}("function"==typeof t.default||"object"==typeof t.default&&null!==t.default)&&void 0===t.default.__esModule&&(Object.defineProperty(t.default,"__esModule",{value:!0}),Object.assign(t.default,t),a.exports=t.default)},43135,(e,a,t)=>{"use strict";Object.defineProperty(t,"__esModule",{value:!0}),Object.defineProperty(t,"isLocalURL",{enumerable:!0,get:function(){return r}});let l=e.r(87683),i=e.r(13708);function r(e){if(!(0,l.isAbsoluteUrl)(e))return!0;try{let a=(0,l.getLocationOrigin)(),t=new URL(e,a);return t.origin===a&&(0,i.hasBasePath)(t.pathname)}catch(e){return!1}}},82094,(e,a,t)=>{"use strict";Object.defineProperty(t,"__esModule",{value:!0}),Object.defineProperty(t,"errorOnce",{enumerable:!0,get:function(){return l}});let l=e=>{}},87383,(e,a,t)=>{"use strict";Object.defineProperty(t,"__esModule",{value:!0});var l={default:function(){return f},useLinkStatus:function(){return v}};for(var i in l)Object.defineProperty(t,i,{enumerable:!0,get:l[i]});let r=e.r(44066),n=e.r(52759),o=r._(e.r(11501)),d=e.r(87428),s=e.r(71855),m=e.r(95379),h=e.r(87683),c=e.r(52992);e.r(75780);let u=e.r(36194),p=e.r(60967),g=e.r(43135),b=e.r(80538);function f(a){var t,l;let i,r,f,[v,y]=(0,o.useOptimistic)(p.IDLE_LINK_STATUS),w=(0,o.useRef)(null),{href:k,as:j,children:z,prefetch:N=null,passHref:M,replace:S,shallow:A,scroll:C,onClick:P,onMouseEnter:T,onTouchStart:O,legacyBehavior:B=!1,onNavigate:L,transitionTypes:_,ref:E,unstable_dynamicOnHover:I,...$}=a;i=z,B&&("string"==typeof i||"number"==typeof i)&&(i=(0,n.jsx)("a",{children:i}));let R=o.default.useContext(s.AppRouterContext),U=!1!==N,F=!1!==N?null===(l=N)||"auto"===l?b.FetchStrategy.PPR:b.FetchStrategy.Full:b.FetchStrategy.PPR,H="string"==typeof(t=j||k)?t:(0,d.formatUrl)(t);if(B){if(i?.$$typeof===Symbol.for("react.lazy"))throw Object.defineProperty(Error("`<Link legacyBehavior>` received a direct child that is either a Server Component, or JSX that was loaded with React.lazy(). This is not supported. Either remove legacyBehavior, or make the direct child a Client Component that renders the Link's `<a>` tag."),"__NEXT_ERROR_CODE",{value:"E863",enumerable:!1,configurable:!0});r=o.default.Children.only(i)}let W=B?r&&"object"==typeof r&&r.ref:E,V=o.default.useCallback(e=>(null!==R&&(w.current=(0,p.mountLinkInstance)(e,H,R,F,U,y)),()=>{w.current&&((0,p.unmountLinkForCurrentNavigation)(w.current),w.current=null),(0,p.unmountPrefetchableInstance)(e)}),[U,H,R,F,y]),D={ref:(0,m.useMergedRef)(V,W),onClick(a){B||"function"!=typeof P||P(a),B&&r.props&&"function"==typeof r.props.onClick&&r.props.onClick(a),!R||a.defaultPrevented||function(a,t,l,i,r,n,d){if("u">typeof window){let s,{nodeName:m}=a.currentTarget;if("A"===m.toUpperCase()&&((s=a.currentTarget.getAttribute("target"))&&"_self"!==s||a.metaKey||a.ctrlKey||a.shiftKey||a.altKey||a.nativeEvent&&2===a.nativeEvent.which)||a.currentTarget.hasAttribute("download"))return;if(!(0,g.isLocalURL)(t)){i&&(a.preventDefault(),location.replace(t));return}if(a.preventDefault(),n){let e=!1;if(n({preventDefault:()=>{e=!0}}),e)return}let{dispatchNavigateAction:h}=e.r(59224);o.default.startTransition(()=>{h(t,i?"replace":"push",!1===r?u.ScrollBehavior.NoScroll:u.ScrollBehavior.Default,l.current,d)})}}(a,H,w,S,C,L,_)},onMouseEnter(e){B||"function"!=typeof T||T(e),B&&r.props&&"function"==typeof r.props.onMouseEnter&&r.props.onMouseEnter(e),R&&U&&(0,p.onNavigationIntent)(e.currentTarget,!0===I)},onTouchStart:function(e){B||"function"!=typeof O||O(e),B&&r.props&&"function"==typeof r.props.onTouchStart&&r.props.onTouchStart(e),R&&U&&(0,p.onNavigationIntent)(e.currentTarget,!0===I)}};return(0,h.isAbsoluteUrl)(H)?D.href=H:B&&!M&&("a"!==r.type||"href"in r.props)||(D.href=(0,c.addBasePath)(H)),f=B?o.default.cloneElement(r,D):(0,n.jsx)("a",{...$,...D,children:i}),(0,n.jsx)(x.Provider,{value:v,children:f})}e.r(82094);let x=(0,o.createContext)(p.IDLE_LINK_STATUS),v=()=>(0,o.useContext)(x);("function"==typeof t.default||"object"==typeof t.default&&null!==t.default)&&void 0===t.default.__esModule&&(Object.defineProperty(t.default,"__esModule",{value:!0}),Object.assign(t.default,t),a.exports=t.default)},98689,(e,a,t)=>{a.exports=e.r(36809)},16233,77219,37008,30516,84097,252,20875,47548,75864,e=>{"use strict";var a=e.i(52759);let t={narrow:760,normal:1160,wide:1360},l=`
+(globalThis.TURBOPACK || (globalThis.TURBOPACK = [])).push([
+  'object' == typeof document ? document.currentScript : void 0,
+  95379,
+  (e, a, t) => {
+    'use strict';
+    (Object.defineProperty(t, '__esModule', { value: !0 }),
+      Object.defineProperty(t, 'useMergedRef', {
+        enumerable: !0,
+        get: function () {
+          return i;
+        },
+      }));
+    let l = e.r(11501);
+    function i(e, a) {
+      let t = (0, l.useRef)(null),
+        i = (0, l.useRef)(null);
+      return (0, l.useCallback)(
+        (l) => {
+          if (null === l) {
+            let e = t.current;
+            e && ((t.current = null), e());
+            let a = i.current;
+            a && ((i.current = null), a());
+          } else (e && (t.current = r(e, l)), a && (i.current = r(a, l)));
+        },
+        [e, a],
+      );
+    }
+    function r(e, a) {
+      if ('function' != typeof e)
+        return (
+          (e.current = a),
+          () => {
+            e.current = null;
+          }
+        );
+      {
+        let t = e(a);
+        return 'function' == typeof t ? t : () => e(null);
+      }
+    }
+    ('function' == typeof t.default ||
+      ('object' == typeof t.default && null !== t.default)) &&
+      void 0 === t.default.__esModule &&
+      (Object.defineProperty(t.default, '__esModule', { value: !0 }),
+      Object.assign(t.default, t),
+      (a.exports = t.default));
+  },
+  16233,
+  77219,
+  37008,
+  30516,
+  83267,
+  81849,
+  58251,
+  (e) => {
+    'use strict';
+    var a = e.i(52759);
+    let t = { narrow: 760, normal: 1160, wide: 1360 },
+      l = `
 main[data-elite-shell] {
   --elite-ink: #111827;
   --elite-ink-soft: #334155;
@@ -3811,4 +3870,1131 @@ html[data-elite-theme="dark"] main[data-elite-shell][data-nav-collapsed="true"] 
     display: none;
   }
 }
-`;function i({label:e,variant:t="topbar",markSrc:l,markAlt:r="",launcherControlsId:n,launcherButtonLabel:o,launcherExpandLabel:d,onLauncherClick:s}){let m="topbar"===t,h=(0,a.jsxs)("svg",{viewBox:"0 0 24 24",fill:"none","aria-hidden":"true",children:[(0,a.jsx)("rect",{x:"4",y:"4",width:"4.5",height:"4.5",rx:"1.1"}),(0,a.jsx)("rect",{x:"9.75",y:"4",width:"4.5",height:"4.5",rx:"1.1"}),(0,a.jsx)("rect",{x:"15.5",y:"4",width:"4.5",height:"4.5",rx:"1.1"}),(0,a.jsx)("rect",{x:"4",y:"9.75",width:"4.5",height:"4.5",rx:"1.1"}),(0,a.jsx)("rect",{x:"9.75",y:"9.75",width:"4.5",height:"4.5",rx:"1.1"}),(0,a.jsx)("rect",{x:"15.5",y:"9.75",width:"4.5",height:"4.5",rx:"1.1"}),(0,a.jsx)("rect",{x:"4",y:"15.5",width:"4.5",height:"4.5",rx:"1.1"}),(0,a.jsx)("rect",{x:"9.75",y:"15.5",width:"4.5",height:"4.5",rx:"1.1"}),(0,a.jsx)("rect",{x:"15.5",y:"15.5",width:"4.5",height:"4.5",rx:"1.1"})]}),c=m?s?(0,a.jsx)("button",{type:"button",className:"elite-shell-topbar-brand-launcher","data-unstyled-button":!0,"data-state":"expanded","data-collapse-label":o,"data-expand-label":d,"aria-label":o,"aria-controls":n,"aria-expanded":"true",onClick:s,children:h}):(0,a.jsx)("span",{className:"elite-shell-topbar-brand-launcher","aria-hidden":"true",children:h}):null;return(0,a.jsxs)("div",{className:m?"elite-shell-topbar-brand":"elite-rail-brand","data-variant":t,children:[(0,a.jsx)("span",{className:m?"elite-shell-topbar-brand-mark":"elite-rail-brand-mark","aria-hidden":"true","data-has-image":l?"true":"false",children:l?(0,a.jsx)("img",{className:"elite-shell-topbar-brand-mark-image",src:l,alt:r}):null}),(0,a.jsxs)("div",{className:m?"elite-shell-topbar-brand-copy":"elite-rail-brand-copy",children:[(0,a.jsx)("span",{className:m?"elite-shell-topbar-brand-name":"elite-rail-brand-name",children:"Elite Message"}),(0,a.jsx)("span",{className:m?"elite-shell-topbar-brand-subtitle":"elite-rail-brand-subtitle",children:e})]}),c]})}e.s(["AppShell",0,function({title:e,subtitle:r,breadcrumbLabel:n,children:o,footer:d,meta:s,nav:m,headerActions:h,secondaryNav:c,surface:u="neutral",density:p="comfortable",contentWidth:g="wide",headerMode:b="default",topbarBrandMarkAlt:f,labels:x}){let v=m?`elite-shell-nav-${u}`:void 0,y="full"===g?void 0:t[g],w=("customer"===u||"admin"===u)&&!!m&&"hidden"!==b,k=n??e,j=!!r.trim(),z=!!m&&("customer"===u||"admin"===u),N=x?.surfaceLabel??function(e){switch(e){case"customer":return"Customer Surface";case"admin":return"Admin Console";default:return"Elite Message"}}(u),M=x?.breadcrumbAriaLabel??"Breadcrumb",S=x?.breadcrumbHomeLabel??"Dashboard",A=x?.customerTopbarLabel??`${N} topbar`,C=x?.mobileNavigationLabel??"Navigation",P=x?.mobileNavigationOpenLabel??"Open",T=x?.collapseSidebarLabel??"Collapse sidebar menu",O=x?.expandSidebarLabel??"Expand sidebar menu",B=x?.brandMarkAlt??f??"Elite Message logo";return(0,a.jsxs)("main",{"data-elite-shell":!0,"data-surface":u,"data-density":p,"data-header-mode":b,style:{minHeight:"100vh",background:"var(--elite-shell-bg)",padding:"hidden"===b||w?0:"clamp(18px, 2vw, 26px)",color:"var(--elite-ink)"},children:[(0,a.jsx)("style",{children:l}),(0,a.jsxs)("div",{className:"elite-shell-frame","data-has-nav":m?"true":"false",children:[w?(0,a.jsxs)("div",{className:"elite-shell-topbar","aria-label":A,children:[(0,a.jsx)(i,{label:N,variant:"topbar",markSrc:"customer"===u?"/images/EliteMessage_Icon_Only.png":void 0,markAlt:B,launcherControlsId:v,launcherButtonLabel:T,launcherExpandLabel:O,onLauncherClick:z?e=>{let a=e.currentTarget.closest("[data-elite-shell]");if(!a)return;let t="true"===a.getAttribute("data-nav-collapsed");!function(e,a,t){a?e.setAttribute("data-nav-collapsed","true"):e.removeAttribute("data-nav-collapsed");let l=e.querySelector(".elite-shell-frame");l&&(a?l.setAttribute("data-nav-collapsed","true"):l.removeAttribute("data-nav-collapsed"));let i=t?e.querySelector(`#${t}`):e.querySelector(".elite-shell-aside");i&&(i.hidden=!1,i.removeAttribute("aria-hidden"));let r=e.querySelector(".elite-shell-mobile-nav");r&&(r.hidden=a);let n=e.querySelector(".elite-shell-topbar-brand-launcher");if(n){let e=n.dataset.collapseLabel??"Collapse sidebar menu",t=n.dataset.expandLabel??"Expand sidebar menu";n.dataset.state=a?"collapsed":"expanded",n.setAttribute("aria-expanded",a?"false":"true"),n.setAttribute("aria-label",a?t:e)}}(a,!t,v)}:void 0}),(0,a.jsx)("div",{className:"elite-shell-topbar-center",children:s}),(0,a.jsx)("div",{className:"elite-shell-topbar-actions",children:h})]}):null,m?(0,a.jsxs)(a.Fragment,{children:[(0,a.jsx)("div",{className:"elite-shell-mobile-nav",children:(0,a.jsxs)("details",{children:[(0,a.jsxs)("summary",{children:[(0,a.jsx)("span",{children:C}),(0,a.jsx)("span",{"aria-hidden":"true",children:P})]}),(0,a.jsx)("div",{className:"elite-shell-mobile-nav-body",children:m})]})}),(0,a.jsx)("aside",{id:v,className:"elite-shell-aside",children:m})]}):null,(0,a.jsx)("div",{className:"elite-shell-main",children:(0,a.jsxs)("div",{className:"elite-shell-content",style:{maxWidth:y,margin:m?void 0:"0 auto"},children:["hidden"===b?null:(0,a.jsxs)("header",{className:`elite-page-header${"customer"===u?" elite-page-header-customer":""}`,children:[w?null:(0,a.jsxs)("div",{className:"elite-page-header-top",children:[(0,a.jsxs)("span",{className:"elite-page-brand",children:[(0,a.jsx)("span",{className:"elite-page-brand-mark","aria-hidden":"true"}),N]}),(0,a.jsxs)("div",{className:"elite-toolbar",children:[s,h]})]}),"customer"===u?(0,a.jsxs)("div",{className:"elite-page-header-body elite-page-header-body-customer",children:[(0,a.jsxs)("div",{className:"elite-page-header-row",children:[(0,a.jsx)("h1",{className:"elite-page-title",children:e}),(0,a.jsxs)("nav",{className:"elite-page-breadcrumbs","aria-label":M,children:[(0,a.jsx)("a",{href:"/",children:S}),(0,a.jsx)("span",{"aria-hidden":"true",children:"/"}),(0,a.jsx)("span",{children:k})]})]}),j?(0,a.jsx)("p",{className:"elite-page-subtitle",children:r}):null]}):(0,a.jsxs)("div",{className:"elite-page-header-body",children:[(0,a.jsx)("h1",{className:"elite-page-title",children:e}),j?(0,a.jsx)("p",{className:"elite-page-subtitle",children:r}):null]})]}),c?(0,a.jsx)("div",{className:"elite-page-secondary-nav",children:c}):null,(0,a.jsx)("div",{className:"elite-page-stack",children:o}),d?(0,a.jsx)("footer",{className:"elite-page-footer",children:d}):null]})})]})]})}],77219),e.i(25762);function r({children:e,tone:t="neutral"}){return(0,a.jsx)("span",{className:"elite-status-badge","data-tone":t,children:e})}e.s(["ActionButton",0,function({tone:e="primary",size:t="default",stretch:l=!1,children:i,...r}){return(0,a.jsx)("button",{...r,"data-elite-button":!0,"data-tone":e,"data-size":t,"data-stretch":l?"true":"false",children:i})},"AnchorNav",0,function({items:e}){return(0,a.jsx)("nav",{className:"elite-anchor-nav","aria-label":"Section navigation",children:e.map(e=>(0,a.jsx)("a",{href:e.href,children:e.label},e.href))})},"DefinitionGrid",0,function({items:e,minItemWidth:t=170,emphasis:l="soft"}){return(0,a.jsx)("div",{className:"elite-definition-grid",style:{"--elite-grid-min":`${t}px`},children:e.map(e=>(0,a.jsxs)("div",{className:"elite-definition-item","data-tone":e.tone??"neutral","data-emphasis":l,children:[(0,a.jsx)("div",{className:"elite-definition-label",children:e.label}),(0,a.jsx)("div",{className:"elite-definition-value",children:e.value})]},`${e.label}-${String(e.value)}`))})},"Field",0,function({label:e,hint:t,tone:l="neutral",children:i}){return(0,a.jsxs)("label",{className:"elite-field","data-tone":l,children:[(0,a.jsx)("span",{className:"elite-field-label",children:e}),i,t?(0,a.jsx)("span",{className:"elite-field-hint",children:t}):null]})},"MetricCard",0,function({label:e,value:t,hint:l,tone:i="neutral",emphasis:r="soft"}){return(0,a.jsxs)("div",{className:"elite-metric-card","data-tone":i,"data-emphasis":r,children:[(0,a.jsx)("div",{className:"elite-metric-label",children:e}),(0,a.jsx)("div",{className:"elite-metric-value",children:t}),l?(0,a.jsx)("div",{className:"elite-metric-hint",children:l}):null]})},"MetricGrid",0,function({children:e,minItemWidth:t=170}){return(0,a.jsx)("div",{className:"elite-metric-grid",style:{"--elite-grid-min":`${t}px`},children:e})},"NoticeBanner",0,function({title:e,tone:t="info",emphasis:l="soft",surface:i,children:r}){return(0,a.jsxs)("div",{className:"elite-notice","data-tone":t,"data-emphasis":l,"data-surface":i,children:[(0,a.jsx)("div",{className:"elite-notice-title",children:e}),(0,a.jsx)("div",{children:r})]})},"SectionGrid",0,function({children:e,minItemWidth:t=280}){return(0,a.jsx)("div",{className:"elite-section-grid",style:{"--elite-grid-min":`${t}px`},children:e})},"SelectInput",0,function(e){return(0,a.jsx)("select",{...e,"data-elite-control":!0})},"StatusBadge",0,r,"TextAreaInput",0,function(e){return(0,a.jsx)("textarea",{...e,"data-elite-control":!0})},"TextInput",0,function(e){return(0,a.jsx)("input",{...e,"data-elite-control":!0})}],37008),e.s(["InfoCard",0,function({eyebrow:e,title:t,subtitle:l,action:i,children:r,className:n,tone:o="neutral",density:d="comfortable",surface:s,id:m,...h}){return(0,a.jsxs)("section",{...h,id:m,"data-elite-card":!0,"data-tone":o,"data-density":d,"data-surface":s,className:n,style:h.style,children:[(0,a.jsxs)("div",{className:"elite-card-header",children:[(0,a.jsxs)("div",{className:"elite-card-copy",children:[e?(0,a.jsx)("p",{className:"elite-card-eyebrow",children:e}):null,(0,a.jsx)("h2",{className:"elite-card-title",children:t}),l?(0,a.jsx)("p",{className:"elite-card-subtitle",children:l}):null]}),i?(0,a.jsx)("div",{className:"elite-card-action",children:i}):null]}),(0,a.jsx)("div",{className:"elite-card-body",children:r})]})}],30516),e.i(9194);var n=e.i(49153);e.s([],16233);var o=e.i(87383);let d=[{key:"dashboard",href:"/",label:"Overview",icon:"dashboard",section:"pinned"},{key:"messages",href:"/messages",label:"Messages",icon:"messages",section:"operations"},{key:"workers",href:"/workers",label:"Workers",icon:"workers",section:"operations"},{key:"support",href:"/support",label:"Support",icon:"support",section:"operations"},{key:"audit",href:"/audit",label:"Audit",icon:"audit",section:"operations"},{key:"users",href:"/users",label:"Users",icon:"users",section:"directory"},{key:"workspaces",href:"/workspaces",label:"Workspaces",icon:"workspaces",section:"directory"}];function s(e){return e.startsWith("/users")?"users":e.startsWith("/workspaces")?"workspaces":e.startsWith("/messages")?"messages":e.startsWith("/workers/")?"worker-detail":e.startsWith("/workers")?"workers":e.startsWith("/support")?"support":e.startsWith("/audit")?"audit":e.startsWith("/instances/")?"instance":"dashboard"}function m(e,a){return e===a||"worker-detail"===a&&"workers"===e||"instance"===a&&"dashboard"===e}function h({kind:e}){switch(e){case"dashboard":return(0,a.jsxs)("svg",{viewBox:"0 0 20 20",fill:"none","aria-hidden":"true",children:[(0,a.jsx)("path",{d:"M3.6 9.35 10 4.15l6.4 5.2"}),(0,a.jsx)("path",{d:"M5.2 8.85V16h4.1v-4.4h1.4V16h4.1V8.85"})]});case"messages":return(0,a.jsxs)("svg",{viewBox:"0 0 20 20",fill:"none","aria-hidden":"true",children:[(0,a.jsx)("path",{d:"M4.2 5.6h11.6v7.1H9.7L6.2 15.5v-2.8H4.2z"}),(0,a.jsx)("path",{d:"M6.3 8.1h7.4"}),(0,a.jsx)("path",{d:"M6.3 10.2h4.8"})]});case"workers":return(0,a.jsxs)("svg",{viewBox:"0 0 20 20",fill:"none","aria-hidden":"true",children:[(0,a.jsx)("rect",{x:"3.9",y:"4.2",width:"4.2",height:"4.2",rx:"1"}),(0,a.jsx)("rect",{x:"11.9",y:"4.2",width:"4.2",height:"4.2",rx:"1"}),(0,a.jsx)("rect",{x:"3.9",y:"11.6",width:"4.2",height:"4.2",rx:"1"}),(0,a.jsx)("path",{d:"M10 6.3H11.9"}),(0,a.jsx)("path",{d:"M6 8.4v3.2"}),(0,a.jsx)("path",{d:"M8.1 13.7H11.9"}),(0,a.jsx)("path",{d:"M14 8.4v5.3"})]});case"support":return(0,a.jsxs)("svg",{viewBox:"0 0 20 20",fill:"none","aria-hidden":"true",children:[(0,a.jsx)("path",{d:"M10 15.9a5.9 5.9 0 1 0-5.9-5.9"}),(0,a.jsx)("path",{d:"M4.1 10.05v2.75"}),(0,a.jsx)("path",{d:"M15.9 10.05v2.75"}),(0,a.jsx)("path",{d:"M6.25 15.15c.85.65 2.05 1.05 3.75 1.05s2.9-.4 3.75-1.05"})]});case"audit":return(0,a.jsxs)("svg",{viewBox:"0 0 20 20",fill:"none","aria-hidden":"true",children:[(0,a.jsx)("path",{d:"M10 3.1 15.8 5.2V9c0 3.35-2 6.35-5.8 7.9C6.2 15.35 4.2 12.35 4.2 9V5.2z"}),(0,a.jsx)("path",{d:"M8 9.8 9.35 11.15 12.2 8.3"})]});case"users":return(0,a.jsxs)("svg",{viewBox:"0 0 20 20",fill:"none","aria-hidden":"true",children:[(0,a.jsx)("circle",{cx:"7.1",cy:"7.2",r:"2.2"}),(0,a.jsx)("circle",{cx:"13.25",cy:"8",r:"1.7"}),(0,a.jsx)("path",{d:"M3.9 15c.55-2.15 2.35-3.45 5.05-3.45 2.7 0 4.5 1.3 5.05 3.45"}),(0,a.jsx)("path",{d:"M12 14.95c.4-1.35 1.45-2.2 3.15-2.2.45 0 .85.05 1.2.15"})]});case"workspaces":return(0,a.jsxs)("svg",{viewBox:"0 0 20 20",fill:"none","aria-hidden":"true",children:[(0,a.jsx)("rect",{x:"3.8",y:"4.1",width:"5.6",height:"5.6",rx:"1.2"}),(0,a.jsx)("rect",{x:"10.6",y:"4.1",width:"5.6",height:"3.6",rx:"1.2"}),(0,a.jsx)("rect",{x:"10.6",y:"9.9",width:"5.6",height:"6",rx:"1.2"}),(0,a.jsx)("rect",{x:"3.8",y:"11.9",width:"5.6",height:"4",rx:"1.2"})]});default:return null}}function c(){return(0,a.jsx)("svg",{viewBox:"0 0 20 20",fill:"none","aria-hidden":"true",children:(0,a.jsx)("path",{d:"m7.2 4.9 4.9 5.1-4.9 5.1"})})}function u(e,t){let l=d.filter(a=>a.section===e);return 0===l.length?null:(0,a.jsxs)("div",{className:"elite-rail-section",children:[(0,a.jsx)("div",{className:"elite-rail-section-label",children:"pinned"===e?"Pinned":"operations"===e?"Operations":"Directory"}),(0,a.jsx)("div",{className:"elite-rail-links",children:l.map(e=>{var l;return l=m(e.key,t),(0,a.jsxs)(o.default,{href:e.href,className:"elite-rail-link","data-key":e.key,"data-active":l?"true":"false","data-tooltip":e.label,"aria-current":l?"page":void 0,title:e.label,children:[(0,a.jsxs)("span",{className:"elite-rail-link-main",children:[(0,a.jsx)("span",{className:"elite-rail-link-icon","aria-hidden":"true",children:(0,a.jsx)(h,{kind:e.icon})}),(0,a.jsx)("span",{className:"elite-rail-link-label",children:e.label})]}),(0,a.jsx)("span",{className:"elite-rail-link-trailing",children:l?(0,a.jsx)(r,{tone:"warning",children:"Current"}):(0,a.jsx)("span",{className:"elite-rail-link-chevron","aria-hidden":"true",children:(0,a.jsx)(c,{})})})]},e.key)})})]})}e.s(["AdminNav",0,function({current:e,account:t}){let l=t?{label:"Active operator",name:t.user.displayName,metaPrimary:t.user.role.replaceAll("_"," "),metaSecondary:t.user.email}:{label:"Admin surface",name:"Operations Console",metaPrimary:"Platform admin",metaSecondary:"Global access"};return(0,a.jsxs)("nav",{className:"elite-rail","aria-label":"Admin navigation",children:[(0,a.jsx)("div",{className:"elite-rail-header",children:(0,a.jsxs)("div",{className:"elite-rail-workspace",children:[(0,a.jsx)("div",{className:"elite-rail-workspace-label",children:l.label}),(0,a.jsx)("div",{className:"elite-rail-workspace-name",children:l.name}),(0,a.jsxs)("div",{className:"elite-rail-workspace-meta",children:[(0,a.jsx)("span",{children:l.metaPrimary}),(0,a.jsx)("span",{children:l.metaSecondary})]})]})}),u("pinned",e),u("operations",e),u("directory",e),(0,a.jsx)("div",{className:"elite-rail-meta",children:t?(0,a.jsxs)(a.Fragment,{children:[(0,a.jsx)(r,{tone:"warning",children:t.user.displayName}),(0,a.jsxs)(r,{tone:"neutral",children:[t.workspaces.length," workspaces"]})]}):(0,a.jsx)(r,{tone:"neutral",children:"Admin surface"})})]})},"adminNavItems",0,d,"isAdminNavItemActive",0,m,"resolveAdminNavCurrent",0,s],84097);var p=e.i(98689),g=e.i(11501),b=e.i(86544);let f="elite-message.admin.access-token",x=b.default.env.NEXT_PUBLIC_API_BASE_URL??"http://localhost:3002";function v(){return window.sessionStorage.getItem(f)}function y(e){window.sessionStorage.setItem(f,e)}function w(){window.sessionStorage.removeItem(f)}async function k(e){try{return await e()}catch{return null}}async function j(e){let a=await k(()=>fetch(`${x}/api/v1/auth/refresh`,{method:"POST",credentials:"include"}));if(!a){let a=v();return e?.(a),a}if(!a.ok)return w(),e?.(null),null;let t=await a.json();return y(t.accessToken),e?.(t.accessToken),t.accessToken}async function z(e,a,t){let l=e??v();if(l||(l=await j(t)),!l)return null;let i=l,r=await k(()=>a(i));if(!r)return null;if(401===r.status){if(!(l=await j(t)))return null;let e=l;if(!(r=await k(()=>a(e))))return null}return r}async function N(e){let a=await k(()=>fetch(`${x}/api/v1/account/me`,{headers:{authorization:`Bearer ${e}`},credentials:"include"}));if(!a||401===a.status)return null;if(403===a.status)throw Error("This account cannot open the admin console.");if(!a.ok)throw Error("Could not load the admin account.");let t=await a.json();return(0,n.setGlobalThemePreference)(t.themePreference),t}function M({syncAccount:e=!1}){async function t(a){if(!e)return;let t=await z(null,e=>fetch(`${x}/api/v1/account/me/theme`,{method:"PATCH",headers:{authorization:`Bearer ${e}`,"content-type":"application/json"},credentials:"include",body:JSON.stringify({themePreference:a})}));if(!t||!t.ok)return}return(0,a.jsx)(n.ThemePreferenceMenuButton,{onPreferenceChange:e?t:void 0})}function S(e){if(!(e instanceof HTMLElement))return;let a=e.closest("details");a instanceof HTMLDetailsElement&&(a.open=!1)}function A({children:e}){return(0,a.jsx)("span",{"aria-hidden":"true",children:e})}function C(){return(0,a.jsxs)("svg",{viewBox:"0 0 20 20",fill:"none","aria-hidden":"true",children:[(0,a.jsx)("path",{d:"M10 2.9 16.2 5.2v4c0 3.6-2.15 6.55-6.2 8-4.05-1.45-6.2-4.4-6.2-8v-4z"}),(0,a.jsx)("path",{d:"M8.2 9.8 9.45 11.05 12.1 8.4"})]})}function P(){return(0,a.jsxs)("svg",{viewBox:"0 0 20 20",fill:"none","aria-hidden":"true",children:[(0,a.jsx)("path",{d:"M4.5 8V4.5H8"}),(0,a.jsx)("path",{d:"M12 4.5H15.5V8"}),(0,a.jsx)("path",{d:"M15.5 12V15.5H12"}),(0,a.jsx)("path",{d:"M8 15.5H4.5V12"})]})}function T(){return(0,a.jsxs)("svg",{viewBox:"0 0 20 20",fill:"none","aria-hidden":"true",children:[(0,a.jsx)("circle",{cx:"8.5",cy:"8.5",r:"4.25"}),(0,a.jsx)("path",{d:"M12 12L16.25 16.25"})]})}function O(){return(0,a.jsxs)("svg",{viewBox:"0 0 20 20",fill:"none","aria-hidden":"true",children:[(0,a.jsx)("circle",{cx:"7.1",cy:"7.2",r:"2.2"}),(0,a.jsx)("circle",{cx:"13.25",cy:"8",r:"1.7"}),(0,a.jsx)("path",{d:"M3.9 15c.55-2.15 2.35-3.45 5.05-3.45 2.7 0 4.5 1.3 5.05 3.45"}),(0,a.jsx)("path",{d:"M12 14.95c.4-1.35 1.45-2.2 3.15-2.2.45 0 .85.05 1.2.15"})]})}function B(){return(0,a.jsxs)("svg",{viewBox:"0 0 20 20",fill:"none","aria-hidden":"true",children:[(0,a.jsx)("rect",{x:"3.8",y:"4.1",width:"5.6",height:"5.6",rx:"1.2"}),(0,a.jsx)("rect",{x:"10.6",y:"4.1",width:"5.6",height:"3.6",rx:"1.2"}),(0,a.jsx)("rect",{x:"10.6",y:"9.9",width:"5.6",height:"6",rx:"1.2"}),(0,a.jsx)("rect",{x:"3.8",y:"11.9",width:"5.6",height:"4",rx:"1.2"})]})}function L(){return(0,a.jsxs)("svg",{viewBox:"0 0 20 20",fill:"none","aria-hidden":"true",children:[(0,a.jsx)("path",{d:"M10 15.9a5.9 5.9 0 1 0-5.9-5.9"}),(0,a.jsx)("path",{d:"M4.1 10.05v2.75"}),(0,a.jsx)("path",{d:"M15.9 10.05v2.75"}),(0,a.jsx)("path",{d:"M6.25 15.15c.85.65 2.05 1.05 3.75 1.05s2.9-.4 3.75-1.05"})]})}function _(){return(0,a.jsxs)("svg",{viewBox:"0 0 20 20",fill:"none","aria-hidden":"true",children:[(0,a.jsx)("path",{d:"M10 3.1 15.8 5.2V9c0 3.35-2 6.35-5.8 7.9C6.2 15.35 4.2 12.35 4.2 9V5.2z"}),(0,a.jsx)("path",{d:"M8 9.8 9.35 11.15 12.2 8.3"})]})}e.s(["apiBaseUrl",0,x,"clearStoredToken",0,w,"readStoredToken",0,v,"writeStoredToken",0,y],252),e.s(["loadAdminAccount",0,N,"refreshAdminAccessToken",0,j,"requestWithAdminRefresh",0,z],20875),e.s(["AdminThemeControl",0,M],47548),e.s(["AdminTopbarControls",0,function({account:e}){let t=(0,p.useRouter)(),l=s((0,p.usePathname)()??"/"),i=e?.user.displayName??"Admin Operator",r=e?.user.role.replaceAll("_"," ")??"Admin console",n=(i||e?.user.email||"A").trim().charAt(0).toUpperCase(),[o,h]=(0,g.useState)(!1);function c(e){t.push(e)}async function u(){try{if(document.fullscreenElement)return void await document.exitFullscreen();await document.documentElement.requestFullscreen()}catch{}}async function b(){try{await fetch(`${x}/api/v1/auth/logout`,{method:"POST",credentials:"include"})}finally{w(),window.location.assign("/")}}return(0,g.useEffect)(()=>{h(!!document.fullscreenElement);let e=()=>{h(!!document.fullscreenElement)};return document.addEventListener("fullscreenchange",e),()=>{document.removeEventListener("fullscreenchange",e)}},[]),(0,a.jsxs)("div",{className:"elite-customer-topbar-controls",children:[(0,a.jsxs)("div",{className:"elite-customer-topbar-utilities","aria-label":"Admin topbar shortcuts",children:[(0,a.jsxs)("button",{type:"button","data-unstyled-button":!0,className:"elite-customer-topbar-language","aria-label":"Open admin overview","data-active":"dashboard"===l?"true":"false",onClick:()=>{c("/")},children:[(0,a.jsx)("span",{className:"elite-customer-topbar-language-flag","aria-hidden":"true",children:(0,a.jsx)(C,{})}),(0,a.jsx)("span",{className:"elite-customer-topbar-language-code",children:"OPS"})]}),(0,a.jsx)(M,{syncAccount:!0}),(0,a.jsx)("button",{type:"button","data-unstyled-button":!0,className:"elite-customer-topbar-utility","aria-label":o?"Exit fullscreen":"Enter fullscreen","aria-pressed":o,"data-active":o?"true":"false",onClick:()=>{u()},children:(0,a.jsx)(A,{children:(0,a.jsx)(P,{})})}),(0,a.jsx)("button",{type:"button","data-unstyled-button":!0,className:"elite-customer-topbar-utility","aria-label":"Open message explorer","data-active":"messages"===l?"true":"false",onClick:()=>{c("/messages")},children:(0,a.jsx)(A,{children:(0,a.jsx)(T,{})})}),(0,a.jsx)("button",{type:"button","data-unstyled-button":!0,className:"elite-customer-topbar-utility","aria-label":"Open users explorer","data-active":"users"===l?"true":"false",onClick:()=>{c("/users")},children:(0,a.jsx)(A,{children:(0,a.jsx)(O,{})})}),(0,a.jsx)("button",{type:"button","data-unstyled-button":!0,className:"elite-customer-topbar-utility","aria-label":"Open workspaces explorer","data-active":"workspaces"===l?"true":"false",onClick:()=>{c("/workspaces")},children:(0,a.jsx)(A,{children:(0,a.jsx)(B,{})})}),(0,a.jsx)("button",{type:"button","data-unstyled-button":!0,className:"elite-customer-topbar-utility","aria-label":"Open support cases","data-active":"support"===l?"true":"false",onClick:()=>{c("/support")},children:(0,a.jsx)(A,{children:(0,a.jsx)(L,{})})}),(0,a.jsx)("button",{type:"button","data-unstyled-button":!0,className:"elite-customer-topbar-utility","aria-label":"Open audit explorer","data-active":"audit"===l?"true":"false",onClick:()=>{c("/audit")},children:(0,a.jsx)(A,{children:(0,a.jsx)(_,{})})})]}),(0,a.jsxs)("details",{className:"elite-customer-topbar-menu",children:[(0,a.jsxs)("summary",{className:"elite-customer-topbar-user","aria-label":"Admin account menu",children:[(0,a.jsx)("span",{className:"elite-customer-topbar-user-avatar","aria-hidden":"true",children:n}),(0,a.jsxs)("span",{className:"elite-customer-topbar-user-copy",children:[(0,a.jsx)("strong",{children:i}),(0,a.jsx)("span",{children:r})]}),(0,a.jsx)("span",{className:"elite-customer-topbar-user-caret","aria-hidden":"true",children:"▾"})]}),(0,a.jsxs)("div",{className:"elite-customer-topbar-menu-panel",children:[(0,a.jsx)("div",{className:"elite-customer-topbar-menu-eyebrow",children:"Quick navigation"}),(0,a.jsx)("div",{className:"elite-customer-topbar-menu-list",children:d.map(e=>{let t=m(e.key,l);return(0,a.jsxs)("button",{type:"button","data-unstyled-button":!0,className:"elite-customer-topbar-menu-item","data-active":t?"true":"false",onClick:a=>{S(a.currentTarget),c(e.href)},children:[(0,a.jsxs)("span",{className:"elite-customer-topbar-menu-item-copy",children:[(0,a.jsx)("strong",{children:e.label}),(0,a.jsx)("span",{children:"/"===e.href?"Admin overview":`Open ${e.label.toLowerCase()}`})]}),(0,a.jsx)("span",{className:"elite-customer-topbar-menu-item-state","aria-hidden":"true",children:t?"Active":"Open"})]},e.key)})}),(0,a.jsx)("button",{type:"button","data-unstyled-button":!0,className:"elite-customer-topbar-menu-logout",onClick:e=>{S(e.currentTarget),b()},children:"Log out"})]})]})]})}],75864)}]);
+`;
+    function i({
+      label: e,
+      variant: t = 'topbar',
+      markSrc: l,
+      markAlt: r = '',
+      launcherControlsId: n,
+      launcherButtonLabel: o,
+      launcherExpandLabel: d,
+      onLauncherClick: s,
+    }) {
+      let m = 'topbar' === t,
+        h = (0, a.jsxs)('svg', {
+          viewBox: '0 0 24 24',
+          fill: 'none',
+          'aria-hidden': 'true',
+          children: [
+            (0, a.jsx)('rect', {
+              x: '4',
+              y: '4',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, a.jsx)('rect', {
+              x: '9.75',
+              y: '4',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, a.jsx)('rect', {
+              x: '15.5',
+              y: '4',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, a.jsx)('rect', {
+              x: '4',
+              y: '9.75',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, a.jsx)('rect', {
+              x: '9.75',
+              y: '9.75',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, a.jsx)('rect', {
+              x: '15.5',
+              y: '9.75',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, a.jsx)('rect', {
+              x: '4',
+              y: '15.5',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, a.jsx)('rect', {
+              x: '9.75',
+              y: '15.5',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+            (0, a.jsx)('rect', {
+              x: '15.5',
+              y: '15.5',
+              width: '4.5',
+              height: '4.5',
+              rx: '1.1',
+            }),
+          ],
+        }),
+        c = m
+          ? s
+            ? (0, a.jsx)('button', {
+                type: 'button',
+                className: 'elite-shell-topbar-brand-launcher',
+                'data-unstyled-button': !0,
+                'data-state': 'expanded',
+                'data-collapse-label': o,
+                'data-expand-label': d,
+                'aria-label': o,
+                'aria-controls': n,
+                'aria-expanded': 'true',
+                onClick: s,
+                children: h,
+              })
+            : (0, a.jsx)('span', {
+                className: 'elite-shell-topbar-brand-launcher',
+                'aria-hidden': 'true',
+                children: h,
+              })
+          : null;
+      return (0, a.jsxs)('div', {
+        className: m ? 'elite-shell-topbar-brand' : 'elite-rail-brand',
+        'data-variant': t,
+        children: [
+          (0, a.jsx)('span', {
+            className: m
+              ? 'elite-shell-topbar-brand-mark'
+              : 'elite-rail-brand-mark',
+            'aria-hidden': 'true',
+            'data-has-image': l ? 'true' : 'false',
+            children: l
+              ? (0, a.jsx)('img', {
+                  className: 'elite-shell-topbar-brand-mark-image',
+                  src: l,
+                  alt: r,
+                })
+              : null,
+          }),
+          (0, a.jsxs)('div', {
+            className: m
+              ? 'elite-shell-topbar-brand-copy'
+              : 'elite-rail-brand-copy',
+            children: [
+              (0, a.jsx)('span', {
+                className: m
+                  ? 'elite-shell-topbar-brand-name'
+                  : 'elite-rail-brand-name',
+                children: 'Elite Message',
+              }),
+              (0, a.jsx)('span', {
+                className: m
+                  ? 'elite-shell-topbar-brand-subtitle'
+                  : 'elite-rail-brand-subtitle',
+                children: e,
+              }),
+            ],
+          }),
+          c,
+        ],
+      });
+    }
+    (e.s(
+      [
+        'AppShell',
+        0,
+        function ({
+          title: e,
+          subtitle: r,
+          breadcrumbLabel: n,
+          children: o,
+          footer: d,
+          meta: s,
+          nav: m,
+          headerActions: h,
+          secondaryNav: c,
+          surface: g = 'neutral',
+          density: p = 'comfortable',
+          contentWidth: u = 'wide',
+          headerMode: b = 'default',
+          topbarBrandMarkAlt: f,
+          labels: x,
+        }) {
+          let v = m ? `elite-shell-nav-${g}` : void 0,
+            w = 'full' === u ? void 0 : t[u],
+            y = ('customer' === g || 'admin' === g) && !!m && 'hidden' !== b,
+            k = n ?? e,
+            j = !!r.trim(),
+            z = !!m && ('customer' === g || 'admin' === g),
+            N =
+              x?.surfaceLabel ??
+              (function (e) {
+                switch (e) {
+                  case 'customer':
+                    return 'Customer Surface';
+                  case 'admin':
+                    return 'Admin Console';
+                  default:
+                    return 'Elite Message';
+                }
+              })(g),
+            S = x?.breadcrumbAriaLabel ?? 'Breadcrumb',
+            A = x?.breadcrumbHomeLabel ?? 'Dashboard',
+            C = x?.customerTopbarLabel ?? `${N} topbar`,
+            H = x?.mobileNavigationLabel ?? 'Navigation',
+            I = x?.mobileNavigationOpenLabel ?? 'Open',
+            G = x?.collapseSidebarLabel ?? 'Collapse sidebar menu',
+            M = x?.expandSidebarLabel ?? 'Expand sidebar menu',
+            T = x?.brandMarkAlt ?? f ?? 'Elite Message logo';
+          return (0, a.jsxs)('main', {
+            'data-elite-shell': !0,
+            'data-surface': g,
+            'data-density': p,
+            'data-header-mode': b,
+            style: {
+              minHeight: '100vh',
+              background: 'var(--elite-shell-bg)',
+              padding: 'hidden' === b || y ? 0 : 'clamp(18px, 2vw, 26px)',
+              color: 'var(--elite-ink)',
+            },
+            children: [
+              (0, a.jsx)('style', { children: l }),
+              (0, a.jsxs)('div', {
+                className: 'elite-shell-frame',
+                'data-has-nav': m ? 'true' : 'false',
+                children: [
+                  y
+                    ? (0, a.jsxs)('div', {
+                        className: 'elite-shell-topbar',
+                        'aria-label': C,
+                        children: [
+                          (0, a.jsx)(i, {
+                            label: N,
+                            variant: 'topbar',
+                            markSrc:
+                              'customer' === g
+                                ? '/images/EliteMessage_Icon_Only.png'
+                                : void 0,
+                            markAlt: T,
+                            launcherControlsId: v,
+                            launcherButtonLabel: G,
+                            launcherExpandLabel: M,
+                            onLauncherClick: z
+                              ? (e) => {
+                                  let a =
+                                    e.currentTarget.closest(
+                                      '[data-elite-shell]',
+                                    );
+                                  if (!a) return;
+                                  let t =
+                                    'true' ===
+                                    a.getAttribute('data-nav-collapsed');
+                                  !(function (e, a, t) {
+                                    a
+                                      ? e.setAttribute(
+                                          'data-nav-collapsed',
+                                          'true',
+                                        )
+                                      : e.removeAttribute('data-nav-collapsed');
+                                    let l =
+                                      e.querySelector('.elite-shell-frame');
+                                    l &&
+                                      (a
+                                        ? l.setAttribute(
+                                            'data-nav-collapsed',
+                                            'true',
+                                          )
+                                        : l.removeAttribute(
+                                            'data-nav-collapsed',
+                                          ));
+                                    let i = t
+                                      ? e.querySelector(`#${t}`)
+                                      : e.querySelector('.elite-shell-aside');
+                                    i &&
+                                      ((i.hidden = !1),
+                                      i.removeAttribute('aria-hidden'));
+                                    let r = e.querySelector(
+                                      '.elite-shell-mobile-nav',
+                                    );
+                                    r && (r.hidden = a);
+                                    let n = e.querySelector(
+                                      '.elite-shell-topbar-brand-launcher',
+                                    );
+                                    if (n) {
+                                      let e =
+                                          n.dataset.collapseLabel ??
+                                          'Collapse sidebar menu',
+                                        t =
+                                          n.dataset.expandLabel ??
+                                          'Expand sidebar menu';
+                                      ((n.dataset.state = a
+                                        ? 'collapsed'
+                                        : 'expanded'),
+                                        n.setAttribute(
+                                          'aria-expanded',
+                                          a ? 'false' : 'true',
+                                        ),
+                                        n.setAttribute(
+                                          'aria-label',
+                                          a ? t : e,
+                                        ));
+                                    }
+                                  })(a, !t, v);
+                                }
+                              : void 0,
+                          }),
+                          (0, a.jsx)('div', {
+                            className: 'elite-shell-topbar-center',
+                            children: s,
+                          }),
+                          (0, a.jsx)('div', {
+                            className: 'elite-shell-topbar-actions',
+                            children: h,
+                          }),
+                        ],
+                      })
+                    : null,
+                  m
+                    ? (0, a.jsxs)(a.Fragment, {
+                        children: [
+                          (0, a.jsx)('div', {
+                            className: 'elite-shell-mobile-nav',
+                            children: (0, a.jsxs)('details', {
+                              children: [
+                                (0, a.jsxs)('summary', {
+                                  children: [
+                                    (0, a.jsx)('span', { children: H }),
+                                    (0, a.jsx)('span', {
+                                      'aria-hidden': 'true',
+                                      children: I,
+                                    }),
+                                  ],
+                                }),
+                                (0, a.jsx)('div', {
+                                  className: 'elite-shell-mobile-nav-body',
+                                  children: m,
+                                }),
+                              ],
+                            }),
+                          }),
+                          (0, a.jsx)('aside', {
+                            id: v,
+                            className: 'elite-shell-aside',
+                            children: m,
+                          }),
+                        ],
+                      })
+                    : null,
+                  (0, a.jsx)('div', {
+                    className: 'elite-shell-main',
+                    children: (0, a.jsxs)('div', {
+                      className: 'elite-shell-content',
+                      style: { maxWidth: w, margin: m ? void 0 : '0 auto' },
+                      children: [
+                        'hidden' === b
+                          ? null
+                          : (0, a.jsxs)('header', {
+                              className: `elite-page-header${'customer' === g ? ' elite-page-header-customer' : ''}`,
+                              children: [
+                                y
+                                  ? null
+                                  : (0, a.jsxs)('div', {
+                                      className: 'elite-page-header-top',
+                                      children: [
+                                        (0, a.jsxs)('span', {
+                                          className: 'elite-page-brand',
+                                          children: [
+                                            (0, a.jsx)('span', {
+                                              className:
+                                                'elite-page-brand-mark',
+                                              'aria-hidden': 'true',
+                                            }),
+                                            N,
+                                          ],
+                                        }),
+                                        (0, a.jsxs)('div', {
+                                          className: 'elite-toolbar',
+                                          children: [s, h],
+                                        }),
+                                      ],
+                                    }),
+                                'customer' === g
+                                  ? (0, a.jsxs)('div', {
+                                      className:
+                                        'elite-page-header-body elite-page-header-body-customer',
+                                      children: [
+                                        (0, a.jsxs)('div', {
+                                          className: 'elite-page-header-row',
+                                          children: [
+                                            (0, a.jsx)('h1', {
+                                              className: 'elite-page-title',
+                                              children: e,
+                                            }),
+                                            (0, a.jsxs)('nav', {
+                                              className:
+                                                'elite-page-breadcrumbs',
+                                              'aria-label': S,
+                                              children: [
+                                                (0, a.jsx)('a', {
+                                                  href: '/',
+                                                  children: A,
+                                                }),
+                                                (0, a.jsx)('span', {
+                                                  'aria-hidden': 'true',
+                                                  children: '/',
+                                                }),
+                                                (0, a.jsx)('span', {
+                                                  children: k,
+                                                }),
+                                              ],
+                                            }),
+                                          ],
+                                        }),
+                                        j
+                                          ? (0, a.jsx)('p', {
+                                              className: 'elite-page-subtitle',
+                                              children: r,
+                                            })
+                                          : null,
+                                      ],
+                                    })
+                                  : (0, a.jsxs)('div', {
+                                      className: 'elite-page-header-body',
+                                      children: [
+                                        (0, a.jsx)('h1', {
+                                          className: 'elite-page-title',
+                                          children: e,
+                                        }),
+                                        j
+                                          ? (0, a.jsx)('p', {
+                                              className: 'elite-page-subtitle',
+                                              children: r,
+                                            })
+                                          : null,
+                                      ],
+                                    }),
+                              ],
+                            }),
+                        c
+                          ? (0, a.jsx)('div', {
+                              className: 'elite-page-secondary-nav',
+                              children: c,
+                            })
+                          : null,
+                        (0, a.jsx)('div', {
+                          className: 'elite-page-stack',
+                          children: o,
+                        }),
+                        d
+                          ? (0, a.jsx)('footer', {
+                              className: 'elite-page-footer',
+                              children: d,
+                            })
+                          : null,
+                      ],
+                    }),
+                  }),
+                ],
+              }),
+            ],
+          });
+        },
+      ],
+      77219,
+    ),
+      e.i(25762));
+    (e.s(
+      [
+        'ActionButton',
+        0,
+        function ({
+          tone: e = 'primary',
+          size: t = 'default',
+          stretch: l = !1,
+          children: i,
+          ...r
+        }) {
+          return (0, a.jsx)('button', {
+            ...r,
+            'data-elite-button': !0,
+            'data-tone': e,
+            'data-size': t,
+            'data-stretch': l ? 'true' : 'false',
+            children: i,
+          });
+        },
+        'AnchorNav',
+        0,
+        function ({ items: e }) {
+          return (0, a.jsx)('nav', {
+            className: 'elite-anchor-nav',
+            'aria-label': 'Section navigation',
+            children: e.map((e) =>
+              (0, a.jsx)('a', { href: e.href, children: e.label }, e.href),
+            ),
+          });
+        },
+        'CheckboxField',
+        0,
+        function ({ label: e, hint: t, ...l }) {
+          return (0, a.jsxs)('label', {
+            className: 'elite-checkbox-row',
+            children: [
+              (0, a.jsx)('input', { ...l, type: 'checkbox' }),
+              (0, a.jsxs)('span', {
+                children: [
+                  (0, a.jsx)('span', {
+                    className: 'elite-checkbox-label',
+                    children: e,
+                  }),
+                  t
+                    ? (0, a.jsx)('span', {
+                        className: 'elite-field-hint',
+                        children: t,
+                      })
+                    : null,
+                ],
+              }),
+            ],
+          });
+        },
+        'DefinitionGrid',
+        0,
+        function ({ items: e, minItemWidth: t = 170, emphasis: l = 'soft' }) {
+          return (0, a.jsx)('div', {
+            className: 'elite-definition-grid',
+            style: { '--elite-grid-min': `${t}px` },
+            children: e.map((e) =>
+              (0, a.jsxs)(
+                'div',
+                {
+                  className: 'elite-definition-item',
+                  'data-tone': e.tone ?? 'neutral',
+                  'data-emphasis': l,
+                  children: [
+                    (0, a.jsx)('div', {
+                      className: 'elite-definition-label',
+                      children: e.label,
+                    }),
+                    (0, a.jsx)('div', {
+                      className: 'elite-definition-value',
+                      children: e.value,
+                    }),
+                  ],
+                },
+                `${e.label}-${String(e.value)}`,
+              ),
+            ),
+          });
+        },
+        'Field',
+        0,
+        function ({ label: e, hint: t, tone: l = 'neutral', children: i }) {
+          return (0, a.jsxs)('label', {
+            className: 'elite-field',
+            'data-tone': l,
+            children: [
+              (0, a.jsx)('span', {
+                className: 'elite-field-label',
+                children: e,
+              }),
+              i,
+              t
+                ? (0, a.jsx)('span', {
+                    className: 'elite-field-hint',
+                    children: t,
+                  })
+                : null,
+            ],
+          });
+        },
+        'MetricCard',
+        0,
+        function ({
+          label: e,
+          value: t,
+          hint: l,
+          tone: i = 'neutral',
+          emphasis: r = 'soft',
+        }) {
+          return (0, a.jsxs)('div', {
+            className: 'elite-metric-card',
+            'data-tone': i,
+            'data-emphasis': r,
+            children: [
+              (0, a.jsx)('div', {
+                className: 'elite-metric-label',
+                children: e,
+              }),
+              (0, a.jsx)('div', {
+                className: 'elite-metric-value',
+                children: t,
+              }),
+              l
+                ? (0, a.jsx)('div', {
+                    className: 'elite-metric-hint',
+                    children: l,
+                  })
+                : null,
+            ],
+          });
+        },
+        'MetricGrid',
+        0,
+        function ({ children: e, minItemWidth: t = 170 }) {
+          return (0, a.jsx)('div', {
+            className: 'elite-metric-grid',
+            style: { '--elite-grid-min': `${t}px` },
+            children: e,
+          });
+        },
+        'NoticeBanner',
+        0,
+        function ({
+          title: e,
+          tone: t = 'info',
+          emphasis: l = 'soft',
+          surface: i,
+          children: r,
+        }) {
+          return (0, a.jsxs)('div', {
+            className: 'elite-notice',
+            'data-tone': t,
+            'data-emphasis': l,
+            'data-surface': i,
+            children: [
+              (0, a.jsx)('div', {
+                className: 'elite-notice-title',
+                children: e,
+              }),
+              (0, a.jsx)('div', { children: r }),
+            ],
+          });
+        },
+        'SectionGrid',
+        0,
+        function ({ children: e, minItemWidth: t = 280 }) {
+          return (0, a.jsx)('div', {
+            className: 'elite-section-grid',
+            style: { '--elite-grid-min': `${t}px` },
+            children: e,
+          });
+        },
+        'SelectInput',
+        0,
+        function (e) {
+          return (0, a.jsx)('select', { ...e, 'data-elite-control': !0 });
+        },
+        'StatusBadge',
+        0,
+        function ({ children: e, tone: t = 'neutral' }) {
+          return (0, a.jsx)('span', {
+            className: 'elite-status-badge',
+            'data-tone': t,
+            children: e,
+          });
+        },
+        'TextAreaInput',
+        0,
+        function (e) {
+          return (0, a.jsx)('textarea', { ...e, 'data-elite-control': !0 });
+        },
+        'TextInput',
+        0,
+        function (e) {
+          return (0, a.jsx)('input', { ...e, 'data-elite-control': !0 });
+        },
+      ],
+      37008,
+    ),
+      e.s(
+        [
+          'InfoCard',
+          0,
+          function ({
+            eyebrow: e,
+            title: t,
+            subtitle: l,
+            action: i,
+            children: r,
+            className: n,
+            tone: o = 'neutral',
+            density: d = 'comfortable',
+            surface: s,
+            id: m,
+            ...h
+          }) {
+            return (0, a.jsxs)('section', {
+              ...h,
+              id: m,
+              'data-elite-card': !0,
+              'data-tone': o,
+              'data-density': d,
+              'data-surface': s,
+              className: n,
+              style: h.style,
+              children: [
+                (0, a.jsxs)('div', {
+                  className: 'elite-card-header',
+                  children: [
+                    (0, a.jsxs)('div', {
+                      className: 'elite-card-copy',
+                      children: [
+                        e
+                          ? (0, a.jsx)('p', {
+                              className: 'elite-card-eyebrow',
+                              children: e,
+                            })
+                          : null,
+                        (0, a.jsx)('h2', {
+                          className: 'elite-card-title',
+                          children: t,
+                        }),
+                        l
+                          ? (0, a.jsx)('p', {
+                              className: 'elite-card-subtitle',
+                              children: l,
+                            })
+                          : null,
+                      ],
+                    }),
+                    i
+                      ? (0, a.jsx)('div', {
+                          className: 'elite-card-action',
+                          children: i,
+                        })
+                      : null,
+                  ],
+                }),
+                (0, a.jsx)('div', {
+                  className: 'elite-card-body',
+                  children: r,
+                }),
+              ],
+            });
+          },
+        ],
+        30516,
+      ),
+      e.i(9194),
+      e.i(49153),
+      e.s([], 16233));
+    var r = e.i(11501);
+    e.i(86544);
+    let n = 'elite-message.customer.access-token',
+      o = 'https://api.levan-pms.com';
+    function d(e) {
+      window.sessionStorage.setItem(n, e);
+    }
+    function s(e) {
+      window.location.assign(
+        `${o}/api/v1/auth/google/authorize?mode=${encodeURIComponent(e)}`,
+      );
+    }
+    function m(e, a = 'en') {
+      let t = e.trim();
+      return t
+        ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t)
+          ? null
+          : 'ar' === a
+            ? 'استخدم عنوان بريد إلكتروني صالحًا مثل name@company.com.'
+            : 'Use a valid email address like name@company.com.'
+        : 'ar' === a
+          ? 'أدخل عنوان البريد الإلكتروني لهذا الحساب.'
+          : 'Enter the email address for this account.';
+    }
+    function h(e, a = 'en') {
+      let t = e.trim();
+      return t
+        ? t.length < 2
+          ? 'ar' === a
+            ? 'يجب أن يتكون الاسم الظاهر من حرفين على الأقل.'
+            : 'Display name must be at least 2 characters.'
+          : null
+        : 'ar' === a
+          ? 'أدخل الاسم الذي يجب أن يظهر في مساحة العمل.'
+          : 'Enter the name that should appear across the workspace.';
+    }
+    function c(e, a = 'en') {
+      let t = e.trim();
+      return t && t.length < 2
+        ? 'ar' === a
+          ? 'يجب أن يتكون اسم مساحة العمل من حرفين على الأقل عند إدخاله.'
+          : 'Workspace name must be at least 2 characters when provided.'
+        : null;
+    }
+    function g(e, a = 'en') {
+      return e
+        ? null
+        : 'ar' === a
+          ? 'أدخل كلمة المرور.'
+          : 'Enter your password.';
+    }
+    function p(e, a = 'en') {
+      return !e || e.length < 8
+        ? 'ar' === a
+          ? 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.'
+          : 'Password must be at least 8 characters.'
+        : null;
+    }
+    function u(e) {
+      'function' == typeof window.__eliteCustomerAuthRedirectHook
+        ? window.__eliteCustomerAuthRedirectHook?.(e)
+        : window.location.assign(e);
+    }
+    (e.s(
+      [
+        'apiBaseUrl',
+        0,
+        o,
+        'clearStoredToken',
+        0,
+        function () {
+          window.sessionStorage.removeItem(n);
+        },
+        'readStoredToken',
+        0,
+        function () {
+          return window.sessionStorage.getItem(n);
+        },
+        'writeStoredToken',
+        0,
+        d,
+      ],
+      83267,
+    ),
+      e.s(
+        [
+          'beginGoogleAuthorization',
+          0,
+          s,
+          'parseGoogleAuthCallbackHash',
+          0,
+          function (e) {
+            let a = new URLSearchParams(e.startsWith('#') ? e.slice(1) : e),
+              t = 'signup' === a.get('mode') ? 'signup' : 'login',
+              l = a.get('access_token');
+            return l
+              ? { kind: 'success', mode: t, accessToken: l }
+              : {
+                  kind: 'error',
+                  mode: t,
+                  errorCode: a.get('error_code') ?? 'google_callback_invalid',
+                  errorMessage:
+                    a.get('error_message') ??
+                    'Google authentication could not be completed.',
+                };
+          },
+        ],
+        81849,
+      ),
+      e.s(
+        [
+          'redirectToCustomerRoute',
+          0,
+          u,
+          'useCustomerAuthForm',
+          0,
+          function ({
+            locale: e,
+            initialMode: a = 'login',
+            redirectTo: t = '/dashboard',
+          }) {
+            let l =
+                'ar' === e
+                  ? {
+                      alreadyHaveAccess: 'لديك حساب بالفعل؟',
+                      continueWithGoogle: 'تابع باستخدام Google',
+                      createAccount: 'إنشاء الحساب',
+                      creatingAccount: 'جارٍ إنشاء الحساب...',
+                      displayName: 'الاسم الظاهر',
+                      displayNameHint:
+                        'يظهر هذا الاسم في لوحة التحكم وشاشات الدعم.',
+                      emailAddress: 'البريد الإلكتروني',
+                      existingAccount:
+                        'يوجد حساب بهذا البريد الإلكتروني بالفعل.',
+                      fixHighlightedFields:
+                        'أصلح الحقول المميزة ثم حاول مرة أخرى.',
+                      needNewWorkspace: 'ليس لديك حساب؟',
+                      password: 'كلمة المرور',
+                      passwordHint:
+                        'استخدم 8 أحرف على الأقل. كلما زاد الطول وتنوعت الأحرف كانت أقوى.',
+                      passwordHide: 'إخفاء',
+                      passwordHideAria: 'إخفاء كلمة المرور',
+                      passwordShow: 'إظهار',
+                      passwordShowAria: 'إظهار كلمة المرور',
+                      setCustomWorkspaceName:
+                        'تعيين اسم مخصص لمساحة العمل (اختياري)',
+                      signin: 'تسجيل الدخول',
+                      signinFailed: 'فشل تسجيل الدخول',
+                      signinGoogle: 'تسجيل الدخول عبر Google',
+                      signinSubmitting: 'جارٍ تسجيل الدخول...',
+                      signinSuccess: (e) => `تم تسجيل الدخول باسم ${e}.`,
+                      signup: 'إنشاء حساب',
+                      signupFailed: 'فشل التسجيل',
+                      signupSuccess: (e) => `تم إنشاء الحساب للمستخدم ${e}.`,
+                      signInAction: 'تسجيل الدخول',
+                      signInInstead: 'سجّل الدخول بدلًا من ذلك',
+                      workspaceHint:
+                        'اترك هذا الحقل فارغًا لإنشاء اسم مساحة العمل من الاسم الظاهر.',
+                      workspaceName: 'اسم مساحة العمل',
+                    }
+                  : {
+                      alreadyHaveAccess: 'Already have access?',
+                      continueWithGoogle: 'Continue with Google',
+                      createAccount: 'Create account',
+                      creatingAccount: 'Creating account...',
+                      displayName: 'Display name',
+                      displayNameHint:
+                        'This name appears in the dashboard and support views.',
+                      emailAddress: 'Email address',
+                      existingAccount:
+                        'An account with this email already exists.',
+                      fixHighlightedFields:
+                        'Fix the highlighted fields and try again.',
+                      needNewWorkspace: 'Need a new workspace?',
+                      password: 'Password',
+                      passwordHint:
+                        'Use at least 8 characters. Longer passwords with mixed characters are stronger.',
+                      passwordHide: 'Hide',
+                      passwordHideAria: 'Hide password',
+                      passwordShow: 'Show',
+                      passwordShowAria: 'Show password',
+                      setCustomWorkspaceName:
+                        'Set a custom workspace name (optional)',
+                      signin: 'Sign in',
+                      signinFailed: 'Signin failed',
+                      signinGoogle: 'Sign in with Google',
+                      signinSubmitting: 'Signing in...',
+                      signinSuccess: (e) => `Signed in as ${e}.`,
+                      signup: 'Sign up',
+                      signupFailed: 'Signup failed',
+                      signupSuccess: (e) => `Created account for ${e}.`,
+                      signInAction: 'Sign in',
+                      signInInstead: 'Sign in instead',
+                      workspaceHint:
+                        'Leave this empty to generate the workspace name from your display name.',
+                      workspaceName: 'Workspace name',
+                    },
+              [i, n] = (0, r.useState)(a),
+              [b, f] = (0, r.useState)(''),
+              [x, v] = (0, r.useState)(''),
+              [w, y] = (0, r.useState)(''),
+              [k, j] = (0, r.useState)(''),
+              [z, N] = (0, r.useState)(!1),
+              [S, A] = (0, r.useState)(!1),
+              [C, H] = (0, r.useState)(null),
+              [I, G] = (0, r.useState)(null),
+              [M, T] = (0, r.useState)({
+                email: !1,
+                password: !1,
+                displayName: !1,
+                workspaceName: !1,
+              }),
+              F = M.email || b.length > 0 ? m(b, e) : null,
+              $ = M.password || x.length > 0 ? g(x, e) : null,
+              _ = M.email || b.length > 0 ? m(b, e) : null,
+              L = M.password || x.length > 0 ? p(x, e) : null,
+              P = M.displayName || w.length > 0 ? h(w, e) : null,
+              B = M.workspaceName || k.length > 0 ? c(k, e) : null,
+              O = (function (e, a = 'en') {
+                if (!e)
+                  return 'ar' === a
+                    ? {
+                        score: 0,
+                        label: 'قوة كلمة المرور',
+                        help: 'استخدم 8 أحرف على الأقل. ويكون المزيج من الحروف والأرقام والرموز أقوى.',
+                      }
+                    : {
+                        score: 0,
+                        label: 'Password strength',
+                        help: 'Use at least 8 characters. A mix of letters, numbers, and symbols is stronger.',
+                      };
+                let t = [
+                  /[a-z]/.test(e),
+                  /[A-Z]/.test(e),
+                  /\d/.test(e),
+                  /[^A-Za-z0-9]/.test(e),
+                ].filter(Boolean).length;
+                return e.length < 8 || t <= 1
+                  ? 'ar' === a
+                    ? {
+                        score: 1,
+                        label: 'ضعيفة',
+                        help: 'أضف طولاً أكبر ومزيجًا من أنواع الأحرف قبل استخدام كلمة المرور هذه.',
+                      }
+                    : {
+                        score: 1,
+                        label: 'Weak',
+                        help: 'Add length and a mix of character types before using this password.',
+                      }
+                  : e.length >= 12 && t >= 3
+                    ? 'ar' === a
+                      ? {
+                          score: 3,
+                          label: 'قوية',
+                          help: 'تغطية جيدة. هذه مناسبة لحساب مالك طويل الأمد.',
+                        }
+                      : {
+                          score: 3,
+                          label: 'Strong',
+                          help: 'Good coverage. This is appropriate for a long-lived owner account.',
+                        }
+                    : 'ar' === a
+                      ? {
+                          score: 2,
+                          label: 'جيدة',
+                          help: 'أضف طولًا أكبر أو نوعًا إضافيًا من الأحرف للحصول على كلمة مرور أقوى.',
+                        }
+                      : {
+                          score: 2,
+                          label: 'Good',
+                          help: 'Add either more length or one more character type for a stronger password.',
+                        };
+              })(x, e);
+            function E() {
+              T({
+                email: !1,
+                password: !1,
+                displayName: !1,
+                workspaceName: !1,
+              });
+            }
+            async function R(a) {
+              if (
+                (a.preventDefault(),
+                H(null),
+                G(null),
+                T((e) => ({ ...e, email: !0, password: !0 })),
+                m(b, e) || g(x, e))
+              )
+                return void H(l.fixHighlightedFields);
+              A(!0);
+              try {
+                let e = await fetch(`${o}/api/v1/auth/login`, {
+                  method: 'POST',
+                  headers: { 'content-type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ email: b, password: x }),
+                });
+                if (!e.ok) {
+                  let a = await e.json().catch(() => null);
+                  H(
+                    (function (e) {
+                      if (!e || 'object' != typeof e) return null;
+                      let a = e.message;
+                      return Array.isArray(a)
+                        ? (a[0] ?? null)
+                        : 'string' == typeof a
+                          ? a
+                          : null;
+                    })(a) ?? l.signinFailed,
+                  );
+                  return;
+                }
+                let a = await e.json();
+                (d(a.accessToken),
+                  G(l.signinSuccess(a.user.displayName)),
+                  u(t));
+              } finally {
+                A(!1);
+              }
+            }
+            async function U(a) {
+              if (
+                (a.preventDefault(),
+                H(null),
+                G(null),
+                T({
+                  email: !0,
+                  password: !0,
+                  displayName: !0,
+                  workspaceName: !0,
+                }),
+                h(w, e) || c(k, e) || m(b, e) || p(x, e))
+              )
+                return void H(l.fixHighlightedFields);
+              A(!0);
+              try {
+                let e = await fetch(`${o}/api/v1/auth/signup`, {
+                  method: 'POST',
+                  headers: { 'content-type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({
+                    email: b,
+                    password: x,
+                    displayName: w,
+                    workspaceName: k.trim() || void 0,
+                  }),
+                });
+                if (!e.ok)
+                  return void H(
+                    409 === e.status ? l.existingAccount : l.signupFailed,
+                  );
+                let a = await e.json();
+                (d(a.accessToken),
+                  G(l.signupSuccess(a.user.displayName)),
+                  E(),
+                  u(t));
+              } finally {
+                A(!1);
+              }
+            }
+            return {
+              mode: i,
+              setMode: function (e) {
+                (n(e), H(null), G(null), N(!1));
+              },
+              copy: l,
+              email: b,
+              setEmail: f,
+              password: x,
+              setPassword: v,
+              displayName: w,
+              setDisplayName: y,
+              workspaceName: k,
+              setWorkspaceName: j,
+              passwordVisible: z,
+              setPasswordVisible: N,
+              touched: M,
+              markTouched: function (e) {
+                T((a) => (a[e] ? a : { ...a, [e]: !0 }));
+              },
+              resetTouched: E,
+              loginEmailError: F,
+              loginPasswordError: $,
+              signupEmailError: _,
+              signupPasswordError: L,
+              signupDisplayNameError: P,
+              signupWorkspaceNameError: B,
+              signupPasswordStrength: O,
+              submitting: S,
+              errorMessage: C,
+              statusMessage: I,
+              submitLogin: R,
+              submitSignup: U,
+              continueWithGoogle: function (e) {
+                (H(null), G(null), s(e));
+              },
+            };
+          },
+        ],
+        58251,
+      ));
+  },
+]);
