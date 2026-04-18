@@ -1,0 +1,58 @@
+import type { WorkerEnv } from '@elite-message/config';
+import type { InternalWorkerAssignedInstance } from '@elite-message/contracts';
+import type { SessionRuntime, SessionRuntimeOptions } from './session-runtime';
+type WhatsAppWebSessionRuntimeOptions = SessionRuntimeOptions & {
+    browserExecutablePath: string;
+    env: WorkerEnv;
+};
+export declare function resolveWorkerBrowserExecutablePath(preferredPath?: string): string | null;
+export declare class WhatsAppWebSessionRuntime implements SessionRuntime {
+    private readonly options;
+    private readonly managedInstances;
+    private readonly sessionStorageDir;
+    private readonly screenshotRootDir;
+    private module;
+    private stopping;
+    constructor(options: WhatsAppWebSessionRuntimeOptions);
+    start(): Promise<void>;
+    stop(): Promise<void>;
+    syncAssignedInstances(instances: InternalWorkerAssignedInstance[]): void;
+    processAssignments(): Promise<void>;
+    removeInstance(instanceId: string): void;
+    getActiveInstanceCount(): number;
+    private runOperation;
+    private runNextMessage;
+    private processOutboundMessage;
+    private ensureClient;
+    private bindClientEvents;
+    private handleQr;
+    private handleLoading;
+    private handleStateChange;
+    private handleAuthenticated;
+    private handleReady;
+    private handleDisconnected;
+    private handleInboundMessage;
+    private handleOutboundAck;
+    private stopClient;
+    private logoutClient;
+    private takeoverClient;
+    private destroyClient;
+    private disposeClientReference;
+    private clearLocalSessionStorage;
+    private captureScreenshot;
+    private waitForConflictResolution;
+    private transitionStatus;
+    private completeOperation;
+    private failOperation;
+    private buildDiagnostics;
+    private recordClientEvent;
+    private downloadInboundMedia;
+    private validateOutboundMessage;
+    private extractMessageId;
+    private resolveSessionLabel;
+    private readStringField;
+    private readBooleanField;
+    private readTimestampField;
+}
+export {};
+//# sourceMappingURL=whatsapp-web-session-runtime.d.ts.map
