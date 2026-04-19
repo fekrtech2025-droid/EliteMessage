@@ -1,6 +1,7 @@
 import { createHmac } from 'node:crypto';
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import type { WebhookEventType } from '@elite-message/contracts';
+import { createLogger } from '@elite-message/config';
 import { Prisma, prisma } from '@elite-message/db';
 import { AuditLogsService } from '../audit-logs/audit-logs.service';
 import { toWebhookDeliverySummary } from '../common/presenters';
@@ -30,6 +31,7 @@ function toJsonInput(value: unknown): Prisma.InputJsonValue | null {
 export class WebhookDispatchService implements OnModuleInit, OnModuleDestroy {
   private retryTimer: NodeJS.Timeout | undefined;
   private processingDueDeliveries = false;
+  private readonly logger = createLogger({ service: 'api' });
 
   constructor(
     private readonly realtimeService: RealtimeService,
@@ -38,7 +40,9 @@ export class WebhookDispatchService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit() {
     this.retryTimer = setInterval(() => {
-      void this.dispatchDueDeliveries();
+      void this.dispatchDueDeliveries().catch((error) => {
+        this.logger.error({ error }, 'webhook_dispatch.retry_sweep_failed');
+      });
     }, 2_000);
     this.retryTimer.unref();
   }

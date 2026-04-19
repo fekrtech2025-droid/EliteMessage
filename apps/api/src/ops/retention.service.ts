@@ -21,11 +21,15 @@ export class RetentionService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit() {
     this.sweepTimer = setInterval(() => {
-      void this.runSweep();
+      void this.runSweep().catch((error) => {
+        this.logger.error({ error }, 'retention.sweep.failed');
+      });
     }, this.env.API_RETENTION_SWEEP_INTERVAL_MS);
     this.sweepTimer.unref();
 
-    void this.runSweep();
+    void this.runSweep().catch((error) => {
+      this.logger.error({ error }, 'retention.sweep.failed');
+    });
   }
 
   onModuleDestroy() {
