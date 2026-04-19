@@ -20,6 +20,7 @@
     "test": "vitest run --passWithNoTests",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
+    "db:bootstrap:plain": "bash ./scripts/bootstrap-plain-postgres.sh",
     "db:reset": "prisma migrate reset --force --skip-seed"
   },
   "dependencies": {
