@@ -1,6 +1,5 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { userInfo } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -8,11 +7,11 @@ const currentDir = dirname(fileURLToPath(import.meta.url));
 export const workspaceRoot = resolve(currentDir, '..');
 
 type LocalEnv = {
-  POSTGRES_HOST: string;
-  POSTGRES_PORT: string;
-  POSTGRES_USER: string;
-  POSTGRES_PASSWORD: string;
-  POSTGRES_DB: string;
+  DATABASE_HOST: string;
+  DATABASE_PORT: string;
+  DATABASE_USER: string;
+  DATABASE_PASSWORD: string;
+  DATABASE_NAME: string;
   REDIS_URL: string;
   REDIS_PORT: string;
   S3_ENDPOINT: string;
@@ -132,49 +131,60 @@ export function ensureDir(path: string) {
   mkdirSync(path, { recursive: true });
 }
 
-export function quoteLiteral(value: string): string {
-  return value.replace(/'/g, "''");
-}
-
 function localPath(...segments: string[]) {
   return resolve(workspaceRoot, '.local', ...segments);
 }
 
-export function isPostgresReady(env: LocalEnv) {
-  const result = runCapture(
-    'psql',
-    [
-      '-h',
-      env.POSTGRES_HOST,
-      '-p',
-      env.POSTGRES_PORT,
-      '-d',
-      'postgres',
-      '-c',
-      'select 1;',
-    ],
-    {
-      env: {
-        ...process.env,
-        PGUSER: userInfo().username,
-      },
-    },
-  );
+function mysqlArgs(env: LocalEnv, withDatabase = false) {
+  const args = [
+    '--protocol',
+    'TCP',
+    '--host',
+    env.DATABASE_HOST,
+    '--port',
+    env.DATABASE_PORT,
+    '--user',
+    env.DATABASE_USER,
+    `--password=${env.DATABASE_PASSWORD}`,
+  ];
 
-  return result.status === 0;
+  if (withDatabase) {
+    args.push(env.DATABASE_NAME);
+  }
+
+  return args;
 }
 
-export async function ensurePostgresService(env: LocalEnv) {
-  if (isPostgresReady(env)) {
+export function isMysqlReady(env: LocalEnv) {
+  const result = runCapture('mysqladmin', [
+    '--protocol',
+    'TCP',
+    '--host',
+    env.DATABASE_HOST,
+    '--port',
+    env.DATABASE_PORT,
+    '--user',
+    env.DATABASE_USER,
+    `--password=${env.DATABASE_PASSWORD}`,
+    'ping',
+  ]);
+
+  return result.status === 0 && result.stdout.includes('mysqld is alive');
+}
+
+export async function ensureMysqlService(env: LocalEnv) {
+  if (isMysqlReady(env)) {
     return;
   }
 
+  if (!commandExists('mysqladmin')) {
+    throw new Error(
+      'MySQL tooling not found on PATH. Install mysql/mysqladmin locally or use Docker-based dev infrastructure.',
+    );
+  }
+
   if (commandExists('brew')) {
-    const formulaCandidates = [
-      'postgresql@14',
-      'postgresql@17',
-      'postgresql@16',
-    ];
+    const formulaCandidates = ['mysql', 'mysql@8.4', 'mysql@8.0', 'mariadb'];
     for (const formula of formulaCandidates) {
       const result = runCapture('brew', ['list', '--versions', formula]);
       if (result.status === 0 && result.stdout.trim()) {
@@ -186,91 +196,28 @@ export async function ensurePostgresService(env: LocalEnv) {
     }
   }
 
-  await waitFor(() => isPostgresReady(env), 'PostgreSQL');
+  await waitFor(() => isMysqlReady(env), 'MySQL');
 }
 
 export async function ensureLocalDatabase(env: LocalEnv) {
   const localHosts = new Set(['localhost', '127.0.0.1', '::1']);
-  if (!localHosts.has(env.POSTGRES_HOST)) {
+  if (!localHosts.has(env.DATABASE_HOST)) {
     return;
   }
 
-  await ensurePostgresService(env);
+  await ensureMysqlService(env);
 
-  const roleSql = `
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${quoteLiteral(env.POSTGRES_USER)}') THEN
-    EXECUTE 'CREATE ROLE "${env.POSTGRES_USER}" LOGIN SUPERUSER PASSWORD ''${quoteLiteral(env.POSTGRES_PASSWORD)}''';
-  ELSE
-    EXECUTE 'ALTER ROLE "${env.POSTGRES_USER}" WITH LOGIN SUPERUSER PASSWORD ''${quoteLiteral(env.POSTGRES_PASSWORD)}''';
-  END IF;
-END
-$$;`;
-
-  runOrThrow(
-    'psql',
-    [
-      '-h',
-      env.POSTGRES_HOST,
-      '-p',
-      env.POSTGRES_PORT,
-      '-d',
-      'postgres',
-      '-v',
-      'ON_ERROR_STOP=1',
-      '-c',
-      roleSql,
-    ],
-    {
-      env: {
-        ...process.env,
-        PGUSER: userInfo().username,
-      },
-    },
-  );
-
-  const dbExists =
-    runOrThrow(
-      'psql',
-      [
-        '-h',
-        env.POSTGRES_HOST,
-        '-p',
-        env.POSTGRES_PORT,
-        '-d',
-        'postgres',
-        '-tAc',
-        `SELECT 1 FROM pg_database WHERE datname = '${quoteLiteral(env.POSTGRES_DB)}'`,
-      ],
-      {
-        env: {
-          ...process.env,
-          PGUSER: userInfo().username,
-        },
-      },
-    ).stdout.trim() === '1';
-
-  if (!dbExists) {
-    runOrThrow(
-      'createdb',
-      [
-        '-h',
-        env.POSTGRES_HOST,
-        '-p',
-        env.POSTGRES_PORT,
-        '-O',
-        env.POSTGRES_USER,
-        env.POSTGRES_DB,
-      ],
-      {
-        env: {
-          ...process.env,
-          PGUSER: userInfo().username,
-        },
-      },
+  if (!commandExists('mysql')) {
+    throw new Error(
+      'MySQL client not found on PATH. Install mysql locally or use Docker-based dev infrastructure.',
     );
   }
+
+  runOrThrow('mysql', [
+    ...mysqlArgs(env),
+    '--execute',
+    `CREATE DATABASE IF NOT EXISTS \`${env.DATABASE_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`,
+  ]);
 }
 
 export function isRedisReady(env: LocalEnv) {

@@ -21,7 +21,7 @@ flowchart LR
   AW["Admin Web (Next.js)"]
   API["API (NestJS + Express + Socket.IO)"]
   WK["Worker (BullMQ + whatsapp-web.js)"]
-  DB["PostgreSQL (Prisma)"]
+  DB["MySQL (Prisma)"]
   REDIS["Redis"]
   S3["MinIO / S3-compatible storage"]
   OBS["Prometheus / Alertmanager / Grafana"]
@@ -67,7 +67,7 @@ What remains partially mature:
 
 ## Supporting Infrastructure
 
-- PostgreSQL stores tenant, runtime, audit, support, and message data
+- MySQL stores tenant, runtime, audit, support, and message data
 - Redis supports queue-backed and worker-related flows
 - MinIO supports S3-compatible object storage needs
 - Prometheus, Grafana, and Alertmanager are provisioned for local observability

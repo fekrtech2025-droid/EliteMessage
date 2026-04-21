@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import process from 'node:process';
 import {
   mkdirSync,
   readFileSync,
@@ -176,7 +177,7 @@ function buildFrontMatter(language) {
       </tr>
       <tr>
         <td>${isArabic ? 'التقنيات الرئيسية' : 'Core technologies'}</td>
-        <td>Next.js 16, React 19, NestJS 11, Prisma 7, PostgreSQL, Redis, BullMQ, MinIO</td>
+        <td>Next.js 16, React 19, NestJS 11, Prisma 7, MySQL, Redis, BullMQ, MinIO</td>
       </tr>
       <tr>
         <td>${isArabic ? 'مصدر الحقيقة' : 'Source of truth'}</td>
@@ -338,7 +339,7 @@ function generateDiagrams() {
       ${svgCard({ x: 92, y: 176, width: 260, height: 96, title: 'Customer Web', subtitle: 'Next.js + React' })}
       ${svgCard({ x: 848, y: 176, width: 260, height: 96, title: 'Admin Web', subtitle: 'Next.js + React' })}
       ${svgCard({ x: 410, y: 166, width: 380, height: 122, title: 'API', subtitle: 'NestJS + Express + Socket.IO', fill: '#edf7f3', stroke: '#badccd', titleSize: 30, subtitleSize: 17, titleMaxChars: 24, subtitleMaxChars: 28 })}
-      ${svgCard({ x: 90, y: 402, width: 248, height: 104, title: 'PostgreSQL', subtitle: 'Prisma data model', titleSize: 25 })}
+      ${svgCard({ x: 90, y: 402, width: 248, height: 104, title: 'MySQL', subtitle: 'Prisma data model', titleSize: 25 })}
       ${svgCard({ x: 368, y: 402, width: 208, height: 104, title: 'Redis', subtitle: 'Queue + cache', titleSize: 25, subtitleMaxChars: 18 })}
       ${svgCard({ x: 612, y: 402, width: 208, height: 104, title: 'MinIO', subtitle: 'S3-compatible storage', titleSize: 25, subtitleMaxChars: 20 })}
       ${svgCard({ x: 856, y: 386, width: 254, height: 136, title: 'Worker', subtitle: 'BullMQ + whatsapp-web.js', fill: '#f8fafc', titleSize: 28, subtitleSize: 16, subtitleMaxChars: 24 })}
@@ -365,7 +366,7 @@ function generateDiagrams() {
       ${svgCard({ x: 848, y: 176, width: 260, height: 96, title: 'واجهة العميل', subtitle: 'Next.js + React', rtl: true, titleMaxChars: 18, subtitleMaxChars: 22 })}
       ${svgCard({ x: 92, y: 176, width: 260, height: 96, title: 'واجهة الإدارة', subtitle: 'Next.js + React', rtl: true, titleMaxChars: 18, subtitleMaxChars: 22 })}
       ${svgCard({ x: 410, y: 166, width: 380, height: 122, title: 'API', subtitle: 'NestJS + Express + Socket.IO', rtl: true, fill: '#edf7f3', stroke: '#badccd', titleSize: 30, subtitleSize: 17, titleMaxChars: 24, subtitleMaxChars: 28 })}
-      ${svgCard({ x: 90, y: 402, width: 248, height: 104, title: 'PostgreSQL', subtitle: 'Prisma', rtl: true, titleSize: 25, subtitleMaxChars: 18 })}
+      ${svgCard({ x: 90, y: 402, width: 248, height: 104, title: 'MySQL', subtitle: 'Prisma', rtl: true, titleSize: 25, subtitleMaxChars: 18 })}
       ${svgCard({ x: 368, y: 402, width: 208, height: 104, title: 'Redis', subtitle: 'Queue + Cache', rtl: true, titleSize: 25, subtitleMaxChars: 18 })}
       ${svgCard({ x: 612, y: 402, width: 208, height: 104, title: 'MinIO', subtitle: 'S3-compatible', rtl: true, titleSize: 25, subtitleMaxChars: 18 })}
       ${svgCard({ x: 856, y: 386, width: 254, height: 136, title: 'العامل', subtitle: 'BullMQ + whatsapp-web.js', rtl: true, fill: '#f8fafc', titleSize: 28, subtitleSize: 16, subtitleMaxChars: 24 })}
@@ -538,7 +539,7 @@ function generateDiagrams() {
     path.join(diagramsDir, 'en/worker-lifecycle-sequence.svg'),
     genericSequence(
       'Worker and Lifecycle Operation Sequence',
-      ['Customer/Admin UI', 'API', 'Redis', 'Worker', 'PostgreSQL'],
+      ['Customer/Admin UI', 'API', 'Redis', 'Worker', 'MySQL'],
       [
         [0, 1, 'Request instance operation'],
         [1, 4, 'Persist pending operation'],
@@ -555,7 +556,7 @@ function generateDiagrams() {
     path.join(diagramsDir, 'ar/worker-lifecycle-sequence.svg'),
     genericSequence(
       'تسلسل عمليات العامل ودورة الحياة',
-      ['واجهة المستخدم', 'API', 'Redis', 'العامل', 'PostgreSQL'],
+      ['واجهة المستخدم', 'API', 'Redis', 'العامل', 'MySQL'],
       [
         [0, 1, 'طلب تنفيذ عملية على الـ instance'],
         [1, 4, 'حفظ العملية كـ pending'],
@@ -572,7 +573,7 @@ function generateDiagrams() {
     path.join(diagramsDir, 'en/webhook-delivery-sequence.svg'),
     genericSequence(
       'Webhook Delivery Flow',
-      ['API', 'PostgreSQL', 'Customer Webhook', 'Admin UI'],
+      ['API', 'MySQL', 'Customer Webhook', 'Admin UI'],
       [
         [0, 1, 'Create webhook delivery record'],
         [0, 2, 'Send signed webhook request'],
@@ -587,7 +588,7 @@ function generateDiagrams() {
     path.join(diagramsDir, 'ar/webhook-delivery-sequence.svg'),
     genericSequence(
       'تدفق تسليم الـ webhook',
-      ['API', 'PostgreSQL', 'Webhook العميل', 'واجهة الإدارة'],
+      ['API', 'MySQL', 'Webhook العميل', 'واجهة الإدارة'],
       [
         [0, 1, 'إنشاء سجل تسليم الـ webhook'],
         [0, 2, 'إرسال طلب موقع'],

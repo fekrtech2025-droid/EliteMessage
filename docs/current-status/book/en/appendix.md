@@ -13,7 +13,7 @@
 
 ## Local Infrastructure
 
-- PostgreSQL 17
+- MySQL 8.4
 - Redis 8
 - MinIO
 - Prometheus

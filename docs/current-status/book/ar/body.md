@@ -6,7 +6,7 @@
 - تطبيق ويب للإدارة لمتابعة المستخدمين ومساحات العمل والعاملين والرسائل والدعم والتدقيق
 - واجهة API مبنية على `NestJS` تخدم مسارات العملاء والإدارة والواجهات العامة والداخلية
 - خدمة عامل `worker` تدير العمليات غير المتزامنة وحالة التشغيل وربط WhatsApp
-- بنية تحتية محلية تشمل `PostgreSQL` و `Redis` و `MinIO` و `Prometheus` و `Grafana` و `Alertmanager`
+- بنية تحتية محلية تشمل `MySQL` و `Redis` و `MinIO` و `Prometheus` و `Grafana` و `Alertmanager`
 
 ## حالة التنفيذ الحالية
 
@@ -67,7 +67,7 @@
 | تطبيقات الويب  | Next.js 16 + React 19               |
 | الـ API        | NestJS 11 + Express 5               |
 | العامل         | BullMQ + Redis + `whatsapp-web.js`  |
-| قاعدة البيانات | PostgreSQL + Prisma 7               |
+| قاعدة البيانات | MySQL + Prisma 7                    |
 | التخزين        | MinIO / S3-compatible               |
 | المراقبة       | Prometheus + Grafana + Alertmanager |
 
@@ -179,7 +179,7 @@
 - تطبيق إدارة
 - API مركزية
 - worker runtime
-- PostgreSQL
+- MySQL
 - Redis
 - MinIO
 - منظومة مراقبة
@@ -329,7 +329,7 @@
 
 ## توثيق مخطط قاعدة البيانات
 
-تستخدم المنصة `PostgreSQL` مع `Prisma 7`.
+تستخدم المنصة `MySQL` مع `Prisma 7`.
 
 الكيانات الأساسية:
 
@@ -443,7 +443,7 @@
 
 ## البنية التحتية المحلية
 
-- PostgreSQL 17
+- MySQL 8.4
 - Redis 8
 - MinIO
 - Prometheus

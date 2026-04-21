@@ -35,7 +35,7 @@ Elite Message is a multi-application messaging platform for managing WhatsApp-li
 - an admin web application for users, workspaces, workers, support, audit, messages, and instance operations
 - a NestJS API that serves authentication, dashboard, admin, customer, public instance, internal, and webhook-oriented endpoints
 - a worker process that handles instance runtime, queue-backed operational work, heartbeats, and WhatsApp session handling
-- PostgreSQL, Redis, MinIO, Prometheus, Alertmanager, and Grafana for local infrastructure and operational support
+- MySQL, Redis, MinIO, Prometheus, Alertmanager, and Grafana for local infrastructure and operational support
 
 ## Technology Baseline
 
@@ -47,7 +47,7 @@ Elite Message is a multi-application messaging platform for managing WhatsApp-li
 | API                | NestJS 11 on Express 5               |
 | Realtime           | Socket.IO                            |
 | Worker             | Node.js + BullMQ + `whatsapp-web.js` |
-| Database           | PostgreSQL                           |
+| Database           | MySQL                                |
 | ORM                | Prisma 7                             |
 | Queue / broker     | Redis                                |
 | Object storage     | MinIO / S3-compatible storage        |

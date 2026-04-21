@@ -6,7 +6,7 @@ Elite Message is now an active multi-application platform rather than a reposito
 - an admin web application for users, workspaces, workers, messages, support, audit, and instance oversight
 - a NestJS API that exposes customer, admin, internal, and public API surfaces
 - a worker runtime that manages queued operational work and WhatsApp-linked instance execution
-- a PostgreSQL-centric data model backed by Redis, MinIO, and local observability tooling
+- a MySQL-centric data model backed by Redis, MinIO, and local observability tooling
 
 ## Current Implementation Status
 
@@ -67,7 +67,7 @@ Elite Message is now an active multi-application platform rather than a reposito
 | Web apps       | Next.js 16 + React 19              |
 | API            | NestJS 11 + Express 5              |
 | Worker         | BullMQ + Redis + `whatsapp-web.js` |
-| Database       | PostgreSQL + Prisma 7              |
+| Database       | MySQL + Prisma 7                   |
 | Object storage | MinIO / S3-compatible              |
 | Observability  | Prometheus, Grafana, Alertmanager  |
 

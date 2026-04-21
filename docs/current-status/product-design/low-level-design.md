@@ -68,7 +68,7 @@ Current worker concerns include:
 ## Data Layer
 
 - Prisma schema in `packages/db/prisma/schema.prisma`
-- PostgreSQL source of truth
+- MySQL source of truth
 - relation-heavy model centered on `User`, `Workspace`, `Membership`, and `Instance`
 
 ## Observability Layer

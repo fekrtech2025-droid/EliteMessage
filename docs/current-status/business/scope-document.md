@@ -33,7 +33,7 @@ Elite Message delivers a multi-tenant messaging control platform for customers a
 
 ### Platform scope
 
-- PostgreSQL-backed tenant and runtime data model
+- MySQL-backed tenant and runtime data model
 - API tokens for account and instance access
 - webhook delivery tracking
 - rate limiting and retention settings
@@ -55,7 +55,7 @@ Elite Message delivers a multi-tenant messaging control platform for customers a
 
 ## Assumptions
 
-- PostgreSQL remains the primary system of record
+- MySQL remains the primary system of record
 - Redis remains the queue and transient coordination layer
 - customer usage centers on instance-oriented sending workflows
 - admin users require higher-trust controls than customers

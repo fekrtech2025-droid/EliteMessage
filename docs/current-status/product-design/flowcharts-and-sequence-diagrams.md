@@ -9,7 +9,7 @@ sequenceDiagram
   participant U as Customer User
   participant CW as Customer Web
   participant API as API
-  participant DB as PostgreSQL
+  participant DB as MySQL
 
   U->>CW: Open signin/signup
   U->>CW: Submit credentials or choose Google
@@ -40,7 +40,7 @@ sequenceDiagram
   participant API as API
   participant R as Redis/BullMQ
   participant WK as Worker
-  participant DB as PostgreSQL
+  participant DB as MySQL
 
   CW->>API: Request instance operation
   API->>DB: Persist operation as pending
@@ -57,7 +57,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
   participant API as API
-  participant DB as PostgreSQL
+  participant DB as MySQL
   participant Target as Customer Webhook Endpoint
   participant Admin as Admin UI
 

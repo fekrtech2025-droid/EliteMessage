@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
 }
 
 enum UserRole {
@@ -187,15 +187,15 @@ enum SupportCasePriority {
 }
 
 model User {
-  id                    String           @id @default(uuid()) @db.Uuid
-  email                 String           @unique
-  displayName           String
-  passwordHash          String
+  id                    String           @id @default(uuid()) @db.Char(36)
+  email                 String           @unique @db.VarChar(191)
+  displayName           String           @db.VarChar(191)
+  passwordHash          String           @db.VarChar(255)
   role                  UserRole         @default(customer)
   status                UserStatus       @default(active)
   themePreference       ThemePreference  @default(light)
-  adminMfaSecret        String?
-  adminMfaPendingSecret String?
+  adminMfaSecret        String?          @db.VarChar(255)
+  adminMfaPendingSecret String?          @db.VarChar(255)
   adminMfaEnabledAt     DateTime?
   memberships           Membership[]
   refreshSessions       RefreshSession[]
@@ -208,9 +208,9 @@ model User {
 }
 
 model Workspace {
-  id           String          @id @default(uuid()) @db.Uuid
-  name         String
-  slug         String          @unique
+  id           String          @id @default(uuid()) @db.Char(36)
+  name         String          @db.VarChar(191)
+  slug         String          @unique @db.VarChar(191)
   status       WorkspaceStatus @default(active)
   trialEndsAt  DateTime?
   memberships  Membership[]
@@ -223,9 +223,9 @@ model Workspace {
 }
 
 model Membership {
-  id          String         @id @default(uuid()) @db.Uuid
-  workspaceId String         @db.Uuid
-  userId      String         @db.Uuid
+  id          String         @id @default(uuid()) @db.Char(36)
+  workspaceId String         @db.Char(36)
+  userId      String         @db.Char(36)
   role        MembershipRole
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
@@ -237,11 +237,11 @@ model Membership {
 }
 
 model RefreshSession {
-  id         String    @id @default(uuid()) @db.Uuid
-  userId     String    @db.Uuid
-  tokenHash  String    @unique
-  userAgent  String?
-  ipAddress  String?
+  id         String    @id @default(uuid()) @db.Char(36)
+  userId     String    @db.Char(36)
+  tokenHash  String    @unique @db.VarChar(191)
+  userAgent  String?   @db.Text
+  ipAddress  String?   @db.VarChar(191)
   expiresAt  DateTime
   lastUsedAt DateTime?
   revokedAt  DateTime?
@@ -253,14 +253,14 @@ model RefreshSession {
 }
 
 model ApiToken {
-  id              String       @id @default(uuid()) @db.Uuid
-  name            String
+  id              String       @id @default(uuid()) @db.Char(36)
+  name            String       @db.VarChar(191)
   tokenType       ApiTokenType
-  tokenHash       String       @unique
-  prefix          String
-  workspaceId     String?      @db.Uuid
-  instanceId      String?      @db.Uuid
-  createdByUserId String?      @db.Uuid
+  tokenHash       String       @unique @db.VarChar(191)
+  prefix          String       @db.VarChar(191)
+  workspaceId     String?      @db.Char(36)
+  instanceId      String?      @db.Char(36)
+  createdByUserId String?      @db.Char(36)
   lastUsedAt      DateTime?
   expiresAt       DateTime?
   revokedAt       DateTime?
@@ -275,16 +275,16 @@ model ApiToken {
 }
 
 model Instance {
-  id                   String                  @id @default(uuid()) @db.Uuid
-  publicId             String                  @unique
-  workspaceId          String                  @db.Uuid
-  name                 String
+  id                   String                  @id @default(uuid()) @db.Char(36)
+  publicId             String                  @unique @db.VarChar(191)
+  workspaceId          String                  @db.Char(36)
+  name                 String                  @db.VarChar(191)
   status               InstanceLifecycleStatus @default(standby)
-  substatus            String?
-  assignedWorkerId     String?
+  substatus            String?                 @db.Text
+  assignedWorkerId     String?                 @db.VarChar(191)
   lastHeartbeatAt      DateTime?
   lastLifecycleEventAt DateTime?
-  createdByUserId      String?                 @db.Uuid
+  createdByUserId      String?                 @db.Char(36)
   createdAt            DateTime                @default(now())
   updatedAt            DateTime                @updatedAt
   workspace            Workspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -305,12 +305,12 @@ model Instance {
 }
 
 model InstanceSettings {
-  id                     String   @id @default(uuid()) @db.Uuid
-  instanceId             String   @unique @db.Uuid
+  id                     String   @id @default(uuid()) @db.Char(36)
+  instanceId             String   @unique @db.Char(36)
   sendDelay              Int      @default(1)
   sendDelayMax           Int      @default(15)
-  webhookUrl             String?
-  webhookSecret          String
+  webhookUrl             String?  @db.Text
+  webhookSecret          String   @db.VarChar(191)
   webhookMessageReceived Boolean  @default(false)
   webhookMessageCreate   Boolean  @default(false)
   webhookMessageAck      Boolean  @default(false)
@@ -320,35 +320,35 @@ model InstanceSettings {
 }
 
 model InstanceRuntimeState {
-  id                  String         @id @default(uuid()) @db.Uuid
-  instanceId          String         @unique @db.Uuid
-  qrCode              String?
+  id                  String         @id @default(uuid()) @db.Char(36)
+  instanceId          String         @unique @db.Char(36)
+  qrCode              String?        @db.LongText
   qrExpiresAt         DateTime?
   sessionBackend      SessionBackend @default(placeholder)
-  currentSessionLabel String?
+  currentSessionLabel String?        @db.VarChar(191)
   sessionDiagnostics  Json?
   lastStartedAt       DateTime?
   lastAuthenticatedAt DateTime?
-  lastDisconnectedAt DateTime?
+  lastDisconnectedAt  DateTime?
   lastInboundMessageAt DateTime?
   lastScreenshotAt    DateTime?
-  lastScreenshotPath  String?
-  disconnectReason    String?
+  lastScreenshotPath  String?        @db.Text
+  disconnectReason    String?        @db.Text
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
   instance            Instance       @relation(fields: [instanceId], references: [id], onDelete: Cascade)
 }
 
 model InstanceOperation {
-  id                 String                  @id @default(uuid()) @db.Uuid
-  instanceId         String                  @db.Uuid
+  id                 String                  @id @default(uuid()) @db.Char(36)
+  instanceId         String                  @db.Char(36)
   operationType      InstanceOperationType
   status             InstanceOperationStatus @default(pending)
   requestedByActorType InstanceActorType
-  requestedByActorId String?
-  targetWorkerId     String?
-  message            String?
-  errorMessage       String?
+  requestedByActorId String?                 @db.VarChar(191)
+  targetWorkerId     String?                 @db.VarChar(191)
+  message            String?                 @db.Text
+  errorMessage       String?                 @db.Text
   metadata           Json?
   createdAt          DateTime                @default(now())
   startedAt          DateTime?
@@ -361,12 +361,12 @@ model InstanceOperation {
 }
 
 model InstanceLifecycleEvent {
-  id         String                    @id @default(uuid()) @db.Uuid
-  instanceId String                    @db.Uuid
+  id         String                    @id @default(uuid()) @db.Char(36)
+  instanceId String                    @db.Char(36)
   eventType  InstanceLifecycleEventType
   actorType  InstanceActorType
-  actorId    String?
-  message    String
+  actorId    String?                   @db.VarChar(191)
+  message    String                    @db.Text
   fromStatus InstanceLifecycleStatus?
   toStatus   InstanceLifecycleStatus?
   metadata   Json?
@@ -377,28 +377,28 @@ model InstanceLifecycleEvent {
 }
 
 model OutboundMessage {
-  id                 String                @id @default(uuid()) @db.Uuid
-  publicMessageId    String                @unique
-  instanceId         String                @db.Uuid
+  id                 String                @id @default(uuid()) @db.Char(36)
+  publicMessageId    String                @unique @db.VarChar(191)
+  instanceId         String                @db.Char(36)
   messageType        OutboundMessageType
-  recipient          String
-  body               String?
-  mediaUrl           String?
-  caption            String?
-  referenceId        String?
+  recipient          String                @db.VarChar(191)
+  body               String?               @db.LongText
+  mediaUrl           String?               @db.Text
+  caption            String?               @db.LongText
+  referenceId        String?               @db.VarChar(191)
   priority           Int                   @default(100)
   status             MessageDeliveryStatus @default(queue)
   ack                MessageDeliveryAck    @default(pending)
   scheduledFor       DateTime              @default(now())
-  processingWorkerId String?
+  processingWorkerId String?               @db.VarChar(191)
   processingStartedAt DateTime?
-  workerId           String?
-  providerMessageId  String?
-  errorMessage       String?
+  workerId           String?               @db.VarChar(191)
+  providerMessageId  String?               @db.VarChar(191)
+  errorMessage       String?               @db.Text
   sentAt             DateTime?
   acknowledgedAt     DateTime?
   createdByActorType InstanceActorType
-  createdByActorId   String?
+  createdByActorId   String?               @db.VarChar(191)
   metadata           Json?
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @updatedAt
@@ -413,14 +413,14 @@ model OutboundMessage {
 }
 
 model OutboundMessageAttempt {
-  id           String                @id @default(uuid()) @db.Uuid
-  messageId    String                @db.Uuid
-  workerId     String?
+  id           String                @id @default(uuid()) @db.Char(36)
+  messageId    String                @db.Char(36)
+  workerId     String?               @db.VarChar(191)
   attemptNumber Int
   status       MessageDeliveryStatus
   ack          MessageDeliveryAck?
-  message      String?
-  errorMessage String?
+  message      String?               @db.Text
+  errorMessage String?               @db.Text
   createdAt    DateTime              @default(now())
   outboundMessage OutboundMessage    @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
@@ -429,17 +429,17 @@ model OutboundMessageAttempt {
 }
 
 model InboundMessage {
-  id                String             @id @default(uuid()) @db.Uuid
-  publicMessageId   String             @unique
-  instanceId        String             @db.Uuid
-  providerMessageId String?
-  chatId            String?
-  sender            String
-  pushName          String?
+  id                String             @id @default(uuid()) @db.Char(36)
+  publicMessageId   String             @unique @db.VarChar(191)
+  instanceId        String             @db.Char(36)
+  providerMessageId String?            @db.VarChar(191)
+  chatId            String?            @db.VarChar(191)
+  sender            String             @db.VarChar(191)
+  pushName          String?            @db.VarChar(191)
   kind              InboundMessageKind @default(chat)
-  body              String?
-  mediaUrl          String?
-  mimeType          String?
+  body              String?            @db.LongText
+  mediaUrl          String?            @db.Text
+  mimeType          String?            @db.VarChar(191)
   fromMe            Boolean            @default(false)
   sentAt            DateTime?
   receivedAt        DateTime           @default(now())
@@ -454,20 +454,20 @@ model InboundMessage {
 }
 
 model WebhookDelivery {
-  id                 String                @id @default(uuid()) @db.Uuid
-  instanceId         String                @db.Uuid
-  messageId          String?               @db.Uuid
+  id                 String                @id @default(uuid()) @db.Char(36)
+  instanceId         String                @db.Char(36)
+  messageId          String?               @db.Char(36)
   eventType          WebhookEventType
   status             WebhookDeliveryStatus @default(pending)
-  targetUrl          String
+  targetUrl          String                @db.Text
   payload            Json
   attemptCount       Int                   @default(0)
   nextAttemptAt      DateTime              @default(now())
   lastAttemptAt      DateTime?
   deliveredAt        DateTime?
   responseStatusCode Int?
-  responseBody       String?
-  errorMessage       String?
+  responseBody       String?               @db.LongText
+  errorMessage       String?               @db.Text
   createdAt          DateTime              @default(now())
   updatedAt          DateTime              @updatedAt
   instance           Instance              @relation(fields: [instanceId], references: [id], onDelete: Cascade)
@@ -479,10 +479,10 @@ model WebhookDelivery {
 }
 
 model WorkerHeartbeat {
-  id                  String       @id @default(uuid()) @db.Uuid
-  workerId            String       @unique
+  id                  String       @id @default(uuid()) @db.Char(36)
+  workerId            String       @unique @db.VarChar(191)
   status              WorkerStatus
-  region              String
+  region              String       @db.VarChar(191)
   uptimeSeconds       Int
   activeInstanceCount Int
   lastSeenAt          DateTime
@@ -493,15 +493,15 @@ model WorkerHeartbeat {
 }
 
 model AuditLog {
-  id         String          @id @default(uuid()) @db.Uuid
-  workspaceId String?        @db.Uuid
-  instanceId String?         @db.Uuid
+  id         String          @id @default(uuid()) @db.Char(36)
+  workspaceId String?        @db.Char(36)
+  instanceId String?         @db.Char(36)
   actorType  AuditActorType
-  actorId    String?
+  actorId    String?         @db.VarChar(191)
   entityType AuditEntityType
-  entityId   String?
-  action     String
-  summary    String
+  entityId   String?         @db.VarChar(191)
+  action     String          @db.VarChar(191)
+  summary    String          @db.Text
   metadata   Json?
   createdAt  DateTime        @default(now())
   workspace  Workspace?      @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
@@ -515,17 +515,17 @@ model AuditLog {
 }
 
 model SupportCase {
-  id                  String              @id @default(uuid()) @db.Uuid
-  publicId            String              @unique
-  workspaceId         String?             @db.Uuid
-  instanceId          String?             @db.Uuid
-  requesterUserId     String?             @db.Uuid
-  assignedAdminUserId String?             @db.Uuid
-  title               String
-  description         String
+  id                  String              @id @default(uuid()) @db.Char(36)
+  publicId            String              @unique @db.VarChar(191)
+  workspaceId         String?             @db.Char(36)
+  instanceId          String?             @db.Char(36)
+  requesterUserId     String?             @db.Char(36)
+  assignedAdminUserId String?             @db.Char(36)
+  title               String              @db.VarChar(191)
+  description         String              @db.LongText
   priority            SupportCasePriority @default(normal)
   status              SupportCaseStatus   @default(open)
-  internalNotes       String?
+  internalNotes       String?             @db.LongText
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
   resolvedAt          DateTime?

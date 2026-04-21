@@ -1391,13 +1391,11 @@ export class MessagesService {
         recipient: filters.recipient
           ? {
               contains: filters.recipient,
-              mode: 'insensitive',
             }
           : undefined,
         referenceId: filters.referenceId
           ? {
               contains: filters.referenceId,
-              mode: 'insensitive',
             }
           : undefined,
       },
@@ -1451,7 +1449,6 @@ export class MessagesService {
         sender: filters.sender
           ? {
               contains: filters.sender,
-              mode: 'insensitive',
             }
           : undefined,
       },

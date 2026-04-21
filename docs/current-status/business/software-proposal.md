@@ -45,7 +45,7 @@ Deliver and continue maturing a platform with these layers:
 ## Why This Architecture Is Appropriate
 
 - web surfaces and runtime worker concerns are separated cleanly
-- PostgreSQL and Prisma provide a clear source of truth for multi-tenant records
+- MySQL and Prisma provide a clear source of truth for multi-tenant records
 - Redis and BullMQ fit queue-backed lifecycle and message processing
 - Next.js + NestJS keep the stack type-safe and straightforward for a TypeScript team
 

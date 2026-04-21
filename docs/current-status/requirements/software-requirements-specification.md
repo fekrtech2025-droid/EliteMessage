@@ -14,7 +14,7 @@ Primary components:
 - admin web application
 - API service
 - worker service
-- PostgreSQL database
+- MySQL database
 - Redis queue
 - MinIO object storage
 - observability stack
@@ -47,7 +47,7 @@ Primary components:
 ## 6. Design Constraints
 
 - TypeScript monorepo architecture
-- PostgreSQL as the system of record
+- MySQL as the system of record
 - Next.js for both web surfaces
 - NestJS API
 - BullMQ/Redis for queue-backed worker operations

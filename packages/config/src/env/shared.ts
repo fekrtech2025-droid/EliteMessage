@@ -29,11 +29,11 @@ export const bootstrapEnvSchema = z.object({
 
 export const databaseEnvSchema = z.object({
   DATABASE_URL: z.string().url(),
-  POSTGRES_HOST: z.string().min(1),
-  POSTGRES_PORT: numberFromString.pipe(z.number().int().positive()),
-  POSTGRES_USER: z.string().min(1),
-  POSTGRES_PASSWORD: z.string().min(1),
-  POSTGRES_DB: z.string().min(1),
+  DATABASE_HOST: z.string().min(1),
+  DATABASE_PORT: numberFromString.pipe(z.number().int().positive()),
+  DATABASE_USER: z.string().min(1),
+  DATABASE_PASSWORD: z.string().min(1),
+  DATABASE_NAME: z.string().min(1),
 });
 
 export const redisEnvSchema = z.object({

@@ -17,7 +17,7 @@ Older documents in `docs/` remain useful as historical or reference material, bu
 - `Next.js` for customer and admin dashboards
 - `NestJS` for the control plane API
 - `Node.js` worker service for runtime orchestration shells
-- `PostgreSQL` + `Prisma`
+- `MySQL` + `Prisma`
 - `Redis` + `BullMQ`
 - `MinIO` for local S3-compatible storage
 
@@ -38,7 +38,7 @@ Older documents in `docs/` remain useful as historical or reference material, bu
 
 - Node `20.19.x` or `22.x`
 - `corepack` enabled
-- Docker / Docker Compose, or local PostgreSQL + Redis
+- Docker / Docker Compose, or local MySQL + Redis
 - local infra downloads and caches are kept inside this repository on the mounted volume:
   - `.pnpm-store`
   - `.local`
@@ -54,7 +54,7 @@ Older documents in `docs/` remain useful as historical or reference material, bu
 
 If Docker is unavailable, `pnpm dev:infra` falls back to:
 
-- local PostgreSQL service bootstrap
+- local MySQL service bootstrap
 - local Redis check/start
 - a lightweight S3/MinIO-compatible storage mock under `.local/`
 
@@ -68,17 +68,17 @@ Before running anything, make sure the machine has:
 
 - Node `20.19.x` or `22.x`
 - `corepack`
-- either Docker, or local PostgreSQL and Redis tooling available on `PATH`
+- either Docker, or local MySQL and Redis tooling available on `PATH`
 - the default local ports available:
   - `3000` customer web
   - `3001` admin web
   - `3002` API
   - `3003` worker
-  - `5432` PostgreSQL
+  - `3306` MySQL
   - `6379` Redis
   - `9000` S3/MinIO-compatible storage
 
-If Docker is not installed, the local bootstrap expects local database/Redis tools such as `psql`, `createdb`, `redis-server`, and `redis-cli` to be available.
+If Docker is not installed, the local bootstrap expects local database/Redis tools such as `mysql`, `mysqladmin`, `redis-server`, and `redis-cli` to be available.
 
 ### 2. Prepare the environment file
 
@@ -95,7 +95,7 @@ Important defaults from `.env`:
 - customer web: `http://localhost:3000`
 - admin web: `http://localhost:3001`
 - API: `http://localhost:3002`
-- PostgreSQL database: `elite_message`
+- MySQL database: `elite_message`
 - Redis: `redis://localhost:6379`
 - S3-compatible endpoint: `http://localhost:9000`
 
@@ -121,11 +121,11 @@ pnpm dev:infra
 
 What this command does:
 
-- if Docker is available, it starts `postgres`, `redis`, and `minio` from `docker-compose.yml`
+- if Docker is available, it starts `mysql`, `redis`, and `minio` from `docker-compose.yml`
 - if Docker is not available, it falls back to local-service mode
 - in local-service mode it:
-  - checks or starts PostgreSQL
-  - ensures the local database role and database can be created
+  - checks or starts MySQL
+  - ensures the local database exists
   - checks or starts Redis
   - starts a lightweight S3-compatible storage mock under `.local/` unless `ELITE_STORAGE_MODE=minio` is set
 
@@ -141,8 +141,8 @@ pnpm db:migrate
 
 What this command does:
 
-- ensures the local PostgreSQL role and database exist when using a local host
-- applies Prisma migrations
+- ensures the local MySQL database exists when using a local host
+- applies the Prisma schema with `prisma db push`
 - seeds development bootstrap data
 
 The seed creates default local accounts:
@@ -233,7 +233,7 @@ pnpm dev
 
 - `pnpm dev`: build shared packages once, then start all apps in watch mode
 - `pnpm dev:worker:whatsapp-web`: start the worker in real `whatsapp_web` mode using a local Chrome/Chromium/Edge executable
-- `pnpm dev:infra`: start PostgreSQL, Redis, and MinIO using Docker when available, otherwise local-service mode
+- `pnpm dev:infra`: start MySQL, Redis, and MinIO using Docker when available, otherwise local-service mode
 - `pnpm dev:infra:stop`: stop repo-managed local Redis/MinIO processes and bring Docker infra down if used
 - `pnpm build`: build all packages and apps
 - `pnpm lint`: run ESLint across the monorepo

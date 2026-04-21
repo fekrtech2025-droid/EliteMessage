@@ -3,7 +3,7 @@
 This guide is for deploying Elite Message to a cPanel account that includes:
 
 - `Setup Node.js App`
-- `PostgreSQL Databases`
+- `MySQL Databases`
 - `Cron Jobs`
 - domain and subdomain management
 
@@ -17,7 +17,7 @@ Elite Message is not a single website. A production deployment requires:
 - `admin-web` Next.js application
 - `api` NestJS application
 - `worker` Node.js worker process
-- PostgreSQL
+- MySQL-compatible database access
 - Redis
 - S3-compatible object storage
 
@@ -43,7 +43,7 @@ Before deploying, be clear about these constraints:
 
 1. Redis is required. This codebase uses BullMQ and Redis-backed worker flows. If your cPanel provider does not give you a Redis service, use an external Redis provider.
 2. S3-compatible storage is required. If your host does not provide MinIO or S3-compatible storage, use an external provider such as Cloudflare R2, Backblaze B2 S3-compatible access, DigitalOcean Spaces, or AWS S3.
-3. PostgreSQL is required. This guide assumes you will use cPanel PostgreSQL for the primary database.
+3. MySQL is required. This guide assumes you will use cPanel MySQL or a MySQL-compatible external service for the primary database.
 4. The browser-backed `whatsapp-web.js` runtime may not be suitable for shared hosting. If Chrome/Chromium is not available on the host, keep the worker on the placeholder or non-browser-compatible backend until you move the worker to a VPS.
 5. SSH access is strongly recommended. You can create the Node apps in cPanel UI, but the monorepo install, build, and database migration steps are much easier over SSH.
 
@@ -104,9 +104,9 @@ Use subdomains for the service apps. Do not use aliases or parked domains for th
 
    If one hostname does not resolve, fix DNS first. If it resolves but HTTPS fails, run AutoSSL again after propagation completes.
 
-## 2. Prepare PostgreSQL in cPanel
+## 2. Prepare MySQL in cPanel
 
-Create a PostgreSQL database and a dedicated database user in cPanel.
+Create a MySQL database and a dedicated database user in cPanel.
 
 You will need:
 
@@ -114,9 +114,9 @@ You will need:
 - username
 - password
 - host, usually `localhost`
-- port, usually `5432`
+- port, usually `3306`
 
-Because cPanel commonly prefixes PostgreSQL names with the account name, expect values like:
+Because cPanel commonly prefixes MySQL names with the account name, expect values like:
 
 - database: `levanpms_elite_message`
 - user: `levanpms_elite_user`
@@ -124,12 +124,12 @@ Because cPanel commonly prefixes PostgreSQL names with the account name, expect 
 Then construct:
 
 ```env
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_USER=levanpms_elite_user
-POSTGRES_PASSWORD=replace-with-real-password
-POSTGRES_DB=levanpms_elite_message
-DATABASE_URL=postgresql://levanpms_elite_user:replace-with-real-password@localhost:5432/levanpms_elite_message?schema=public
+DATABASE_HOST=localhost
+DATABASE_PORT=3306
+DATABASE_USER=levanpms_elite_user
+DATABASE_PASSWORD=replace-with-real-password
+DATABASE_NAME=levanpms_elite_message
+DATABASE_URL=mysql://levanpms_elite_user:replace-with-real-password@localhost:3306/levanpms_elite_message
 ```
 
 ## 3. Provision External Redis and S3-Compatible Storage
@@ -243,12 +243,12 @@ WORKER_WA_DOWNLOAD_INBOUND_MEDIA=true
 WORKER_WA_STARTUP_TIMEOUT_MS=120000
 WORKER_WA_AUTO_RECOVERY_DELAY_MS=5000
 
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_USER=levanpms_elite_user
-POSTGRES_PASSWORD=replace-with-real-password
-POSTGRES_DB=levanpms_elite_message
-DATABASE_URL=postgresql://levanpms_elite_user:replace-with-real-password@localhost:5432/levanpms_elite_message?schema=public
+DATABASE_HOST=localhost
+DATABASE_PORT=3306
+DATABASE_USER=levanpms_elite_user
+DATABASE_PASSWORD=replace-with-real-password
+DATABASE_NAME=levanpms_elite_message
+DATABASE_URL=mysql://levanpms_elite_user:replace-with-real-password@localhost:3306/levanpms_elite_message
 
 REDIS_URL=redis://username:password@your-redis-host:6379
 REDIS_HOST=your-redis-host
@@ -354,7 +354,7 @@ The safer cPanel approach is to set them explicitly in each app configuration.
 ### Minimum variables for API
 
 - everything listed in the API section of the production example above
-- especially PostgreSQL, Redis, S3, token, cookie, and CORS variables
+- especially database, Redis, S3, token, cookie, and CORS variables
 
 ### Minimum variables for worker
 
@@ -369,7 +369,7 @@ The safer cPanel approach is to set them explicitly in each app configuration.
 - `WORKER_SESSION_BACKEND`
 - `WORKER_SESSION_STORAGE_DIR`
 - Redis variables
-- PostgreSQL variables if the selected worker runtime needs them
+- database variables if the selected worker runtime needs them
 - S3 variables if the selected worker runtime needs them
 
 ## 10. Restart Services in the Correct Order
@@ -443,7 +443,7 @@ If the full four-service deployment proves too heavy for this cPanel account, th
 
 - keep `customer-web` and `admin-web` on cPanel
 - move `api` and `worker` to a VPS
-- keep PostgreSQL, Redis, and S3 on managed services or the VPS
+- keep MySQL, Redis, and S3 on managed services or the VPS
 
 In that setup:
 

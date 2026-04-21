@@ -99,7 +99,7 @@ tracking</li>
 <li>Web apps: Next.js 16 and React 19</li>
 <li>API: NestJS 11 with Express 5 and Socket.IO</li>
 <li>Worker: BullMQ + Redis + <code>whatsapp-web.js</code></li>
-<li>Database: PostgreSQL via Prisma 7</li>
+<li>Database: MySQL via Prisma 7</li>
 <li>Object storage: MinIO / S3-compatible</li>
 <li>Observability: Prometheus, Alertmanager, Grafana</li>
 </ul>
@@ -183,8 +183,8 @@ operational controls</li>
 Appropriate</h3>
 <ul>
 <li>web surfaces and runtime worker concerns are separated cleanly</li>
-<li>PostgreSQL and Prisma provide a clear source of truth for
-multi-tenant records</li>
+<li>MySQL and Prisma provide a clear source of truth for multi-tenant
+records</li>
 <li>Redis and BullMQ fit queue-backed lifecycle and message
 processing</li>
 <li>Next.js + NestJS keep the stack type-safe and straightforward for a
@@ -231,7 +231,7 @@ operational API surface.</p>
 </ul>
 <h4 id="platform-scope">Platform scope</h4>
 <ul>
-<li>PostgreSQL-backed tenant and runtime data model</li>
+<li>MySQL-backed tenant and runtime data model</li>
 <li>API tokens for account and instance access</li>
 <li>webhook delivery tracking</li>
 <li>rate limiting and retention settings</li>
@@ -256,7 +256,7 @@ configuration scaffolding exists</li>
 </ul>
 <h3 id="assumptions">Assumptions</h3>
 <ul>
-<li>PostgreSQL remains the primary system of record</li>
+<li>MySQL remains the primary system of record</li>
 <li>Redis remains the queue and transient coordination layer</li>
 <li>customer usage centers on instance-oriented sending workflows</li>
 <li>admin users require higher-trust controls than customers</li>
@@ -440,9 +440,9 @@ implemented product surfaces and platform responsibilities.</p>
 <h3 id="stakeholder-register">Stakeholder Register</h3>
 <table>
 <colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+<col style="width: 47%" />
 </colgroup>
 <thead>
 <tr>
@@ -521,14 +521,14 @@ documented boundaries</li>
 <li>Impact: Low / Medium / High</li>
 </ul>
 <h3 id="current-risks">Current Risks</h3>
-<table style="width:100%;">
+<table>
 <colgroup>
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
-<col style="width: 16%" />
+<col style="width: 1%" />
+<col style="width: 34%" />
+<col style="width: 5%" />
+<col style="width: 3%" />
+<col style="width: 47%" />
+<col style="width: 7%" />
 </colgroup>
 <thead>
 <tr>

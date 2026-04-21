@@ -4,7 +4,7 @@ Status date: 2026-04-12
 
 ## Primary Technology
 
-- Database: PostgreSQL
+- Database: MySQL
 - Access layer: Prisma 7
 - Schema source: `packages/db/prisma/schema.prisma`
 

@@ -43,7 +43,7 @@
   
       
     <rect x="90" y="402" width="248" height="104" rx="20" fill="url(#card)" stroke="#cfd9e7" />
-    <text x="214" y="436" text-anchor="middle" font-size="25" font-weight="700" fill="#10213c" ><tspan x="214" dy="0">PostgreSQL</tspan></text>
+    <text x="214" y="436" text-anchor="middle" font-size="25" font-weight="700" fill="#10213c" ><tspan x="214" dy="0">MySQL</tspan></text>
     <text x="214" y="474" text-anchor="middle" font-size="15" font-weight="500" fill="#5c6d84" ><tspan x="214" dy="0">Prisma data model</tspan></text>
   
       

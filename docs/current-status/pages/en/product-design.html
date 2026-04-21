@@ -105,8 +105,7 @@ Characteristics</h3>
 </ul>
 <h3 id="supporting-infrastructure">Supporting Infrastructure</h3>
 <ul>
-<li>PostgreSQL stores tenant, runtime, audit, support, and message
-data</li>
+<li>MySQL stores tenant, runtime, audit, support, and message data</li>
 <li>Redis supports queue-backed and worker-related flows</li>
 <li>MinIO supports S3-compatible object storage needs</li>
 <li>Prometheus, Grafana, and Alertmanager are provisioned for local
@@ -247,7 +246,7 @@ flows</li>
 <h3 id="data-layer">Data Layer</h3>
 <ul>
 <li>Prisma schema in <code>packages/db/prisma/schema.prisma</code></li>
-<li>PostgreSQL source of truth</li>
+<li>MySQL source of truth</li>
 <li>relation-heavy model centered on <code>User</code>,
 <code>Workspace</code>, <code>Membership</code>, and
 <code>Instance</code></li>
@@ -267,7 +266,7 @@ should be documented rather than hidden.</p>
 Documentation</h2>
 <h3 id="primary-technology">Primary Technology</h3>
 <ul>
-<li>Database: PostgreSQL</li>
+<li>Database: MySQL</li>
 <li>Access layer: Prisma 7</li>
 <li>Schema source: <code>packages/db/prisma/schema.prisma</code></li>
 </ul>

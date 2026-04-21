@@ -2,7 +2,7 @@ import {
   commandExists,
   ensureLocalDatabase,
   ensureMinioService,
-  ensurePostgresService,
+  ensureMysqlService,
   ensureRedisService,
   loadLocalEnv,
   runOrThrow,
@@ -23,23 +23,21 @@ async function main() {
   }
 
   if (commandExists('docker')) {
-    runOrThrow(
-      'docker',
-      ['compose', 'up', '-d', 'postgres', 'redis', 'minio'],
-      { stdio: 'inherit' },
-    );
+    runOrThrow('docker', ['compose', 'up', '-d', 'mysql', 'redis', 'minio'], {
+      stdio: 'inherit',
+    });
     console.log('Infrastructure is running via Docker Compose.');
     return;
   }
 
   const env = loadLocalEnv();
-  await ensurePostgresService(env);
+  await ensureMysqlService(env);
   await ensureLocalDatabase(env);
   await ensureRedisService(env);
   await ensureMinioService(env);
 
   console.log('Infrastructure is running in local-service mode.');
-  console.log(`PostgreSQL: ${env.POSTGRES_HOST}:${env.POSTGRES_PORT}`);
+  console.log(`MySQL: ${env.DATABASE_HOST}:${env.DATABASE_PORT}`);
   console.log(`Redis: ${env.REDIS_URL}`);
   console.log(`MinIO: ${env.S3_ENDPOINT}`);
 }

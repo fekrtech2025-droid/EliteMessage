@@ -32,7 +32,7 @@
         <line x1="120" y1="180" x2="120" y2="624" stroke="#d5deea" stroke-width="2" stroke-dasharray="8 8" />
       
         <rect x="352" y="116" width="176" height="64" rx="18" fill="url(#card)" stroke="#cfd9e7" />
-        <text x="440" y="148" text-anchor="middle" font-size="19" font-weight="700" fill="#10213c" ><tspan x="440" dy="0">PostgreSQL</tspan></text>
+        <text x="440" y="148" text-anchor="middle" font-size="19" font-weight="700" fill="#10213c" ><tspan x="440" dy="0">MySQL</tspan></text>
         <line x1="440" y1="180" x2="440" y2="624" stroke="#d5deea" stroke-width="2" stroke-dasharray="8 8" />
       
         <rect x="672" y="116" width="176" height="64" rx="18" fill="url(#card)" stroke="#cfd9e7" />

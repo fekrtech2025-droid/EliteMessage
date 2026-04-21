@@ -35,7 +35,7 @@ Current repository scope includes:
 - Web apps: Next.js 16 and React 19
 - API: NestJS 11 with Express 5 and Socket.IO
 - Worker: BullMQ + Redis + `whatsapp-web.js`
-- Database: PostgreSQL via Prisma 7
+- Database: MySQL via Prisma 7
 - Object storage: MinIO / S3-compatible
 - Observability: Prometheus, Alertmanager, Grafana
 

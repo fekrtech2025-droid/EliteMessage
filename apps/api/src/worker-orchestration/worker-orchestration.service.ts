@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import {
   ForbiddenException,
   Injectable,
@@ -28,6 +29,10 @@ import {
   toWorkerHeartbeatRecord,
 } from '../common/presenters';
 import { RealtimeService } from '../realtime/realtime.service';
+
+function generateWebhookSecret() {
+  return randomBytes(32).toString('hex');
+}
 
 @Injectable()
 export class WorkerOrchestrationService {
@@ -787,6 +792,7 @@ export class WorkerOrchestrationService {
         update: {},
         create: {
           instanceId,
+          webhookSecret: generateWebhookSecret(),
         },
       });
 

@@ -1,11 +1,10 @@
-import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import { loadWorkspaceEnv } from '@elite-message/config';
 import { PrismaClient } from '@prisma/client';
-import { Pool } from 'pg';
 
 declare global {
   var __eliteMessagePrisma__: PrismaClient | undefined;
-  var __eliteMessagePgPool__: Pool | undefined;
+  var __eliteMessageDbAdapter__: PrismaMariaDb | undefined;
 }
 
 loadWorkspaceEnv();
@@ -15,22 +14,26 @@ if (!databaseUrl) {
   throw new Error('DATABASE_URL is required to initialize Prisma.');
 }
 
-const pool =
-  global.__eliteMessagePgPool__ ??
-  new Pool({
-    connectionString: databaseUrl,
+const adapter =
+  global.__eliteMessageDbAdapter__ ??
+  new PrismaMariaDb({
+    host: process.env.DATABASE_HOST,
+    port: Number(process.env.DATABASE_PORT),
+    user: process.env.DATABASE_USER,
+    password: process.env.DATABASE_PASSWORD,
+    database: process.env.DATABASE_NAME,
   });
 
 export const prisma =
   global.__eliteMessagePrisma__ ??
   new PrismaClient({
-    adapter: new PrismaPg(pool),
+    adapter,
     log: ['error', 'warn'],
   });
 
 if (process.env.NODE_ENV !== 'production') {
   global.__eliteMessagePrisma__ = prisma;
-  global.__eliteMessagePgPool__ = pool;
+  global.__eliteMessageDbAdapter__ = adapter;
 }
 
 export async function checkDatabaseConnection() {

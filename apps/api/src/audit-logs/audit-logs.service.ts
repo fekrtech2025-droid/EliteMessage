@@ -149,7 +149,6 @@ export class AuditLogsService {
         action: filters.action
           ? {
               contains: filters.action,
-              mode: 'insensitive',
             }
           : undefined,
         entityType: filters.entityType,
@@ -178,7 +177,6 @@ export class AuditLogsService {
         action: filters.action
           ? {
               contains: filters.action,
-              mode: 'insensitive',
             }
           : undefined,
       },
