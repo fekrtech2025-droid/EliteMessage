@@ -5,7 +5,7 @@ import { loadWorkspaceEnv, parseAdminWebEnv } from '@elite-message/config';
 const require = createRequire(import.meta.url);
 const mode = process.argv[2];
 
-if (mode !== 'dev' && mode !== 'start') {
+if (mode !== 'dev' && mode !== 'start' && mode !== 'build') {
   throw new Error(`Unsupported Next.js mode: ${mode ?? 'undefined'}`);
 }
 
@@ -19,7 +19,9 @@ if (mode === 'dev') {
   nextArgs.push('--webpack');
 }
 
-nextArgs.push('--port', String(env.ADMIN_WEB_PORT));
+if (mode !== 'build') {
+  nextArgs.push('--port', String(env.ADMIN_WEB_PORT));
+}
 
 const child = spawn(process.execPath, nextArgs, {
   stdio: 'inherit',

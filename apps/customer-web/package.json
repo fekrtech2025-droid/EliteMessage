@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx ./scripts/run-next.ts dev",
-    "build": "tsx ./scripts/validate-env.ts && next build",
+    "build": "tsx ./scripts/run-next.ts build",
     "start": "tsx ./scripts/run-next.ts start",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.json --noEmit",
