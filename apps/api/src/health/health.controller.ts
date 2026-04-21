@@ -1,4 +1,5 @@
 import { Controller, Get, Header } from '@nestjs/common';
+import { writeApiDebugLog } from '../common/api-debug';
 import { HealthService } from './health.service';
 
 @Controller()
@@ -7,11 +8,13 @@ export class HealthController {
 
   @Get('health')
   getHealth() {
+    writeApiDebugLog('health.public.entered');
     return this.healthService.getHealth();
   }
 
   @Get('ready')
   getReady() {
+    writeApiDebugLog('health.public.ready');
     return this.healthService.getReadiness();
   }
 

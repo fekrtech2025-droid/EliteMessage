@@ -839,12 +839,22 @@ export function AdminInstanceDetailPage({
                     </p>
                   </NoticeBanner>
                 ) : null}
-                {detail.runtime.qrCode ? (
+                {detail.runtime.qrCode &&
+                detail.runtime.sessionBackend !== 'placeholder' ? (
                   <QrPayloadView
                     payload={detail.runtime.qrCode}
                     alt={`WhatsApp QR for ${detail.instance.publicId}`}
                     expiresAt={detail.runtime.qrExpiresAt}
                   />
+                ) : detail.runtime.qrCode ? (
+                  <details>
+                    <summary style={{ cursor: 'pointer', fontWeight: 600 }}>
+                      Show raw placeholder payload
+                    </summary>
+                    <pre className="elite-mono-panel">
+                      {detail.runtime.qrCode}
+                    </pre>
+                  </details>
                 ) : (
                   <NoticeBanner title="No QR published" tone="neutral">
                     <p style={{ margin: 0 }}>

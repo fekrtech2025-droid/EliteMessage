@@ -671,6 +671,7 @@ export const PublicInstanceQrCodeResponseSchema = z.object({
   publicId: z.string().min(1),
   qrCode: z.string().nullish(),
   qrExpiresAt: z.string().datetime().nullish(),
+  sessionBackend: SessionBackendSchema,
   expired: z.boolean(),
   updatedAt: z.string().datetime(),
 });

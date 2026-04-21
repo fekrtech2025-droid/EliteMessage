@@ -374,6 +374,7 @@ export class InstancesService {
       publicId: instance.publicId,
       qrCode: instance.runtimeState.qrCode ?? null,
       qrExpiresAt: qrExpiresAt?.toISOString() ?? null,
+      sessionBackend: instance.runtimeState.sessionBackend,
       expired,
       updatedAt: instance.runtimeState.updatedAt.toISOString(),
     };

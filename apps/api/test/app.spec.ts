@@ -2197,14 +2197,16 @@ describe('api phase 2 routes', () => {
 
     expect(qrCodeResponse.status).toBe(200);
     expect(qrCodeResponse.body.qrCode).toBe('ELITE-PUBLIC-QR|READY');
+    expect(qrCodeResponse.body.sessionBackend).toBe('placeholder');
 
     const qrImageResponse = await request(app.getHttpServer())
       .get(`/instance/${created.instance.publicId}/instance/qr`)
       .set('authorization', `Bearer ${created.instanceApiToken}`);
 
-    expect(qrImageResponse.status).toBe(200);
-    expect(qrImageResponse.headers['content-type']).toContain('image/png');
-    expect(qrImageResponse.body.length).toBeGreaterThan(100);
+    expect(qrImageResponse.status).toBe(404);
+    expect(qrImageResponse.body.message).toContain(
+      'No scannable QR code is available while the instance is running on the placeholder backend.',
+    );
 
     const screenshotResponse = await request(app.getHttpServer()).get(
       `/instance/${created.instance.publicId}/instance/screenshot?token=${encodeURIComponent(created.instanceApiToken)}&encoding=base64`,

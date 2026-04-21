@@ -19,9 +19,9 @@
     "typecheck": "prisma generate && tsc -p tsconfig.json --noEmit",
     "test": "vitest run --passWithNoTests",
     "db:generate": "prisma generate",
-    "db:migrate": "prisma db push --skip-generate",
+    "db:migrate": "prisma db push",
     "db:bootstrap:plain": "bash ./scripts/bootstrap-plain-mysql.sh",
-    "db:reset": "prisma db push --force-reset --skip-generate"
+    "db:reset": "prisma db push --force-reset"
   },
   "dependencies": {
     "@elite-message/config": "workspace:*",

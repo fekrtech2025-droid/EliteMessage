@@ -30,4 +30,4 @@ if [[ "$table_count" != "0" ]]; then
   exit 1
 fi
 
-prisma db push --schema "$SCHEMA_PATH" --accept-data-loss --skip-generate
+prisma db push --schema "$SCHEMA_PATH" --accept-data-loss

@@ -53,18 +53,18 @@ function writeDebug(event, details = {}) {
   }
 }
 
-const port = Number(process.env.PORT || process.env.API_PORT || 3002);
-writeDebug('cpanel-app.start', {
-  envPort: process.env.PORT ?? null,
-  envApiPort: process.env.API_PORT ?? null,
-  resolvedPort: port,
-});
-process.env.API_PORT = String(port);
-
 try {
-  require('./dist/main.js');
-  writeDebug('cpanel-app.required_dist_main');
+  writeDebug('app.wrapper.start', {
+    argv: process.argv,
+    envPort: process.env.PORT ?? null,
+    envApiPort: process.env.API_PORT ?? null,
+    nodeEnv: process.env.NODE_ENV ?? null,
+  });
+  process.chdir(__dirname);
+  writeDebug('app.wrapper.chdir', { cwd: process.cwd() });
+  require('./cpanel-app.js');
+  writeDebug('app.wrapper.required_cpanel_app');
 } catch (error) {
-  writeDebug('cpanel-app.require_failed', error);
+  writeDebug('app.wrapper.error', error);
   throw error;
 }

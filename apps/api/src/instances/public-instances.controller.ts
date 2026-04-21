@@ -83,6 +83,11 @@ export class PublicInstancesController {
         'No QR code is currently available for this instance.',
       );
     }
+    if (qrCode.sessionBackend === 'placeholder') {
+      throw new NotFoundException(
+        'No scannable QR code is available while the instance is running on the placeholder backend.',
+      );
+    }
 
     const buffer = await QRCode.toBuffer(qrCode.qrCode, {
       margin: 1,
