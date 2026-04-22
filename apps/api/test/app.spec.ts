@@ -974,6 +974,182 @@ describe('api phase 2 routes', () => {
     ).toBe(true);
   });
 
+  it('allows customers to cancel a queued pending action', async () => {
+    const accessToken = await login(
+      app,
+      process.env.DEV_BOOTSTRAP_CUSTOMER_EMAIL,
+      process.env.DEV_BOOTSTRAP_CUSTOMER_PASSWORD,
+    );
+
+    const meResponse = await request(app.getHttpServer())
+      .get('/api/v1/account/me')
+      .set('authorization', `Bearer ${accessToken}`);
+
+    expect(meResponse.status).toBe(200);
+    const workspaceId = meResponse.body.workspaces[0].id as string;
+
+    const created = await createInstance(
+      app,
+      accessToken,
+      workspaceId,
+      'Phase 2A Cancel Pending Sender',
+    );
+    createdInstanceIds.push(created.instance.id);
+
+    await request(app.getHttpServer())
+      .post(`/api/v1/customer/instances/${created.instance.id}/actions`)
+      .set('authorization', `Bearer ${accessToken}`)
+      .send({
+        action: 'start',
+      })
+      .expect(201);
+
+    const cancelResponse = await request(app.getHttpServer())
+      .post(`/api/v1/customer/instances/${created.instance.id}/actions/cancel`)
+      .set('authorization', `Bearer ${accessToken}`);
+
+    expect(cancelResponse.status).toBe(200);
+    expect(cancelResponse.body.operation.status).toBe('cancelled');
+    expect(cancelResponse.body.message).toContain('Cancelled queued start');
+
+    const detailResponse = await request(app.getHttpServer())
+      .get(`/api/v1/customer/instances/${created.instance.id}`)
+      .set('authorization', `Bearer ${accessToken}`);
+
+    expect(detailResponse.status).toBe(200);
+    expect(detailResponse.body.pendingOperation).toBeNull();
+
+    const nextActionResponse = await request(app.getHttpServer())
+      .post(`/api/v1/customer/instances/${created.instance.id}/actions`)
+      .set('authorization', `Bearer ${accessToken}`)
+      .send({
+        action: 'start',
+      });
+
+    expect(nextActionResponse.status).toBe(201);
+    expect(nextActionResponse.body.operation.status).toBe('pending');
+  });
+
+  it('rejects cancelling a running action from the customer dashboard', async () => {
+    const customerToken = await login(
+      app,
+      process.env.DEV_BOOTSTRAP_CUSTOMER_EMAIL,
+      process.env.DEV_BOOTSTRAP_CUSTOMER_PASSWORD,
+    );
+
+    const meResponse = await request(app.getHttpServer())
+      .get('/api/v1/account/me')
+      .set('authorization', `Bearer ${customerToken}`);
+
+    expect(meResponse.status).toBe(200);
+    const workspaceId = meResponse.body.workspaces[0].id as string;
+    const created = await createInstance(
+      app,
+      customerToken,
+      workspaceId,
+      'Phase 2A Running Cancel Sender',
+    );
+    createdInstanceIds.push(created.instance.id);
+
+    const actionResponse = await request(app.getHttpServer())
+      .post(`/api/v1/customer/instances/${created.instance.id}/actions`)
+      .set('authorization', `Bearer ${customerToken}`)
+      .send({
+        action: 'start',
+      });
+
+    expect(actionResponse.status).toBe(201);
+    const operationId = actionResponse.body.operation.id as string;
+
+    await request(app.getHttpServer())
+      .post('/api/v1/internal/workers/register')
+      .set('authorization', `Bearer ${getInternalToken()}`)
+      .send({
+        workerId: testWorkerId,
+        status: 'online',
+        region: 'local',
+        uptimeSeconds: 45,
+        activeInstanceCount: 0,
+        timestamp: new Date().toISOString(),
+      })
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .post(`/api/v1/internal/workers/${testWorkerId}/claim-next`)
+      .set('authorization', `Bearer ${getInternalToken()}`)
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .post(
+        `/api/v1/internal/instances/${created.instance.id}/operations/${operationId}/status`,
+      )
+      .set('authorization', `Bearer ${getInternalToken()}`)
+      .send({
+        workerId: testWorkerId,
+        status: 'running',
+        message: 'Worker accepted the start action.',
+      })
+      .expect(200);
+
+    const cancelResponse = await request(app.getHttpServer())
+      .post(`/api/v1/customer/instances/${created.instance.id}/actions/cancel`)
+      .set('authorization', `Bearer ${customerToken}`);
+
+    expect(cancelResponse.status).toBe(409);
+    expect(cancelResponse.body.message).toBe(
+      'This action is already running and can no longer be cancelled from the dashboard.',
+    );
+  });
+
+  it('allows admins to cancel a queued pending action', async () => {
+    const customerToken = await login(
+      app,
+      process.env.DEV_BOOTSTRAP_CUSTOMER_EMAIL,
+      process.env.DEV_BOOTSTRAP_CUSTOMER_PASSWORD,
+    );
+    const adminToken = await login(
+      app,
+      process.env.DEV_BOOTSTRAP_ADMIN_EMAIL,
+      process.env.DEV_BOOTSTRAP_ADMIN_PASSWORD,
+    );
+
+    const meResponse = await request(app.getHttpServer())
+      .get('/api/v1/account/me')
+      .set('authorization', `Bearer ${customerToken}`);
+
+    expect(meResponse.status).toBe(200);
+    const workspaceId = meResponse.body.workspaces[0].id as string;
+    const created = await createInstance(
+      app,
+      customerToken,
+      workspaceId,
+      'Phase 2A Admin Cancel Sender',
+    );
+    createdInstanceIds.push(created.instance.id);
+
+    await request(app.getHttpServer())
+      .post(`/api/v1/customer/instances/${created.instance.id}/actions`)
+      .set('authorization', `Bearer ${customerToken}`)
+      .send({
+        action: 'start',
+      })
+      .expect(201);
+
+    const cancelResponse = await request(app.getHttpServer())
+      .post(`/api/v1/admin/instances/${created.instance.id}/actions/cancel`)
+      .set('authorization', `Bearer ${adminToken}`);
+
+    expect(cancelResponse.status).toBe(200);
+    expect(cancelResponse.body.operation.status).toBe('cancelled');
+
+    const adminDetailResponse = await request(app.getHttpServer())
+      .get(`/api/v1/admin/instances/${created.instance.id}`)
+      .set('authorization', `Bearer ${adminToken}`);
+
+    expect(adminDetailResponse.status).toBe(200);
+    expect(adminDetailResponse.body.pendingOperation).toBeNull();
+  });
+
   it('supports worker claim, runtime updates, operation completion, and release', async () => {
     const customerToken = await login(
       app,

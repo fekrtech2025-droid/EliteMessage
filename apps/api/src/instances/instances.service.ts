@@ -804,6 +804,48 @@ export class InstancesService {
     });
   }
 
+  async cancelCustomerInstanceAction(
+    userId: string,
+    instanceId: string,
+  ): Promise<RequestInstanceActionResponse> {
+    const instance = await prisma.instance.findFirst({
+      where: {
+        id: instanceId,
+        workspace: {
+          memberships: {
+            some: {
+              userId,
+              role: {
+                in: ['owner', 'admin', 'operator'],
+              },
+            },
+          },
+        },
+      },
+      select: {
+        id: true,
+        publicId: true,
+        workspaceId: true,
+        substatus: true,
+      },
+    });
+
+    if (!instance) {
+      throw new NotFoundException(
+        'Instance not found or not actionable by this user.',
+      );
+    }
+
+    return this.cancelQueuedInstanceAction({
+      instanceId: instance.id,
+      publicId: instance.publicId,
+      workspaceId: instance.workspaceId,
+      currentSubstatus: instance.substatus,
+      actorType: 'customer_user',
+      actorId: userId,
+    });
+  }
+
   async requestPublicInstanceAction(
     principal: InstanceApiPrincipal,
     input: RequestInstanceActionRequest,
@@ -914,6 +956,36 @@ export class InstancesService {
       actorType: 'platform_admin',
       actorId: userId,
       input,
+    });
+  }
+
+  async cancelAdminInstanceAction(
+    userId: string,
+    instanceId: string,
+  ): Promise<RequestInstanceActionResponse> {
+    const instance = await prisma.instance.findUnique({
+      where: {
+        id: instanceId,
+      },
+      select: {
+        id: true,
+        publicId: true,
+        workspaceId: true,
+        substatus: true,
+      },
+    });
+
+    if (!instance) {
+      throw new NotFoundException('Instance not found.');
+    }
+
+    return this.cancelQueuedInstanceAction({
+      instanceId: instance.id,
+      publicId: instance.publicId,
+      workspaceId: instance.workspaceId,
+      currentSubstatus: instance.substatus,
+      actorType: 'platform_admin',
+      actorId: userId,
     });
   }
 
@@ -1142,6 +1214,108 @@ export class InstancesService {
     return {
       instanceId: input.instanceId,
       message: `${input.input.action} action queued.`,
+      operation: toInstanceOperationSummary(operation),
+    };
+  }
+
+  private async cancelQueuedInstanceAction(input: {
+    instanceId: string;
+    publicId: string;
+    workspaceId: string;
+    currentSubstatus: string | null;
+    actorType: 'customer_user' | 'platform_admin' | 'system';
+    actorId: string;
+    extraAuditMetadata?: Record<string, unknown>;
+  }): Promise<RequestInstanceActionResponse> {
+    const existingOperation = await prisma.instanceOperation.findFirst({
+      where: {
+        instanceId: input.instanceId,
+        status: {
+          in: ['pending', 'running'],
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    if (!existingOperation) {
+      return {
+        instanceId: input.instanceId,
+        message:
+          'No pending or running instance action is available to cancel.',
+        operation: null,
+      };
+    }
+
+    if (existingOperation.status === 'running') {
+      throw new ConflictException(
+        'This action is already running and can no longer be cancelled from the dashboard.',
+      );
+    }
+
+    const now = new Date();
+    const nextSubstatus =
+      input.currentSubstatus === `${existingOperation.operationType}_queued`
+        ? null
+        : input.currentSubstatus;
+    const cancelledMessage = `${existingOperation.operationType} action cancelled before execution.`;
+
+    const operation = await prisma.$transaction(async (tx) => {
+      const cancelledOperation = await tx.instanceOperation.update({
+        where: {
+          id: existingOperation.id,
+        },
+        data: {
+          status: 'cancelled',
+          message: cancelledMessage,
+          completedAt: now,
+        },
+      });
+
+      await tx.instance.update({
+        where: {
+          id: input.instanceId,
+        },
+        data: {
+          lastLifecycleEventAt: now,
+          substatus: nextSubstatus,
+        },
+      });
+
+      await this.auditLogsService.recordWithClient(tx, {
+        workspaceId: input.workspaceId,
+        instanceId: input.instanceId,
+        actorType: input.actorType,
+        actorId: input.actorId,
+        entityType: 'instance_operation',
+        entityId: cancelledOperation.id,
+        action: 'instance.action.cancelled',
+        summary: `Queued ${existingOperation.operationType} action cancelled.`,
+        metadata: {
+          action: existingOperation.operationType,
+          previousStatus: existingOperation.status,
+          ...(input.extraAuditMetadata ?? {}),
+        },
+      });
+
+      return cancelledOperation;
+    });
+
+    this.realtimeService.publishInstanceOperationUpdated({
+      instanceId: input.instanceId,
+      publicId: input.publicId,
+      operationId: operation.id,
+      status: operation.status,
+    });
+    this.realtimeService.publishInstanceLifecycleUpdated({
+      instanceId: input.instanceId,
+      publicId: input.publicId,
+    });
+
+    return {
+      instanceId: input.instanceId,
+      message: `Cancelled queued ${existingOperation.operationType} action.`,
       operation: toInstanceOperationSummary(operation),
     };
   }

@@ -66,6 +66,7 @@ import {
 } from '../../lib/session';
 
 type PageState = 'loading' | 'unauthenticated' | 'ready';
+type ActionSubmissionState = InstanceAction | 'cancel' | null;
 
 type CustomerInstanceDetailPageProps = {
   instanceId: string;
@@ -308,7 +309,7 @@ export function CustomerInstanceDetailPage({
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [settingsSubmitting, setSettingsSubmitting] = useState(false);
   const [actionSubmitting, setActionSubmitting] =
-    useState<InstanceAction | null>(null);
+    useState<ActionSubmissionState>(null);
   const [screenshotOpening, setScreenshotOpening] = useState(false);
   const [tokenSubmitting, setTokenSubmitting] = useState(false);
   const [messageSubmitting, setMessageSubmitting] = useState<
@@ -321,6 +322,8 @@ export function CustomerInstanceDetailPage({
           actions: 'الإجراءات',
           backToDashboard: 'العودة إلى لوحة تحكم العميل',
           compose: 'التحرير',
+          cancelQueuedAction: 'إلغاء الإجراء الموضوع في الطابور',
+          cancellingQueuedAction: 'جارٍ إلغاء الإجراء الموضوع في الطابور...',
           customerInstanceDetail: 'تفاصيل مثيل العميل',
           events: 'الأحداث',
           inbound: 'الواردة',
@@ -360,6 +363,8 @@ export function CustomerInstanceDetailPage({
           loadingDetail: 'Loading detail',
           messages: 'Messages',
           messageExplorer: 'Message explorer',
+          cancelQueuedAction: 'Cancel queued action',
+          cancellingQueuedAction: 'Cancelling queued action...',
           openLatestScreenshot: 'Open latest screenshot',
           openingScreenshot: 'Opening screenshot...',
           recentEvents: 'Recent lifecycle history',
@@ -560,6 +565,8 @@ export function CustomerInstanceDetailPage({
   const hasPendingOperation =
     detail?.pendingOperation?.status === 'pending' ||
     detail?.pendingOperation?.status === 'running';
+  const canCancelPendingOperation =
+    detail?.pendingOperation?.status === 'pending';
   const conflictActive = detail?.instance.substatus === 'conflict';
 
   async function initialize() {
@@ -878,8 +885,58 @@ export function CustomerInstanceDetailPage({
           setErrorMessage(
             apiErrorMessage ??
               (locale === 'ar'
-              ? `تعذر وضع إجراء ${translateCustomerEnum(locale, action)} في الطابور.`
-              : `Could not queue the ${action} action.`),
+                ? `تعذر وضع إجراء ${translateCustomerEnum(locale, action)} في الطابور.`
+                : `Could not queue the ${action} action.`),
+          );
+        }
+        return;
+      }
+
+      const payload = (await response.json()) as RequestInstanceActionResponse;
+      if (!mountedRef.current) {
+        return;
+      }
+
+      setStatusMessage(payload.message);
+      await reloadDetail();
+    } finally {
+      setActionSubmitting(null);
+    }
+  }
+
+  async function cancelQueuedAction() {
+    setActionSubmitting('cancel');
+    setErrorMessage(null);
+    setStatusMessage(null);
+
+    try {
+      const result = await requestWithRefresh((token) =>
+        fetch(
+          `${apiBaseUrl}/api/v1/customer/instances/${instanceId}/actions/cancel`,
+          {
+            method: 'POST',
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+            credentials: 'include',
+          },
+        ),
+      );
+
+      if (result.kind !== 'ok') {
+        handleAuthenticatedRequestFailure(result);
+        return;
+      }
+
+      const response = result.response;
+      if (!response.ok) {
+        const apiErrorMessage = await readApiErrorMessage(response);
+        if (mountedRef.current) {
+          setErrorMessage(
+            apiErrorMessage ??
+              (locale === 'ar'
+                ? 'تعذر إلغاء الإجراء الموضوع في الطابور.'
+                : 'Could not cancel the queued action.'),
           );
         }
         return;
@@ -1660,11 +1717,48 @@ export function CustomerInstanceDetailPage({
               title={locale === 'ar' ? 'طابور العمليات' : 'Operation queue'}
               tone={hasPendingOperation ? 'warning' : 'info'}
             >
-              <p style={{ margin: 0 }}>
-                {locale === 'ar'
-                  ? 'يمكن أن تكون عملية واحدة فقط معلقة أو قيد التشغيل في الوقت نفسه.'
-                  : 'Only one operation can be pending or running at a time.'}
-              </p>
+              <div style={{ display: 'grid', gap: 12 }}>
+                <p style={{ margin: 0 }}>
+                  {locale === 'ar'
+                    ? 'يمكن أن تكون عملية واحدة فقط معلقة أو قيد التشغيل في الوقت نفسه.'
+                    : 'Only one operation can be pending or running at a time.'}
+                </p>
+                {detail?.pendingOperation ? (
+                  <p style={{ margin: 0 }}>
+                    {locale === 'ar'
+                      ? `الإجراء الحالي: ${translateCustomerEnum(
+                          locale,
+                          detail.pendingOperation.action,
+                        )} (${translateCustomerEnum(
+                          locale,
+                          detail.pendingOperation.status,
+                        )}).`
+                      : `Current queued action: ${detail.pendingOperation.action} (${detail.pendingOperation.status}).`}
+                  </p>
+                ) : null}
+                {canCancelPendingOperation ? (
+                  <div>
+                    <ActionButton
+                      type="button"
+                      tone="danger"
+                      disabled={actionSubmitting !== null || settingsSubmitting}
+                      onClick={() => {
+                        void cancelQueuedAction();
+                      }}
+                    >
+                      {actionSubmitting === 'cancel'
+                        ? copy.cancellingQueuedAction
+                        : copy.cancelQueuedAction}
+                    </ActionButton>
+                  </div>
+                ) : hasPendingOperation ? (
+                  <p style={{ margin: 0 }}>
+                    {locale === 'ar'
+                      ? 'بعد أن يبدأ العامل تنفيذ العملية لا يمكن إلغاؤها من لوحة التحكم.'
+                      : 'Once the worker starts the action, it can no longer be cancelled from the dashboard.'}
+                  </p>
+                ) : null}
+              </div>
             </NoticeBanner>
           </InfoCard>
 

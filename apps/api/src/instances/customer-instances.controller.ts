@@ -3,6 +3,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
@@ -97,6 +99,18 @@ export class CustomerInstancesController {
       user.id,
       instanceId,
       payload,
+    );
+  }
+
+  @Post('instances/:instanceId/actions/cancel')
+  @HttpCode(HttpStatus.OK)
+  async cancelQueuedInstanceAction(
+    @CurrentUser() user: RequestUser,
+    @Param('instanceId') instanceId: string,
+  ) {
+    return this.instancesService.cancelCustomerInstanceAction(
+      user.id,
+      instanceId,
     );
   }
 

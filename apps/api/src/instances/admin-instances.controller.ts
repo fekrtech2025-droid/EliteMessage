@@ -3,6 +3,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Res,
@@ -60,5 +62,14 @@ export class AdminInstancesController {
       instanceId,
       payload,
     );
+  }
+
+  @Post('instances/:instanceId/actions/cancel')
+  @HttpCode(HttpStatus.OK)
+  async cancelQueuedInstanceAction(
+    @CurrentUser() user: RequestUser,
+    @Param('instanceId') instanceId: string,
+  ) {
+    return this.instancesService.cancelAdminInstanceAction(user.id, instanceId);
   }
 }

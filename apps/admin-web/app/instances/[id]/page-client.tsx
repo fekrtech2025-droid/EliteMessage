@@ -47,6 +47,7 @@ import {
 } from '../../lib/session';
 
 type PageState = 'loading' | 'unauthenticated' | 'ready';
+type ActionSubmissionState = InstanceAction | 'cancel' | null;
 
 type AdminInstanceDetailPageProps = {
   instanceId: string;
@@ -210,7 +211,7 @@ export function AdminInstanceDetailPage({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [actionSubmitting, setActionSubmitting] =
-    useState<InstanceAction | null>(null);
+    useState<ActionSubmissionState>(null);
   const [screenshotOpening, setScreenshotOpening] = useState(false);
 
   useEffect(() => {
@@ -330,6 +331,8 @@ export function AdminInstanceDetailPage({
   const hasPendingOperation =
     detail?.pendingOperation?.status === 'pending' ||
     detail?.pendingOperation?.status === 'running';
+  const canCancelPendingOperation =
+    detail?.pendingOperation?.status === 'pending';
   const conflictActive = detail?.instance.substatus === 'conflict';
 
   async function initialize() {
@@ -520,6 +523,54 @@ export function AdminInstanceDetailPage({
         if (mountedRef.current) {
           setErrorMessage(
             apiErrorMessage ?? `Could not process the ${action} action.`,
+          );
+        }
+        return;
+      }
+
+      const payload = (await response.json()) as RequestInstanceActionResponse;
+      if (!mountedRef.current) {
+        return;
+      }
+
+      setStatusMessage(payload.message);
+      await reloadDetail();
+    } finally {
+      setActionSubmitting(null);
+    }
+  }
+
+  async function cancelQueuedAction() {
+    setActionSubmitting('cancel');
+    setErrorMessage(null);
+    setStatusMessage(null);
+
+    try {
+      const response = await requestWithRefresh((token) =>
+        fetch(
+          `${apiBaseUrl}/api/v1/admin/instances/${instanceId}/actions/cancel`,
+          {
+            method: 'POST',
+            headers: {
+              authorization: `Bearer ${token}`,
+            },
+            credentials: 'include',
+          },
+        ),
+      );
+
+      if (!response) {
+        if (mountedRef.current) {
+          setPageState('unauthenticated');
+        }
+        return;
+      }
+
+      if (!response.ok) {
+        const apiErrorMessage = await readApiErrorMessage(response);
+        if (mountedRef.current) {
+          setErrorMessage(
+            apiErrorMessage ?? 'Could not cancel the queued action.',
           );
         }
         return;
@@ -959,6 +1010,43 @@ export function AdminInstanceDetailPage({
                   : 'Reassign instance'}
               </ActionButton>
             </form>
+            <NoticeBanner
+              title="Operation queue"
+              tone={hasPendingOperation ? 'warning' : 'info'}
+            >
+              <div style={{ display: 'grid', gap: 12 }}>
+                <p style={{ margin: 0 }}>
+                  Only one operation can be pending or running at a time.
+                </p>
+                {detail?.pendingOperation ? (
+                  <p style={{ margin: 0 }}>
+                    Current queued action: {detail.pendingOperation.action} (
+                    {detail.pendingOperation.status}).
+                  </p>
+                ) : null}
+                {canCancelPendingOperation ? (
+                  <div>
+                    <ActionButton
+                      type="button"
+                      tone="danger"
+                      disabled={actionSubmitting !== null}
+                      onClick={() => {
+                        void cancelQueuedAction();
+                      }}
+                    >
+                      {actionSubmitting === 'cancel'
+                        ? 'Cancelling queued action...'
+                        : 'Cancel queued action'}
+                    </ActionButton>
+                  </div>
+                ) : hasPendingOperation ? (
+                  <p style={{ margin: 0 }}>
+                    Once the worker starts the action, it can no longer be
+                    cancelled from the dashboard.
+                  </p>
+                ) : null}
+              </div>
+            </NoticeBanner>
           </InfoCard>
 
           <InfoCard
