@@ -16,6 +16,21 @@ process.on('unhandledRejection', (reason) => {
   writeApiDebugLog('process.unhandledRejection', { reason });
 });
 
+function parseCorsOrigins(rawOrigins: string) {
+  return rawOrigins
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+}
+
+function normalizeOrigin(origin: string) {
+  try {
+    return new URL(origin).origin;
+  } catch {
+    return origin.trim();
+  }
+}
+
 async function bootstrap() {
   writeApiDebugLog('bootstrap.start', {
     argv: process.argv,
@@ -37,9 +52,34 @@ async function bootstrap() {
   const logger = createLogger({ service: 'api' });
   const app = await NestFactory.create(AppModule, { logger: false });
   writeApiDebugLog('bootstrap.nest.created');
+  const corsOrigins = parseCorsOrigins(env.API_CORS_ORIGINS);
+  const corsOriginSet = new Set(
+    corsOrigins.map((origin) => normalizeOrigin(origin)),
+  );
 
   app.enableCors({
-    origin: env.API_CORS_ORIGINS.split(','),
+    origin(
+      origin: string | undefined,
+      callback: (error: Error | null, origin?: string | boolean) => void,
+    ) {
+      if (!origin) {
+        callback(null, false);
+        return;
+      }
+
+      const normalizedOrigin = normalizeOrigin(origin);
+      const allowed =
+        corsOriginSet.has('*') || corsOriginSet.has(normalizedOrigin);
+
+      writeApiDebugLog('cors.origin.checked', {
+        origin,
+        normalizedOrigin,
+        allowed,
+        configuredOrigins: corsOrigins,
+      });
+
+      callback(null, allowed ? normalizedOrigin : false);
+    },
     credentials: true,
   });
   writeApiDebugLog('bootstrap.cors.enabled');
