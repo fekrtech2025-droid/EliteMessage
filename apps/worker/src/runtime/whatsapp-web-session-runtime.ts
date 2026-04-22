@@ -132,6 +132,23 @@ function mapAckValue(value: unknown) {
   }
 }
 
+function getErrorMessage(error: unknown, fallback = 'Unknown error.') {
+  return error instanceof Error ? error.message : String(error || fallback);
+}
+
+function isRecoverableBrowserFrameError(error: unknown) {
+  const message = getErrorMessage(error).toLowerCase();
+  return [
+    'detached frame',
+    'execution context was destroyed',
+    'target closed',
+    'session closed',
+    'page has been closed',
+    'browser has disconnected',
+    'cannot find context with specified id',
+  ].some((fragment) => message.includes(fragment));
+}
+
 function mapInboundKind(type: unknown) {
   switch (type) {
     case 'chat':
@@ -725,70 +742,217 @@ export class WhatsAppWebSessionRuntime implements SessionRuntime {
         return;
       }
 
-      const chatId = normalizeRecipient(message.recipient);
-      let sentMessage: WhatsAppMessage;
-      if (message.messageType === 'chat') {
-        sentMessage = await entry.client.sendMessage(
-          chatId,
-          message.body ?? '',
-        );
-      } else {
-        if (!this.module) {
-          throw new Error('WhatsApp Web module is not loaded.');
-        }
-
-        const media = await this.module.MessageMedia.fromUrl(
-          message.mediaUrl!,
-          {
-            unsafeMime: true,
-          },
-        );
-        sentMessage = await entry.client.sendMessage(chatId, media, {
-          caption: message.caption ?? undefined,
-        });
-      }
-
-      const providerMessageId = this.extractMessageId(sentMessage);
-      if (providerMessageId) {
-        entry.outboundByProviderId.set(providerMessageId, message.id);
-      }
-
-      await this.options.internalApi.updateOutboundMessage(
+      const sentMessage = await this.sendOutboundMessage(entry, message);
+      await this.completeOutboundMessageSend(
         instanceId,
-        message.id,
-        {
-          workerId: this.options.workerId,
-          status: 'sent',
-          ack: 'server',
-          providerMessageId: providerMessageId ?? undefined,
-          message: 'Sent through WhatsApp Web runtime.',
-        },
+        message,
+        sentMessage,
+        'Sent through WhatsApp Web runtime.',
+        'worker.message.sent',
+      );
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      entry.lastError = errorMessage;
+
+      if (
+        isRecoverableBrowserFrameError(error) &&
+        (await this.retryOutboundAfterBrowserRecovery(
+          instanceId,
+          message,
+          errorMessage,
+        ))
+      ) {
+        return;
+      }
+
+      await this.failOutboundMessage(instanceId, message, errorMessage);
+    }
+  }
+
+  private async sendOutboundMessage(
+    entry: ManagedWhatsAppInstance,
+    message: OutboundMessageSummary,
+  ) {
+    if (!entry.client) {
+      throw new Error('WhatsApp Web client is not connected.');
+    }
+
+    const chatId = normalizeRecipient(message.recipient);
+    if (message.messageType === 'chat') {
+      return entry.client.sendMessage(chatId, message.body ?? '');
+    }
+
+    if (!this.module) {
+      throw new Error('WhatsApp Web module is not loaded.');
+    }
+
+    const media = await this.module.MessageMedia.fromUrl(message.mediaUrl!, {
+      unsafeMime: true,
+    });
+    return entry.client.sendMessage(chatId, media, {
+      caption: message.caption ?? undefined,
+    });
+  }
+
+  private async completeOutboundMessageSend(
+    instanceId: string,
+    message: OutboundMessageSummary,
+    sentMessage: WhatsAppMessage,
+    statusMessage: string,
+    logEvent: string,
+  ) {
+    const entry = this.managedInstances.get(instanceId);
+    const providerMessageId = this.extractMessageId(sentMessage);
+    if (entry && providerMessageId) {
+      entry.outboundByProviderId.set(providerMessageId, message.id);
+    }
+
+    await this.options.internalApi.updateOutboundMessage(
+      instanceId,
+      message.id,
+      {
+        workerId: this.options.workerId,
+        status: 'sent',
+        ack: 'server',
+        providerMessageId: providerMessageId ?? undefined,
+        message: statusMessage,
+      },
+    );
+
+    this.options.logger.info(
+      {
+        correlationId: randomUUID(),
+        instanceId,
+        messageId: message.id,
+        publicMessageId: message.publicMessageId,
+        providerMessageId,
+        backend: 'whatsapp_web',
+      },
+      logEvent,
+    );
+  }
+
+  private async retryOutboundAfterBrowserRecovery(
+    instanceId: string,
+    message: OutboundMessageSummary,
+    initialErrorMessage: string,
+  ) {
+    const entry = this.managedInstances.get(instanceId);
+    if (!entry || this.stopping) {
+      return false;
+    }
+
+    this.options.logger.warn(
+      {
+        correlationId: randomUUID(),
+        instanceId,
+        messageId: message.id,
+        publicMessageId: message.publicMessageId,
+        backend: 'whatsapp_web',
+        error: initialErrorMessage,
+      },
+      'worker.message.recoverable_browser_send_failed',
+    );
+
+    try {
+      entry.desiredState = 'running';
+      entry.recoveryAttempts += 1;
+      entry.recoverAfterAt = null;
+      this.recordClientEvent(entry, 'send_recovery_requested');
+      await this.options.internalApi.updateInstanceRuntime(instanceId, {
+        workerId: this.options.workerId,
+        sessionBackend: 'whatsapp_web',
+        disconnectReason: initialErrorMessage,
+        sessionDiagnostics: this.buildDiagnostics(instanceId, {
+          phase: 'send_recovery_requested',
+          reason: initialErrorMessage,
+        }),
+      });
+
+      await this.destroyClient(
+        instanceId,
+        `Recovering WhatsApp Web browser after send failure: ${initialErrorMessage}`,
+      );
+      await wait(500);
+
+      const startupOutcome = await this.ensureClient(instanceId);
+      if (startupOutcome !== 'ready') {
+        throw new Error(
+          'WhatsApp Web recovery requires a fresh QR scan before retrying the message.',
+        );
+      }
+
+      const recoveredEntry = this.managedInstances.get(instanceId);
+      if (!recoveredEntry?.client || recoveredEntry.clientState !== 'ready') {
+        throw new Error('WhatsApp Web browser recovery did not reconnect.');
+      }
+
+      const sentMessage = await this.sendOutboundMessage(
+        recoveredEntry,
+        message,
+      );
+      await this.completeOutboundMessageSend(
+        instanceId,
+        message,
+        sentMessage,
+        'Sent through WhatsApp Web runtime after browser recovery.',
+        'worker.message.sent_after_browser_recovery',
       );
 
-      this.options.logger.info(
+      await this.options.internalApi.updateInstanceRuntime(instanceId, {
+        workerId: this.options.workerId,
+        sessionBackend: 'whatsapp_web',
+        disconnectReason: null,
+        sessionDiagnostics: this.buildDiagnostics(instanceId, {
+          phase: 'send_recovery_completed',
+          recoveredMessageId: message.id,
+        }),
+      });
+      return true;
+    } catch (retryError) {
+      const retryErrorMessage = getErrorMessage(retryError);
+      const current = this.managedInstances.get(instanceId);
+      if (current) {
+        current.lastError = retryErrorMessage;
+      }
+
+      this.options.logger.warn(
         {
           correlationId: randomUUID(),
           instanceId,
           messageId: message.id,
           publicMessageId: message.publicMessageId,
-          providerMessageId,
           backend: 'whatsapp_web',
+          initialError: initialErrorMessage,
+          retryError: retryErrorMessage,
         },
-        'worker.message.sent',
+        'worker.message.browser_recovery_retry_failed',
       );
-    } catch (error) {
-      entry.lastError = error instanceof Error ? error.message : String(error);
-      await this.options.internalApi.updateOutboundMessage(
+
+      await this.failOutboundMessage(
         instanceId,
-        message.id,
-        {
-          workerId: this.options.workerId,
-          status: 'unsent',
-          message: 'WhatsApp Web runtime failed to send the outbound message.',
-          errorMessage: error instanceof Error ? error.message : String(error),
-        },
+        message,
+        `Recoverable browser failure: ${initialErrorMessage}. Retry after reconnect failed: ${retryErrorMessage}`,
       );
+      return true;
     }
+  }
+
+  private async failOutboundMessage(
+    instanceId: string,
+    message: OutboundMessageSummary,
+    errorMessage: string,
+  ) {
+    await this.options.internalApi.updateOutboundMessage(
+      instanceId,
+      message.id,
+      {
+        workerId: this.options.workerId,
+        status: 'unsent',
+        message: 'WhatsApp Web runtime failed to send the outbound message.',
+        errorMessage,
+      },
+    );
   }
 
   private async ensureClient(instanceId: string): Promise<StartupOutcome> {
