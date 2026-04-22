@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
-import { mkdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import type { WorkerEnv } from '@elite-message/config';
 import type {
@@ -262,6 +262,68 @@ export function resolveWorkerBrowserExecutablePath(preferredPath?: string) {
   ].filter((value): value is string => Boolean(value));
 
   return candidates.find((candidate) => existsSync(candidate)) ?? null;
+}
+
+async function findLinuxProcessesUsingPath(targetPath: string) {
+  if (process.platform !== 'linux') {
+    return [] as { pid: number; command: string }[];
+  }
+
+  let entries: string[];
+  try {
+    entries = await readdir('/proc');
+  } catch {
+    return [];
+  }
+
+  const matches: { pid: number; command: string }[] = [];
+  await Promise.all(
+    entries.map(async (entry) => {
+      if (!/^\d+$/.test(entry)) {
+        return;
+      }
+
+      const pid = Number(entry);
+      if (!Number.isSafeInteger(pid) || pid === process.pid) {
+        return;
+      }
+
+      try {
+        const command = (await readFile(`/proc/${pid}/cmdline`, 'utf8'))
+          .replace(/\0/g, ' ')
+          .trim();
+        if (command.includes(targetPath)) {
+          matches.push({ pid, command });
+        }
+      } catch {
+        // Process exited or is not readable; ignore it.
+      }
+    }),
+  );
+
+  return matches;
+}
+
+async function terminateProcess(pid: number) {
+  try {
+    process.kill(pid, 'SIGTERM');
+  } catch {
+    return;
+  }
+
+  await wait(1_500);
+
+  try {
+    process.kill(pid, 0);
+  } catch {
+    return;
+  }
+
+  try {
+    process.kill(pid, 'SIGKILL');
+  } catch {
+    // Best-effort cleanup.
+  }
 }
 
 function resolveWhatsAppWebRuntimeModule(
@@ -791,6 +853,8 @@ export class WhatsAppWebSessionRuntime implements SessionRuntime {
       sessionDiagnostics: this.buildDiagnostics(instanceId),
     });
 
+    await this.cleanupStaleBrowserProcesses(instanceId);
+
     const client = new Client({
       authStrategy: new LocalAuth({
         clientId: entry.snapshot.publicId,
@@ -880,6 +944,47 @@ export class WhatsAppWebSessionRuntime implements SessionRuntime {
       entry.startupSignal.promise,
       this.options.env.WORKER_WA_STARTUP_TIMEOUT_MS,
       'WhatsApp Web startup',
+    );
+  }
+
+  private async cleanupStaleBrowserProcesses(instanceId: string) {
+    const entry = this.managedInstances.get(instanceId);
+    if (!entry) {
+      return;
+    }
+
+    const sessionDirectory = resolveSessionDirectory(
+      this.sessionStorageDir,
+      entry.snapshot.publicId,
+    );
+    const matches = await findLinuxProcessesUsingPath(sessionDirectory);
+    if (matches.length === 0) {
+      return;
+    }
+
+    this.options.logger.warn(
+      {
+        correlationId: randomUUID(),
+        instanceId,
+        backend: 'whatsapp_web',
+        sessionDirectory,
+        processIds: matches.map((match) => match.pid),
+      },
+      'worker.runtime.stale_browser_processes_found',
+    );
+
+    await Promise.all(matches.map((match) => terminateProcess(match.pid)));
+    await wait(500);
+
+    this.options.logger.warn(
+      {
+        correlationId: randomUUID(),
+        instanceId,
+        backend: 'whatsapp_web',
+        sessionDirectory,
+        processIds: matches.map((match) => match.pid),
+      },
+      'worker.runtime.stale_browser_processes_cleaned',
     );
   }
 

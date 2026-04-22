@@ -166,6 +166,61 @@ function resolveWorkerBrowserExecutablePath(preferredPath) {
     ].filter((value) => Boolean(value));
     return candidates.find((candidate) => (0, node_fs_1.existsSync)(candidate)) ?? null;
 }
+async function findLinuxProcessesUsingPath(targetPath) {
+    if (process.platform !== 'linux') {
+        return [];
+    }
+    let entries;
+    try {
+        entries = await (0, promises_1.readdir)('/proc');
+    }
+    catch {
+        return [];
+    }
+    const matches = [];
+    await Promise.all(entries.map(async (entry) => {
+        if (!/^\d+$/.test(entry)) {
+            return;
+        }
+        const pid = Number(entry);
+        if (!Number.isSafeInteger(pid) || pid === process.pid) {
+            return;
+        }
+        try {
+            const command = (await (0, promises_1.readFile)(`/proc/${pid}/cmdline`, 'utf8'))
+                .replace(/\0/g, ' ')
+                .trim();
+            if (command.includes(targetPath)) {
+                matches.push({ pid, command });
+            }
+        }
+        catch {
+            // Process exited or is not readable; ignore it.
+        }
+    }));
+    return matches;
+}
+async function terminateProcess(pid) {
+    try {
+        process.kill(pid, 'SIGTERM');
+    }
+    catch {
+        return;
+    }
+    await wait(1_500);
+    try {
+        process.kill(pid, 0);
+    }
+    catch {
+        return;
+    }
+    try {
+        process.kill(pid, 'SIGKILL');
+    }
+    catch {
+        // Best-effort cleanup.
+    }
+}
 function resolveWhatsAppWebRuntimeModule(module) {
     const candidate = ('default' in module && module.default && typeof module.default === 'object'
         ? module.default
@@ -516,6 +571,7 @@ class WhatsAppWebSessionRuntime {
             disconnectReason: null,
             sessionDiagnostics: this.buildDiagnostics(instanceId),
         });
+        await this.cleanupStaleBrowserProcesses(instanceId);
         const client = new Client({
             authStrategy: new LocalAuth({
                 clientId: entry.snapshot.publicId,
@@ -583,6 +639,33 @@ class WhatsAppWebSessionRuntime {
             }
         });
         return withTimeout(entry.startupSignal.promise, this.options.env.WORKER_WA_STARTUP_TIMEOUT_MS, 'WhatsApp Web startup');
+    }
+    async cleanupStaleBrowserProcesses(instanceId) {
+        const entry = this.managedInstances.get(instanceId);
+        if (!entry) {
+            return;
+        }
+        const sessionDirectory = resolveSessionDirectory(this.sessionStorageDir, entry.snapshot.publicId);
+        const matches = await findLinuxProcessesUsingPath(sessionDirectory);
+        if (matches.length === 0) {
+            return;
+        }
+        this.options.logger.warn({
+            correlationId: (0, node_crypto_1.randomUUID)(),
+            instanceId,
+            backend: 'whatsapp_web',
+            sessionDirectory,
+            processIds: matches.map((match) => match.pid),
+        }, 'worker.runtime.stale_browser_processes_found');
+        await Promise.all(matches.map((match) => terminateProcess(match.pid)));
+        await wait(500);
+        this.options.logger.warn({
+            correlationId: (0, node_crypto_1.randomUUID)(),
+            instanceId,
+            backend: 'whatsapp_web',
+            sessionDirectory,
+            processIds: matches.map((match) => match.pid),
+        }, 'worker.runtime.stale_browser_processes_cleaned');
     }
     bindClientEvents(instanceId, client) {
         client.on('qr', (qr) => {
