@@ -28,6 +28,14 @@ function normalizeOrigin(origin) {
 function getHeaderValue(value) {
     return Array.isArray(value) ? value.join(',') : value;
 }
+function getRequestPath(request) {
+    const rawPath = request.originalUrl ?? request.url;
+    return rawPath.split('?')[0] ?? rawPath;
+}
+function shouldPreventResponseCache(path) {
+    return (path.startsWith('/api/v1/') &&
+        !path.startsWith('/api/v1/public/customer-media/'));
+}
 async function bootstrap() {
     (0, api_debug_1.writeApiDebugLog)('bootstrap.start', {
         argv: process.argv,
@@ -49,6 +57,13 @@ async function bootstrap() {
     const corsOrigins = parseCorsOrigins(env.API_CORS_ORIGINS);
     const corsOriginSet = new Set(corsOrigins.map((origin) => normalizeOrigin(origin)));
     app.use((request, response, next) => {
+        const requestPath = getRequestPath(request);
+        if (shouldPreventResponseCache(requestPath)) {
+            response.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+            response.setHeader('Pragma', 'no-cache');
+            response.setHeader('Expires', '0');
+            response.setHeader('Surrogate-Control', 'no-store');
+        }
         const origin = getHeaderValue(request.headers.origin);
         const normalizedOrigin = origin ? normalizeOrigin(origin) : null;
         const allowed = normalizedOrigin !== null &&
@@ -56,7 +71,7 @@ async function bootstrap() {
         if (origin || request.method === 'OPTIONS') {
             (0, api_debug_1.writeApiDebugLog)('cors.manual.checked', {
                 method: request.method,
-                path: request.originalUrl ?? request.url,
+                path: requestPath,
                 origin: origin ?? null,
                 normalizedOrigin,
                 allowed,

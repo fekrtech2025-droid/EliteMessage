@@ -11,6 +11,13 @@ function wait(ms) {
         setTimeout(resolvePromise, ms).unref();
     });
 }
+function isExpiredIsoTimestamp(timestamp) {
+    if (!timestamp) {
+        return false;
+    }
+    const parsed = Date.parse(timestamp);
+    return Number.isNaN(parsed) ? false : parsed <= Date.now();
+}
 function withTimeout(promise, ms, label) {
     return new Promise((resolvePromise, rejectPromise) => {
         const timer = setTimeout(() => {
@@ -330,8 +337,12 @@ class WhatsAppWebSessionRuntime {
                         break;
                     }
                     if (entry.client && entry.clientState === 'qr') {
-                        await this.completeOperation(instanceId, 'start', 'WhatsApp Web QR is ready for scan.');
-                        break;
+                        if (!isExpiredIsoTimestamp(entry.snapshot.runtime.qrExpiresAt)) {
+                            await this.completeOperation(instanceId, 'start', 'WhatsApp Web QR is ready for scan.');
+                            break;
+                        }
+                        await this.destroyClient(instanceId, 'Expired WhatsApp Web QR refresh requested.');
+                        await wait(250);
                     }
                     if ((entry.client && isBootInProgress(entry.clientState)) ||
                         entry.clientPromise) {

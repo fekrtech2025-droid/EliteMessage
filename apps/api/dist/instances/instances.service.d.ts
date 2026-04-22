@@ -46,10 +46,13 @@ export declare class InstancesService {
     updateCustomerInstanceSettings(userId: string, instanceId: string, input: UpdateInstanceSettingsRequest): Promise<UpdateInstanceSettingsResponse>;
     updatePublicInstanceSettings(principal: InstanceApiPrincipal, input: PublicUpdateInstanceSettingsRequest): Promise<UpdateInstanceSettingsResponse>;
     requestCustomerInstanceAction(userId: string, instanceId: string, input: RequestInstanceActionRequest): Promise<RequestInstanceActionResponse>;
+    cancelCustomerInstanceAction(userId: string, instanceId: string): Promise<RequestInstanceActionResponse>;
     requestPublicInstanceAction(principal: InstanceApiPrincipal, input: RequestInstanceActionRequest): Promise<RequestInstanceActionResponse>;
     requestAdminInstanceAction(userId: string, instanceId: string, input: RequestInstanceActionRequest): Promise<RequestInstanceActionResponse>;
+    cancelAdminInstanceAction(userId: string, instanceId: string): Promise<RequestInstanceActionResponse>;
     rotateCustomerInstanceToken(userId: string, instanceId: string): Promise<RotateInstanceTokenResponse>;
     private enqueueInstanceAction;
+    private cancelQueuedInstanceAction;
     private reassignInstance;
     private loadPublicScopedInstanceRuntime;
     private readRuntimeDiagnostics;

@@ -196,6 +196,19 @@ function wait(milliseconds: number) {
   });
 }
 
+function isQrExpired(
+  qrCode: string | null | undefined,
+  expiresAt: string | null | undefined,
+  now = Date.now(),
+) {
+  if (!qrCode || !expiresAt) {
+    return false;
+  }
+
+  const timestamp = Date.parse(expiresAt);
+  return Number.isNaN(timestamp) ? false : timestamp <= now;
+}
+
 function statusTone(status: string) {
   switch (status) {
     case 'authenticated':
@@ -323,6 +336,7 @@ export function CustomerInstanceDetailPage({
     useState<ActionSubmissionState>(null);
   const [screenshotOpening, setScreenshotOpening] = useState(false);
   const [tokenSubmitting, setTokenSubmitting] = useState(false);
+  const [runtimeNow, setRuntimeNow] = useState(() => Date.now());
   const [messageSubmitting, setMessageSubmitting] = useState<
     'chat' | 'image' | null
   >(null);
@@ -484,6 +498,21 @@ export function CustomerInstanceDetailPage({
     setInstanceAccess(readInstanceCredentials(detail.instance.id));
   }, [detail]);
 
+  useEffect(() => {
+    if (!detail?.runtime.qrExpiresAt) {
+      return;
+    }
+
+    setRuntimeNow(Date.now());
+    const timer = setInterval(() => {
+      setRuntimeNow(Date.now());
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [detail?.runtime.qrExpiresAt]);
+
   const reloadDetail = useEffectEvent(async () => {
     const token = readStoredToken();
     if (!token) {
@@ -598,6 +627,11 @@ export function CustomerInstanceDetailPage({
   const canOfferCancelFromConflict =
     errorMessage?.toLowerCase().includes('pending or running') ?? false;
   const conflictActive = detail?.instance.substatus === 'conflict';
+  const runtimeQrExpired = isQrExpired(
+    detail?.runtime.qrCode,
+    detail?.runtime.qrExpiresAt,
+    runtimeNow,
+  );
 
   async function initialize() {
     const storedAccessToken = readStoredToken();
@@ -629,6 +663,7 @@ export function CustomerInstanceDetailPage({
       fetch(`${apiBaseUrl}/api/v1/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
+        cache: 'no-store',
       }),
     );
 
@@ -663,6 +698,7 @@ export function CustomerInstanceDetailPage({
               authorization: `Bearer ${token}`,
             },
             credentials: 'include',
+            cache: 'no-store',
           }),
         ),
         performCustomerRequest(() =>
@@ -673,6 +709,7 @@ export function CustomerInstanceDetailPage({
                 authorization: `Bearer ${token}`,
               },
               credentials: 'include',
+              cache: 'no-store',
             },
           ),
         ),
@@ -684,6 +721,7 @@ export function CustomerInstanceDetailPage({
                 authorization: `Bearer ${token}`,
               },
               credentials: 'include',
+              cache: 'no-store',
             },
           ),
         ),
@@ -695,6 +733,7 @@ export function CustomerInstanceDetailPage({
                 authorization: `Bearer ${token}`,
               },
               credentials: 'include',
+              cache: 'no-store',
             },
           ),
         ),
@@ -899,6 +938,7 @@ export function CustomerInstanceDetailPage({
             'content-type': 'application/json',
           },
           credentials: 'include',
+          cache: 'no-store',
           body: JSON.stringify({ action }),
         }),
       );
@@ -950,6 +990,7 @@ export function CustomerInstanceDetailPage({
               authorization: `Bearer ${token}`,
             },
             credentials: 'include',
+            cache: 'no-store',
           },
         ),
       );
@@ -1735,15 +1776,39 @@ export function CustomerInstanceDetailPage({
                     settingsSubmitting
                   }
                   onClick={() => {
-                    void requestAction(action);
+                    void requestAction(
+                      runtimeQrExpired && action === 'start'
+                        ? 'restart'
+                        : action,
+                    );
                   }}
                 >
-                  {actionSubmitting === action
-                    ? `${translateCustomerEnum(locale, action)}...`
-                    : translateCustomerEnum(locale, action)}
+                  {runtimeQrExpired && action === 'start'
+                    ? actionSubmitting === 'restart'
+                      ? locale === 'ar'
+                        ? 'جارٍ إنشاء QR جديد...'
+                        : 'Generating fresh QR...'
+                      : locale === 'ar'
+                        ? 'إنشاء QR جديد'
+                        : 'Generate fresh QR'
+                    : actionSubmitting === action
+                      ? `${translateCustomerEnum(locale, action)}...`
+                      : translateCustomerEnum(locale, action)}
                 </ActionButton>
               ))}
             </div>
+            {runtimeQrExpired ? (
+              <NoticeBanner
+                title={locale === 'ar' ? 'انتهت صلاحية QR' : 'QR expired'}
+                tone="warning"
+              >
+                <p style={{ margin: 0 }}>
+                  {locale === 'ar'
+                    ? 'انتهت صلاحية رمز QR الحالي. استخدم إنشاء QR جديد لبدء جلسة واتساب جديدة.'
+                    : 'The current QR code has expired. Use Generate fresh QR to restart the WhatsApp session and publish a new scannable code.'}
+                </p>
+              </NoticeBanner>
+            ) : null}
             <NoticeBanner
               title={locale === 'ar' ? 'طابور العمليات' : 'Operation queue'}
               tone={hasPendingOperation ? 'warning' : 'info'}

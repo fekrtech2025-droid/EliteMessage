@@ -92,6 +92,10 @@ function isConflictSubstatus(substatus: string | null | undefined) {
   return substatus === 'conflict';
 }
 
+function isExpired(timestamp: Date | null | undefined) {
+  return Boolean(timestamp && timestamp.getTime() <= Date.now());
+}
+
 function generateWebhookSecret() {
   return randomBytes(24).toString('hex');
 }
@@ -1109,10 +1113,27 @@ export class InstancesService {
   }): Promise<RequestInstanceActionResponse> {
     await this.ensureInstanceScaffolding(input.instanceId);
 
-    if (
+    let shouldTreatStartAsNoOp =
       input.input.action === 'start' &&
-      startNoOpStatuses.has(input.currentStatus)
-    ) {
+      startNoOpStatuses.has(input.currentStatus);
+
+    if (shouldTreatStartAsNoOp && input.currentStatus === 'qr') {
+      const runtimeState = await prisma.instanceRuntimeState.findUnique({
+        where: {
+          instanceId: input.instanceId,
+        },
+        select: {
+          qrCode: true,
+          qrExpiresAt: true,
+        },
+      });
+
+      shouldTreatStartAsNoOp = Boolean(
+        runtimeState?.qrCode && !isExpired(runtimeState.qrExpiresAt),
+      );
+    }
+
+    if (shouldTreatStartAsNoOp) {
       return {
         instanceId: input.instanceId,
         message: getStartNoOpMessage(input.currentStatus),
