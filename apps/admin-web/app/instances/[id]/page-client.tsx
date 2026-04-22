@@ -109,6 +109,28 @@ function readDiagnosticField(value: unknown, key: string) {
   return JSON.stringify(candidate);
 }
 
+async function readApiErrorMessage(response: Response) {
+  const contentType = response.headers.get('content-type') ?? '';
+
+  try {
+    if (contentType.includes('application/json')) {
+      const payload = (await response.json()) as { message?: unknown };
+      if (typeof payload.message === 'string' && payload.message.trim()) {
+        return payload.message.trim();
+      }
+    } else {
+      const text = (await response.text()).trim();
+      if (text) {
+        return text;
+      }
+    }
+  } catch {
+    // Fall back to the existing generic UI copy if the response body is unreadable.
+  }
+
+  return null;
+}
+
 function statusTone(status: string) {
   switch (status) {
     case 'authenticated':
@@ -494,8 +516,11 @@ export function AdminInstanceDetailPage({
       }
 
       if (!response.ok) {
+        const apiErrorMessage = await readApiErrorMessage(response);
         if (mountedRef.current) {
-          setErrorMessage(`Could not process the ${action} action.`);
+          setErrorMessage(
+            apiErrorMessage ?? `Could not process the ${action} action.`,
+          );
         }
         return;
       }
