@@ -106,33 +106,7 @@ async function bootstrap() {
 
     next();
   });
-
-  app.enableCors({
-    origin(
-      origin: string | undefined,
-      callback: (error: Error | null, origin?: string | boolean) => void,
-    ) {
-      if (!origin) {
-        callback(null, false);
-        return;
-      }
-
-      const normalizedOrigin = normalizeOrigin(origin);
-      const allowed =
-        corsOriginSet.has('*') || corsOriginSet.has(normalizedOrigin);
-
-      writeApiDebugLog('cors.origin.checked', {
-        origin,
-        normalizedOrigin,
-        allowed,
-        configuredOrigins: corsOrigins,
-      });
-
-      callback(null, allowed ? normalizedOrigin : false);
-    },
-    credentials: true,
-  });
-  writeApiDebugLog('bootstrap.cors.enabled');
+  writeApiDebugLog('bootstrap.manual_cors.enabled');
 
   await app.listen(env.API_PORT);
   writeApiDebugLog('bootstrap.listen.ready', {

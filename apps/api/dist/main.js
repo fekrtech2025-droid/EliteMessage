@@ -78,25 +78,7 @@ async function bootstrap() {
         }
         next();
     });
-    app.enableCors({
-        origin(origin, callback) {
-            if (!origin) {
-                callback(null, false);
-                return;
-            }
-            const normalizedOrigin = normalizeOrigin(origin);
-            const allowed = corsOriginSet.has('*') || corsOriginSet.has(normalizedOrigin);
-            (0, api_debug_1.writeApiDebugLog)('cors.origin.checked', {
-                origin,
-                normalizedOrigin,
-                allowed,
-                configuredOrigins: corsOrigins,
-            });
-            callback(null, allowed ? normalizedOrigin : false);
-        },
-        credentials: true,
-    });
-    (0, api_debug_1.writeApiDebugLog)('bootstrap.cors.enabled');
+    (0, api_debug_1.writeApiDebugLog)('bootstrap.manual_cors.enabled');
     await app.listen(env.API_PORT);
     (0, api_debug_1.writeApiDebugLog)('bootstrap.listen.ready', {
         apiPort: env.API_PORT,
