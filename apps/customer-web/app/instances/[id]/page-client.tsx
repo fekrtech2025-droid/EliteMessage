@@ -567,6 +567,8 @@ export function CustomerInstanceDetailPage({
     detail?.pendingOperation?.status === 'running';
   const canCancelPendingOperation =
     detail?.pendingOperation?.status === 'pending';
+  const canOfferCancelFromConflict =
+    errorMessage?.toLowerCase().includes('pending or running') ?? false;
   const conflictActive = detail?.instance.substatus === 'conflict';
 
   async function initialize() {
@@ -2474,7 +2476,25 @@ export function CustomerInstanceDetailPage({
 
       {errorMessage ? (
         <NoticeBanner title={copy.actionFailed} tone="danger">
-          <p style={{ margin: 0 }}>{errorMessage}</p>
+          <div style={{ display: 'grid', gap: 12 }}>
+            <p style={{ margin: 0 }}>{errorMessage}</p>
+            {canOfferCancelFromConflict ? (
+              <div>
+                <ActionButton
+                  type="button"
+                  tone="danger"
+                  disabled={actionSubmitting !== null}
+                  onClick={() => {
+                    void cancelQueuedAction();
+                  }}
+                >
+                  {actionSubmitting === 'cancel'
+                    ? copy.cancellingQueuedAction
+                    : copy.cancelQueuedAction}
+                </ActionButton>
+              </div>
+            ) : null}
+          </div>
         </NoticeBanner>
       ) : null}
 

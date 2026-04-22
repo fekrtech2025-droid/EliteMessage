@@ -333,6 +333,8 @@ export function AdminInstanceDetailPage({
     detail?.pendingOperation?.status === 'running';
   const canCancelPendingOperation =
     detail?.pendingOperation?.status === 'pending';
+  const canOfferCancelFromConflict =
+    errorMessage?.toLowerCase().includes('pending or running') ?? false;
   const conflictActive = detail?.instance.substatus === 'conflict';
 
   async function initialize() {
@@ -1318,7 +1320,25 @@ export function AdminInstanceDetailPage({
 
       {errorMessage ? (
         <NoticeBanner title="Action failed" tone="danger">
-          <p style={{ margin: 0 }}>{errorMessage}</p>
+          <div style={{ display: 'grid', gap: 12 }}>
+            <p style={{ margin: 0 }}>{errorMessage}</p>
+            {canOfferCancelFromConflict ? (
+              <div>
+                <ActionButton
+                  type="button"
+                  tone="danger"
+                  disabled={actionSubmitting !== null}
+                  onClick={() => {
+                    void cancelQueuedAction();
+                  }}
+                >
+                  {actionSubmitting === 'cancel'
+                    ? 'Cancelling queued action...'
+                    : 'Cancel queued action'}
+                </ActionButton>
+              </div>
+            ) : null}
+          </div>
         </NoticeBanner>
       ) : null}
 
