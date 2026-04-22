@@ -48,6 +48,20 @@ module.exports = [
         return null;
       }
     }
+    async function readBundleApiErrorMessage(a) {
+      let b = a.headers.get('content-type') ?? '';
+      try {
+        if (b.includes('application/json')) {
+          let b = await a.json();
+          if ('string' == typeof b.message && b.message.trim())
+            return b.message.trim();
+        } else {
+          let b = (await a.text()).trim();
+          if (b) return b;
+        }
+      } catch {}
+      return null;
+    }
     a.s([
       'CustomerInstanceDetailPage',
       0,
@@ -221,6 +235,14 @@ module.exports = [
             v.current &&
             x('unauthenticated');
         });
+        let au = (a) => {
+          ('start' === a || 'restart' === a) &&
+            [1e3, 2500, 5e3, 1e4, 15e3, 2e4].forEach((a) => {
+              setTimeout(() => {
+                v.current && ah();
+              }, a);
+            });
+        };
         (0, d.useEffect)(() => {
           if ('ready' !== w) return;
           let b = (0, e.io)(q.apiBaseUrl, {
@@ -292,6 +314,7 @@ module.exports = [
             fetch(`${q.apiBaseUrl}/api/v1/auth/refresh`, {
               method: 'POST',
               credentials: 'include',
+              cache: 'no-store',
             }),
           );
           if (!a) return (af(), null);
@@ -310,6 +333,7 @@ module.exports = [
               fetch(`${q.apiBaseUrl}/api/v1/customer/instances/${a}`, {
                 headers: { authorization: `Bearer ${b}` },
                 credentials: 'include',
+                cache: 'no-store',
               }),
             ),
             t(() =>
@@ -318,6 +342,7 @@ module.exports = [
                 {
                   headers: { authorization: `Bearer ${b}` },
                   credentials: 'include',
+                  cache: 'no-store',
                 },
               ),
             ),
@@ -327,6 +352,7 @@ module.exports = [
                 {
                   headers: { authorization: `Bearer ${b}` },
                   credentials: 'include',
+                  cache: 'no-store',
                 },
               ),
             ),
@@ -336,6 +362,7 @@ module.exports = [
                 {
                   headers: { authorization: `Bearer ${b}` },
                   credentials: 'include',
+                  cache: 'no-store',
                 },
               ),
             ),
@@ -449,23 +476,33 @@ module.exports = [
                   'content-type': 'application/json',
                 },
                 credentials: 'include',
+                cache: 'no-store',
                 body: JSON.stringify({ action: b }),
               }),
             );
             if ('ok' !== c.kind) return void ag(c);
             let d = c.response;
             if (!d.ok) {
+              let c = await readBundleApiErrorMessage(d);
+              if (
+                409 === d.status &&
+                (c ?? '').toLowerCase().includes('pending or running')
+              ) {
+                (v.current && V(c), await ah(), au(b));
+                return;
+              }
               v.current &&
                 T(
-                  'ar' === u
-                    ? `تعذر وضع إجراء ${(0, p.translateCustomerEnum)(u, b)} في الطابور.`
-                    : `Could not queue the ${b} action.`,
+                  c ??
+                    ('ar' === u
+                      ? `تعذر وضع إجراء ${(0, p.translateCustomerEnum)(u, b)} في الطابور.`
+                      : `Could not queue the ${b} action.`),
                 );
               return;
             }
             let e = await d.json();
             if (!v.current) return;
-            (V(e.message), await ah());
+            (V(e.message), await ah(), au(b));
           } finally {
             Z(null);
           }

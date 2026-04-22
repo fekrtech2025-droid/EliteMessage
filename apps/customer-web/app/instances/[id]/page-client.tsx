@@ -951,6 +951,21 @@ export function CustomerInstanceDetailPage({
       const response = result.response;
       if (!response.ok) {
         const apiErrorMessage = await readApiErrorMessage(response);
+        const actionAlreadyInFlight =
+          response.status === 409 &&
+          (apiErrorMessage?.toLowerCase().includes('pending or running') ??
+            false);
+
+        if (actionAlreadyInFlight) {
+          if (mountedRef.current) {
+            setStatusMessage(apiErrorMessage);
+          }
+
+          await reloadDetail();
+          void pollDetailAfterRuntimeAction(action);
+          return;
+        }
+
         if (mountedRef.current) {
           setErrorMessage(
             apiErrorMessage ??

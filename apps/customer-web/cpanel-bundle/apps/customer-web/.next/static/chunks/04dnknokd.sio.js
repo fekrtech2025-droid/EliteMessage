@@ -49,6 +49,20 @@
         return null;
       }
     }
+    async function readBundleApiErrorMessage(e) {
+      let t = e.headers.get('content-type') ?? '';
+      try {
+        if (t.includes('application/json')) {
+          let t = await e.json();
+          if ('string' == typeof t.message && t.message.trim())
+            return t.message.trim();
+        } else {
+          let t = (await e.text()).trim();
+          if (t) return t;
+        }
+      } catch {}
+      return null;
+    }
     e.s([
       'CustomerInstanceDetailPage',
       0,
@@ -222,6 +236,14 @@
             v.current &&
             w('unauthenticated');
         });
+        let ev = (e) => {
+          ('start' === e || 'restart' === e) &&
+            [1e3, 2500, 5e3, 1e4, 15e3, 2e4].forEach((e) => {
+              setTimeout(() => {
+                v.current && eo();
+              }, e);
+            });
+        };
         (0, a.useEffect)(() => {
           if ('ready' !== j) return;
           let t = (0, s.io)(b.apiBaseUrl, {
@@ -293,6 +315,7 @@
             fetch(`${b.apiBaseUrl}/api/v1/auth/refresh`, {
               method: 'POST',
               credentials: 'include',
+              cache: 'no-store',
             }),
           );
           if (!e) return (er(), null);
@@ -311,6 +334,7 @@
               fetch(`${b.apiBaseUrl}/api/v1/customer/instances/${e}`, {
                 headers: { authorization: `Bearer ${t}` },
                 credentials: 'include',
+                cache: 'no-store',
               }),
             ),
             y(() =>
@@ -319,6 +343,7 @@
                 {
                   headers: { authorization: `Bearer ${t}` },
                   credentials: 'include',
+                  cache: 'no-store',
                 },
               ),
             ),
@@ -328,6 +353,7 @@
                 {
                   headers: { authorization: `Bearer ${t}` },
                   credentials: 'include',
+                  cache: 'no-store',
                 },
               ),
             ),
@@ -337,6 +363,7 @@
                 {
                   headers: { authorization: `Bearer ${t}` },
                   credentials: 'include',
+                  cache: 'no-store',
                 },
               ),
             ),
@@ -450,23 +477,33 @@
                   'content-type': 'application/json',
                 },
                 credentials: 'include',
+                cache: 'no-store',
                 body: JSON.stringify({ action: t }),
               }),
             );
             if ('ok' !== n.kind) return void ei(n);
             let a = n.response;
             if (!a.ok) {
+              let n = await readBundleApiErrorMessage(a);
+              if (
+                409 === a.status &&
+                (n ?? '').toLowerCase().includes('pending or running')
+              ) {
+                (v.current && _(n), await eo(), ev(t));
+                return;
+              }
               v.current &&
                 G(
-                  'ar' === k
-                    ? `تعذر وضع إجراء ${(0, g.translateCustomerEnum)(k, t)} في الطابور.`
-                    : `Could not queue the ${t} action.`,
+                  n ??
+                    ('ar' === k
+                      ? `تعذر وضع إجراء ${(0, g.translateCustomerEnum)(k, t)} في الطابور.`
+                      : `Could not queue the ${t} action.`),
                 );
               return;
             }
             let s = await a.json();
             if (!v.current) return;
-            (_(s.message), await eo());
+            (_(s.message), await eo(), ev(t));
           } finally {
             X(null);
           }
