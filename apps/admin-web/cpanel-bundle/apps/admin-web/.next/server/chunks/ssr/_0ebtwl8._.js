@@ -1161,7 +1161,7 @@ Read more: https://nextjs.org/docs/messages/next-image-unconfigured-localpattern
               if ('ready' !== w) return;
               let a = (0, f.io)(r.apiBaseUrl, {
                   path: '/socket.io',
-                  transports: ['websocket', 'polling'],
+                  transports: ['polling'],
                   withCredentials: !0,
                 }),
                 b = null,
