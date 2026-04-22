@@ -25,6 +25,9 @@ function normalizeOrigin(origin) {
         return origin.trim();
     }
 }
+function getHeaderValue(value) {
+    return Array.isArray(value) ? value.join(',') : value;
+}
 async function bootstrap() {
     (0, api_debug_1.writeApiDebugLog)('bootstrap.start', {
         argv: process.argv,
@@ -45,6 +48,36 @@ async function bootstrap() {
     (0, api_debug_1.writeApiDebugLog)('bootstrap.nest.created');
     const corsOrigins = parseCorsOrigins(env.API_CORS_ORIGINS);
     const corsOriginSet = new Set(corsOrigins.map((origin) => normalizeOrigin(origin)));
+    app.use((request, response, next) => {
+        const origin = getHeaderValue(request.headers.origin);
+        const normalizedOrigin = origin ? normalizeOrigin(origin) : null;
+        const allowed = normalizedOrigin !== null &&
+            (corsOriginSet.has('*') || corsOriginSet.has(normalizedOrigin));
+        if (origin || request.method === 'OPTIONS') {
+            (0, api_debug_1.writeApiDebugLog)('cors.manual.checked', {
+                method: request.method,
+                path: request.originalUrl ?? request.url,
+                origin: origin ?? null,
+                normalizedOrigin,
+                allowed,
+                configuredOrigins: corsOrigins,
+            });
+        }
+        if (allowed && normalizedOrigin) {
+            const requestedHeaders = getHeaderValue(request.headers['access-control-request-headers']);
+            response.vary('Origin');
+            response.vary('Access-Control-Request-Headers');
+            response.setHeader('Access-Control-Allow-Origin', normalizedOrigin);
+            response.setHeader('Access-Control-Allow-Credentials', 'true');
+            response.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+            response.setHeader('Access-Control-Allow-Headers', requestedHeaders ?? 'authorization,content-type');
+        }
+        if (request.method === 'OPTIONS') {
+            response.status(204).send();
+            return;
+        }
+        next();
+    });
     app.enableCors({
         origin(origin, callback) {
             if (!origin) {
