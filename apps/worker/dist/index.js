@@ -12,8 +12,23 @@ const heartbeat_1 = require("./worker/heartbeat");
 async function bootstrap() {
     const env = (0, env_1.loadWorkerEnv)();
     const logger = (0, logger_1.createWorkerLogger)(env.WORKER_ID);
-    const redis = await (0, connection_1.createRedisConnection)(env.REDIS_URL, env.ENABLE_EXTERNAL_CONNECTIONS);
-    const queues = (0, bootstrap_1.bootstrapQueues)(redis);
+    let redis;
+    let queues;
+    try {
+        redis = await (0, connection_1.createRedisConnection)(env.REDIS_URL, env.ENABLE_EXTERNAL_CONNECTIONS, (error) => {
+            logger.warn({
+                correlationId: (0, node_crypto_1.randomUUID)(),
+                error: error.message,
+            }, 'worker.redis.error');
+        });
+        queues = (0, bootstrap_1.bootstrapQueues)(redis);
+    }
+    catch (error) {
+        logger.warn({
+            correlationId: (0, node_crypto_1.randomUUID)(),
+            error: error instanceof Error ? error.message : String(error),
+        }, 'worker.redis.unavailable');
+    }
     const internalApi = new client_1.InternalApiClient({
         baseUrl: env.API_BASE_URL,
         internalToken: env.API_INTERNAL_TOKEN,
@@ -137,10 +152,14 @@ async function bootstrap() {
         logger.info({ signal, correlationId: (0, node_crypto_1.randomUUID)() }, 'worker.shutdown.started');
         await releaseAssignments(`Worker shutdown via ${signal}.`);
         await runtime.stop();
-        await Promise.allSettled(Object.values(queues).map((queue) => queue.close()));
-        await redis.quit().catch(() => {
-            redis.disconnect();
-        });
+        if (queues) {
+            await Promise.allSettled(Object.values(queues).map((queue) => queue.close()));
+        }
+        if (redis) {
+            await redis.quit().catch(() => {
+                redis?.disconnect();
+            });
+        }
         await healthServer.close();
         logger.info({ signal, correlationId: (0, node_crypto_1.randomUUID)() }, 'worker.shutdown.completed');
         process.exit(0);
@@ -155,9 +174,10 @@ async function bootstrap() {
     logger.info({
         workerId: env.WORKER_ID,
         region: env.WORKER_REGION,
-        queues: Object.keys(queues),
+        queues: queues ? Object.keys(queues) : [],
         port: healthServer.port,
         sessionBackend: selectedBackend,
+        redis: queues ? 'connected' : 'unavailable',
     }, 'worker.started');
     logger.info({ workerId: env.WORKER_ID, correlationId: (0, node_crypto_1.randomUUID)() }, 'worker.heartbeat.ready');
     await syncWorkerState();

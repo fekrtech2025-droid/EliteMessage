@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import type { InternalWorkerAssignedInstance } from '@elite-message/contracts';
+import type Redis from 'ioredis';
 import { createWorkerLogger } from './logging/logger';
 import { loadWorkerEnv } from './config/env';
 import { createRedisConnection } from './redis/connection';
@@ -13,11 +14,34 @@ import { buildHeartbeatPayload } from './worker/heartbeat';
 async function bootstrap() {
   const env = loadWorkerEnv();
   const logger = createWorkerLogger(env.WORKER_ID);
-  const redis = await createRedisConnection(
-    env.REDIS_URL,
-    env.ENABLE_EXTERNAL_CONNECTIONS,
-  );
-  const queues = bootstrapQueues(redis);
+  let redis: Redis | undefined;
+  let queues: ReturnType<typeof bootstrapQueues> | undefined;
+
+  try {
+    redis = await createRedisConnection(
+      env.REDIS_URL,
+      env.ENABLE_EXTERNAL_CONNECTIONS,
+      (error) => {
+        logger.warn(
+          {
+            correlationId: randomUUID(),
+            error: error.message,
+          },
+          'worker.redis.error',
+        );
+      },
+    );
+    queues = bootstrapQueues(redis);
+  } catch (error) {
+    logger.warn(
+      {
+        correlationId: randomUUID(),
+        error: error instanceof Error ? error.message : String(error),
+      },
+      'worker.redis.unavailable',
+    );
+  }
+
   const internalApi = new InternalApiClient({
     baseUrl: env.API_BASE_URL,
     internalToken: env.API_INTERNAL_TOKEN,
@@ -194,12 +218,16 @@ async function bootstrap() {
 
     await releaseAssignments(`Worker shutdown via ${signal}.`);
     await runtime.stop();
-    await Promise.allSettled(
-      Object.values(queues).map((queue) => queue.close()),
-    );
-    await redis.quit().catch(() => {
-      redis.disconnect();
-    });
+    if (queues) {
+      await Promise.allSettled(
+        Object.values(queues).map((queue) => queue.close()),
+      );
+    }
+    if (redis) {
+      await redis.quit().catch(() => {
+        redis?.disconnect();
+      });
+    }
     await healthServer.close();
 
     logger.info(
@@ -223,9 +251,10 @@ async function bootstrap() {
     {
       workerId: env.WORKER_ID,
       region: env.WORKER_REGION,
-      queues: Object.keys(queues),
+      queues: queues ? Object.keys(queues) : [],
       port: healthServer.port,
       sessionBackend: selectedBackend,
+      redis: queues ? 'connected' : 'unavailable',
     },
     'worker.started',
   );

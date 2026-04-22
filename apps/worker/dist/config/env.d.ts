@@ -22,11 +22,11 @@ export declare function loadWorkerEnv(): {
     WORKER_WA_BROWSER_EXECUTABLE_PATH?: string | undefined;
 } & {
     DATABASE_URL: string;
-    POSTGRES_HOST: string;
-    POSTGRES_PORT: number;
-    POSTGRES_USER: string;
-    POSTGRES_PASSWORD: string;
-    POSTGRES_DB: string;
+    DATABASE_HOST: string;
+    DATABASE_PORT: number;
+    DATABASE_USER: string;
+    DATABASE_PASSWORD: string;
+    DATABASE_NAME: string;
 } & {
     REDIS_URL: string;
     REDIS_HOST: string;
