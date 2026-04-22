@@ -147,6 +147,12 @@ function inferFileExtension(mimeType, fallback) {
 function resolveWorkerBrowserExecutablePath(preferredPath) {
     const candidates = [
         preferredPath,
+        '/usr/bin/google-chrome-stable',
+        '/usr/bin/google-chrome',
+        '/usr/bin/chromium-browser',
+        '/usr/bin/chromium',
+        '/opt/google/chrome/google-chrome',
+        '/snap/bin/chromium',
         '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
         '/Applications/Chromium.app/Contents/MacOS/Chromium',
         '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
