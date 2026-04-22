@@ -240,7 +240,7 @@ export function AdminDashboardPage() {
 
     const socket = io(apiBaseUrl, {
       path: '/socket.io',
-      transports: ['websocket', 'polling'],
+      transports: ['polling'],
       withCredentials: true,
     });
 
@@ -713,14 +713,14 @@ export function AdminDashboardPage() {
                 aria-invalid={loginMfaError ? 'true' : undefined}
               />
             </Field>
-          <ActionButton
-            type="submit"
-            size="compact"
-            stretch
-            disabled={submitting}
-          >
-            {submitting ? 'Signing in...' : 'Sign in'}
-          </ActionButton>
+            <ActionButton
+              type="submit"
+              size="compact"
+              stretch
+              disabled={submitting}
+            >
+              {submitting ? 'Signing in...' : 'Sign in'}
+            </ActionButton>
           </form>
         </AuthSplitLayout>
       ) : null}

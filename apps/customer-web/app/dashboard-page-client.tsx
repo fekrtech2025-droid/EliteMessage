@@ -523,7 +523,7 @@ export function CustomerDashboardPage() {
 
     const socket = io(apiBaseUrl, {
       path: '/socket.io',
-      transports: ['websocket', 'polling'],
+      transports: ['polling'],
       withCredentials: true,
     });
 
