@@ -185,6 +185,17 @@ async function readApiErrorMessage(response: Response) {
   return null;
 }
 
+const runtimeQrRefreshActions = new Set<InstanceAction>(['start', 'restart']);
+const runtimeActionRefreshDelaysMs = [
+  1_000, 2_500, 5_000, 10_000, 15_000, 20_000,
+];
+
+function wait(milliseconds: number) {
+  return new Promise<void>((resolve) => {
+    setTimeout(resolve, milliseconds);
+  });
+}
+
 function statusTone(status: string) {
   switch (status) {
     case 'authenticated':
@@ -503,6 +514,23 @@ export function CustomerInstanceDetailPage({
       setPageState('unauthenticated');
     }
   });
+
+  const pollDetailAfterRuntimeAction = useEffectEvent(
+    async (action: InstanceAction) => {
+      if (!runtimeQrRefreshActions.has(action)) {
+        return;
+      }
+
+      for (const delayMs of runtimeActionRefreshDelaysMs) {
+        await wait(delayMs);
+        if (!mountedRef.current) {
+          return;
+        }
+
+        await reloadDetail();
+      }
+    },
+  );
 
   useEffect(() => {
     if (pageState !== 'ready' || process.env.NODE_ENV === 'test') {
@@ -901,6 +929,7 @@ export function CustomerInstanceDetailPage({
 
       setStatusMessage(payload.message);
       await reloadDetail();
+      void pollDetailAfterRuntimeAction(action);
     } finally {
       setActionSubmitting(null);
     }
