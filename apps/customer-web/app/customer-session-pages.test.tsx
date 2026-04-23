@@ -10,6 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CustomerNav } from './components/customer-nav';
 import { CustomerWorkspaceControls } from './components/customer-workspace-chrome';
 import { CustomerMessagesPage } from './messages/page-client';
+import { CustomerProfilePage } from './profile/page-client';
 import { CustomerSettingsPage } from './settings/page-client';
 import { CustomerSubscriptionPage } from './subscription/page-client';
 import { CustomerApiDocumentsPage } from './api-documents/page-client';
@@ -160,6 +161,24 @@ describe('customer secondary pages', () => {
     expect(loadCustomerAccountMock).toHaveBeenCalledTimes(1);
     expect(refreshCustomerAccessTokenMock).not.toHaveBeenCalled();
     expect(requestWithCustomerRefreshMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the profile page authenticated after the initial ready state', async () => {
+    loadCustomerAccountMock
+      .mockResolvedValueOnce(account)
+      .mockResolvedValueOnce(null);
+    requestWithCustomerRefreshMock.mockResolvedValue(null);
+
+    render(<CustomerProfilePage />);
+
+    expect(
+      await screen.findByRole('heading', { name: 'User Profile' }),
+    ).toBeTruthy();
+    await waitForStableCustomerPage();
+
+    expect(loadCustomerAccountMock).toHaveBeenCalledTimes(1);
+    expect(refreshCustomerAccessTokenMock).not.toHaveBeenCalled();
+    expect(requestWithCustomerRefreshMock).not.toHaveBeenCalled();
   });
 
   it('keeps the subscription page authenticated after the initial ready state', async () => {
@@ -342,6 +361,11 @@ describe('customer secondary pages', () => {
     );
     expect(pushMock).toHaveBeenLastCalledWith(
       '/messages?workspaceId=workspace-1&focus=recipient',
+    );
+
+    fireEvent.click(screen.getByLabelText(/Open profile|فتح الملف الشخصي/i));
+    expect(pushMock).toHaveBeenLastCalledWith(
+      '/profile?workspaceId=workspace-1',
     );
 
     fireEvent.click(

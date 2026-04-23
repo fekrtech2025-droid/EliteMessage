@@ -121,6 +121,16 @@ function StarIcon() {
   );
 }
 
+function ProfileIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+      <circle cx="10" cy="7.4" r="3.15" />
+      <path d="M4.9 16.1c.85-2.65 2.55-4 5.1-4s4.25 1.35 5.1 4" />
+      <path d="M3.2 4.2A8.15 8.15 0 0 1 10 1.8a8.15 8.15 0 0 1 6.8 2.4" />
+    </svg>
+  );
+}
+
 function CartIcon() {
   return (
     <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -246,9 +256,12 @@ export function CustomerWorkspaceControls({
           languagePreference: 'تبديل اللغة',
           logout: 'تسجيل الخروج',
           openMessages: 'فتح صفحة الرسائل',
+          openProfile: 'فتح الملف الشخصي',
           openQueueMessages: 'عرض الرسائل في الانتظار',
           openSettings: 'فتح الإعدادات',
           openSubscription: 'فتح صفحة الاشتراك',
+          profile: 'الملف الشخصي',
+          profileHint: 'بيانات الحساب ومساحات العمل',
           shortcuts: 'اختصارات الشريط العلوي',
           switch: 'اختيار',
           switchWorkspace: 'تبديل مساحة العمل',
@@ -263,9 +276,12 @@ export function CustomerWorkspaceControls({
           languagePreference: 'Language preference',
           logout: 'Log out',
           openMessages: 'Open message search',
+          openProfile: 'Open profile',
           openQueueMessages: 'Open queue messages',
           openSettings: 'Open account settings',
           openSubscription: 'Open subscription',
+          profile: 'Profile',
+          profileHint: 'Account identity and workspaces',
           shortcuts: 'Customer topbar shortcuts',
           switch: 'Switch',
           switchWorkspace: 'Switch workspace',
@@ -436,6 +452,33 @@ export function CustomerWorkspaceControls({
           </span>
         </summary>
         <div className="elite-customer-topbar-menu-panel">
+          <button
+            type="button"
+            data-unstyled-button
+            className="elite-customer-topbar-profile-link"
+            aria-label={copy.openProfile}
+            onClick={(event) => {
+              closeDetailsMenu(event.currentTarget);
+              pushRoute('/profile');
+            }}
+          >
+            <span
+              className="elite-customer-topbar-profile-link-icon"
+              aria-hidden="true"
+            >
+              <ProfileIcon />
+            </span>
+            <span className="elite-customer-topbar-menu-item-copy">
+              <strong>{copy.profile}</strong>
+              <span>{copy.profileHint}</span>
+            </span>
+            <span
+              className="elite-customer-topbar-menu-item-state"
+              aria-hidden="true"
+            >
+              ↗
+            </span>
+          </button>
           <div className="elite-customer-topbar-menu-eyebrow">
             {copy.switchWorkspace}
           </div>
