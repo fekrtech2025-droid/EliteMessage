@@ -4,12 +4,10 @@ import Link from 'next/link';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import type {
   AccountMeResponse,
-  InboundMessageSummary,
   ListCustomerInstancesResponse,
   ListInboundMessagesResponse,
   ListOutboundMessagesResponse,
   MessageStatus,
-  OutboundMessageSummary,
 } from '@elite-message/contracts';
 import {
   ActionButton,
@@ -30,6 +28,15 @@ import {
   CustomerWorkspaceControls,
 } from '../components/customer-workspace-chrome';
 import {
+  buildCustomerConversationEvents,
+  buildCustomerConversations,
+  buildCustomerContacts,
+  filterCustomerConversations,
+  getCustomerContactInitial,
+  type CustomerConversation,
+  type CustomerConversationEvent,
+} from '../lib/customer-conversations';
+import {
   loadCustomerAccount,
   logoutCustomerSession,
   refreshCustomerAccessToken,
@@ -44,7 +51,7 @@ import { apiBaseUrl, readStoredToken } from '../lib/session';
 
 type PageState = 'loading' | 'unauthenticated' | 'ready';
 
-const customerMessageStatuses: Array<MessageStatus | 'all'> = [
+const customerConversationStatuses: Array<MessageStatus | 'all'> = [
   'all',
   'queue',
   'sent',
@@ -61,54 +68,29 @@ function messageTone(status: string) {
       return 'warning' as const;
     case 'invalid':
     case 'expired':
+    case 'unsent':
       return 'danger' as const;
     default:
       return 'neutral' as const;
   }
 }
 
-function getStatusProgress(status: MessageStatus) {
-  switch (status) {
-    case 'sent':
-      return 100;
-    case 'queue':
-      return 42;
-    case 'unsent':
-      return 28;
-    case 'invalid':
-      return 14;
-    case 'expired':
-      return 6;
-    default:
-      return 0;
-  }
-}
-
-function getMessageInitial(value: string) {
-  return value.trim().charAt(0).toUpperCase() || '#';
-}
-
-function getOutboundPreview(message: OutboundMessageSummary, fallback: string) {
-  const preview =
-    message.body?.trim() ||
-    message.caption?.trim() ||
-    message.mediaUrl?.trim() ||
-    '';
-
-  return preview || fallback;
-}
-
-function getInboundPreview(message: InboundMessageSummary, fallback: string) {
-  const preview = message.body?.trim() || message.mediaUrl?.trim() || '';
-
-  return preview || fallback;
+function directionTone(direction: CustomerConversationEvent['direction']) {
+  return direction === 'inbound' ? ('info' as const) : ('success' as const);
 }
 
 function countOutboundStatus(
-  messages: OutboundMessageSummary[],
+  conversations: CustomerConversation[],
   status: MessageStatus,
 ) {
-  return messages.filter((message) => message.status === status).length;
+  return conversations.reduce(
+    (total, conversation) =>
+      total +
+      conversation.events.filter(
+        (event) => event.direction === 'outbound' && event.status === status,
+      ).length,
+    0,
+  );
 }
 
 function readCustomerMessageFilterParam(key: string) {
@@ -121,13 +103,30 @@ function readCustomerMessageFilterParam(key: string) {
 
 function readCustomerMessageStatusParam() {
   const status = readCustomerMessageFilterParam('status');
-  return customerMessageStatuses.includes(status as MessageStatus | 'all')
+  return customerConversationStatuses.includes(status as MessageStatus | 'all')
     ? (status as MessageStatus | 'all')
     : 'all';
 }
 
 function readCustomerMessageFocusParam() {
   return readCustomerMessageFilterParam('focus');
+}
+
+function buildContactsHref(workspaceId: string, query: string) {
+  const params = new URLSearchParams();
+  if (workspaceId) {
+    params.set('workspaceId', workspaceId);
+  }
+  if (query.trim()) {
+    params.set('q', query.trim());
+  }
+
+  const search = params.toString();
+  return search ? `/contacts?${search}` : '/contacts';
+}
+
+function buildInstanceHref(instanceId: string) {
+  return `/instances/${instanceId}`;
 }
 
 export function CustomerMessagesPage() {
@@ -153,104 +152,93 @@ export function CustomerMessagesPage() {
     readCustomerMessageFilterParam('to'),
   );
   const [outboundMessages, setOutboundMessages] = useState<
-    OutboundMessageSummary[]
+    ListOutboundMessagesResponse['items']
   >([]);
   const [inboundMessages, setInboundMessages] = useState<
-    InboundMessageSummary[]
+    ListInboundMessagesResponse['items']
   >([]);
+  const [selectedConversationId, setSelectedConversationId] = useState<
+    string | null
+  >(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const copy =
     locale === 'ar'
       ? {
-          activeFilters: 'الفلاتر النشطة',
+          activeConversation: 'المحادثة النشطة',
           allStatuses: 'كل الحالات',
-          apiIssue: 'مشكلة في مستكشف الرسائل',
-          attention: 'تحتاج متابعة',
           backToDashboard: 'العودة إلى لوحة التحكم',
+          clearFilters: 'مسح الفلاتر',
+          contacts: 'جهات الاتصال',
+          conversationEmpty: 'لا توجد محادثات تطابق النطاق المحدد.',
+          conversationInbox: 'صندوق المحادثات',
+          conversations: 'المحادثات',
           dashboardLogin: 'العودة إلى تسجيل الدخول في لوحة التحكم',
-          delivered: 'تم التسليم',
-          deliveryHealth: 'صحة التسليم',
+          discoveredContacts: 'جهات مكتشفة',
+          failedSends: 'إرسال فاشل',
           filters: 'الفلاتر',
-          inbound: 'الواردة',
-          inboundEmpty: 'لا توجد رسائل واردة تطابق النطاق المحدد.',
-          inboundSubtitle: 'ردود العملاء والوسائط المستلمة ضمن النطاق المحدد.',
+          inbound: 'وارد',
           instance: 'المثيل',
-          loading: 'جارٍ تحميل مستكشف الرسائل',
-          loadingMessage: 'يتم تحديث جلسة العميل وتحميل سجل الرسائل الأخير.',
-          liveTraffic: 'الحركة المباشرة',
-          messageCenter: 'مركز قيادة الرسائل',
-          messageCenterSubtitle:
-            'راقب ضغط الطابور ونتائج التسليم والردود الواردة من واجهة واحدة.',
+          loading: 'جارٍ تحميل المحادثات',
+          loadingMessage:
+            'يتم تحديث جلسة العميل وتحميل أحدث المحادثات وجهات الاتصال.',
+          manageContacts: 'إدارة جهات الاتصال',
           messageScope: 'نطاق الرسائل',
-          messages: 'الرسائل',
-          noDelivered: 'لا توجد رسائل مسلّمة',
-          noInboundActivity: 'لا يوجد نشاط وارد',
-          noQueued: 'لا توجد رسائل في الطابور',
           noPreview: 'لا توجد معاينة',
-          outbound: 'الصادرة',
-          outboundEmpty: 'لا توجد رسائل صادرة تطابق النطاق المحدد.',
-          outboundSubtitle:
-            'تفاصيل الطابور والتسليم والتأكيد لآخر الرسائل المرسلة.',
+          openInstance: 'فتح المثيل',
+          outbound: 'صادر',
           pageSubtitle:
-            'ابحث في أحدث الرسائل الصادرة والواردة عبر مساحة عمل العميل بدلًا من التقيد بصفحة تفاصيل مثيل واحدة.',
-          pageTitle: 'رسائل العميل',
+            'تعامل مع الرسائل كخيوط محادثة شبيهة بتلغرام بدل قائمة سجلات منفصلة.',
+          pageTitle: 'محادثات العميل',
           queued: 'في الطابور',
           recipientContains: 'المستلم يحتوي على',
-          refreshExplorer: 'تحديث المستكشف',
-          refreshTopbar: 'تحديث المستكشف',
+          refreshExplorer: 'تحديث المحادثات',
+          refreshTopbar: 'تحديث',
           returnSignin: 'يجب تسجيل الدخول',
           scopeAllInstances: 'كل مثيلات مساحة العمل',
+          searchPlaceholder: 'ابحث برقم أو اسم أو آخر رسالة',
           sessionMissing: 'جلسة العميل مفقودة أو منتهية الصلاحية.',
-          showing: 'عرض',
           statusQuickFilter: 'فلتر الحالة السريع',
-          totalOutbound: 'الصادرة',
+          threadReady:
+            'اختر محادثة من القائمة لمراجعة السياق الكامل والرسائل الفاشلة.',
           workspace: 'مساحة العمل',
         }
       : {
-          activeFilters: 'Active filters',
+          activeConversation: 'Active conversation',
           allStatuses: 'All statuses',
-          apiIssue: 'Message explorer issue',
-          attention: 'Needs attention',
           backToDashboard: 'Back to dashboard',
+          clearFilters: 'Clear filters',
+          contacts: 'Contacts',
+          conversationEmpty: 'No conversations matched the selected scope.',
+          conversationInbox: 'Conversation inbox',
+          conversations: 'Conversations',
           dashboardLogin: 'Return to the dashboard login',
-          delivered: 'Delivered',
-          deliveryHealth: 'Delivery health',
+          discoveredContacts: 'Discovered contacts',
+          failedSends: 'Failed sends',
           filters: 'Filters',
           inbound: 'Inbound',
-          inboundEmpty: 'No inbound messages matched the selected scope.',
-          inboundSubtitle:
-            'Customer replies and received media inside the selected scope.',
           instance: 'Instance',
-          loading: 'Loading message explorer',
+          loading: 'Loading conversations',
           loadingMessage:
-            'Refreshing the customer session and loading the recent message history.',
-          liveTraffic: 'Live traffic',
-          messageCenter: 'Message command center',
-          messageCenterSubtitle:
-            'Track queue pressure, delivery outcomes, and inbound replies without leaving the operator view.',
+            'Refreshing the customer session and loading recent conversations and contacts.',
+          manageContacts: 'Manage contacts',
           messageScope: 'Message scope',
-          messages: 'Messages',
-          noDelivered: 'No delivered sends',
-          noInboundActivity: 'No inbound activity',
-          noQueued: 'No queued sends',
           noPreview: 'No preview available',
+          openInstance: 'Open instance',
           outbound: 'Outbound',
-          outboundEmpty: 'No outbound messages matched the selected scope.',
-          outboundSubtitle:
-            'Queue, delivery, and acknowledgement details for recent sends.',
           pageSubtitle:
-            'Search recent outbound and inbound traffic across the customer workspace instead of being locked into a single-instance detail page.',
-          pageTitle: 'Customer Messages',
+            'Manage customer traffic as Telegram-style conversation threads instead of separate message logs.',
+          pageTitle: 'Customer Conversations',
           queued: 'Queued',
           recipientContains: 'Recipient contains',
-          refreshExplorer: 'Refresh message explorer',
-          refreshTopbar: 'Refresh explorer',
+          refreshExplorer: 'Refresh conversations',
+          refreshTopbar: 'Refresh',
           returnSignin: 'Sign in required',
           scopeAllInstances: 'All workspace instances',
+          searchPlaceholder: 'Search by number, name, or latest message',
           sessionMissing: 'The customer session is missing or expired.',
-          showing: 'Showing',
           statusQuickFilter: 'Quick status filter',
-          totalOutbound: 'Outbound',
+          threadReady:
+            'Choose a conversation from the list to review context and failed sends.',
           workspace: 'Workspace',
         };
 
@@ -296,8 +284,8 @@ export function CustomerMessagesPage() {
     if (!instanceResponse.ok) {
       handleMessageLoadFailure(
         locale === 'ar'
-          ? 'تعذر تحميل مستكشف رسائل العميل.'
-          : 'Could not load the customer message explorer.',
+          ? 'تعذر تحميل محادثات العميل.'
+          : 'Could not load the customer conversations.',
       );
       return false;
     }
@@ -341,7 +329,7 @@ export function CustomerMessagesPage() {
     if (recipientFilter.trim()) {
       query.set('to', recipientFilter.trim());
     }
-    query.set('limit', '40');
+    query.set('limit', '100');
 
     const inboundQuery = new URLSearchParams();
     if (targetWorkspaceId) {
@@ -350,7 +338,7 @@ export function CustomerMessagesPage() {
     if (targetInstanceId) {
       inboundQuery.set('instanceId', targetInstanceId);
     }
-    inboundQuery.set('limit', '25');
+    inboundQuery.set('limit', '100');
 
     const token = tokenOverride ?? accessToken;
     const [outboundResponse, inboundResponse] = await Promise.all([
@@ -394,8 +382,8 @@ export function CustomerMessagesPage() {
       if (mountedRef.current) {
         setErrorMessage(
           locale === 'ar'
-            ? 'تعذر تحميل مستكشف رسائل العميل.'
-            : 'Could not load the customer message explorer.',
+            ? 'تعذر تحميل محادثات العميل.'
+            : 'Could not load the customer conversations.',
         );
       }
       return;
@@ -423,6 +411,14 @@ export function CustomerMessagesPage() {
     setInstances([]);
     setOutboundMessages([]);
     setInboundMessages([]);
+    setSelectedConversationId(null);
+    setErrorMessage(null);
+  }
+
+  function clearMessageFilters() {
+    setInstanceId('');
+    setStatusFilter('all');
+    setRecipientFilter('');
     setErrorMessage(null);
   }
 
@@ -456,8 +452,8 @@ export function CustomerMessagesPage() {
             error instanceof Error
               ? error.message
               : locale === 'ar'
-                ? 'تعذر تحميل مستكشف رسائل العميل.'
-                : 'Could not load the customer message explorer.',
+                ? 'تعذر تحميل محادثات العميل.'
+                : 'Could not load the customer conversations.',
           );
         }
       }
@@ -555,31 +551,70 @@ export function CustomerMessagesPage() {
     statusFilter === 'all'
       ? copy.allStatuses
       : translateCustomerEnum(locale, statusFilter);
+  const allConversationEvents = buildCustomerConversationEvents({
+    outboundMessages,
+    inboundMessages,
+    emptyPreviewLabel: copy.noPreview,
+  });
+  const allConversations = buildCustomerConversations(allConversationEvents);
+  const conversations = filterCustomerConversations(allConversations, {
+    query: recipientFilter,
+    status: statusFilter,
+  });
+  const contacts = buildCustomerContacts(allConversations);
+  const activeConversation =
+    conversations.find(
+      (conversation) => conversation.id === selectedConversationId,
+    ) ??
+    conversations[0] ??
+    null;
+  const conversationIdsKey = conversations
+    .map((conversation) => conversation.id)
+    .join('|');
   const activeFilterCount = [
-    workspaceId,
     instanceId.trim(),
     statusFilter !== 'all' ? statusFilter : '',
     recipientFilter.trim(),
   ].filter(Boolean).length;
-  const queuedCount = countOutboundStatus(outboundMessages, 'queue');
-  const deliveredCount = countOutboundStatus(outboundMessages, 'sent');
-  const attentionCount =
-    countOutboundStatus(outboundMessages, 'unsent') +
-    countOutboundStatus(outboundMessages, 'invalid') +
-    countOutboundStatus(outboundMessages, 'expired');
-  const latestQueued = outboundMessages.find(
-    (message) => message.status === 'queue',
-  );
-  const latestDelivered = outboundMessages.find(
-    (message) => message.status === 'sent',
-  );
-  const latestInbound = inboundMessages[0] ?? null;
+  const queuedCount = countOutboundStatus(allConversations, 'queue');
+  const sentCount = countOutboundStatus(allConversations, 'sent');
+  const failedCount =
+    countOutboundStatus(allConversations, 'unsent') +
+    countOutboundStatus(allConversations, 'invalid') +
+    countOutboundStatus(allConversations, 'expired');
+
+  useEffect(() => {
+    if (pageState !== 'ready') {
+      return;
+    }
+
+    if (conversations.length === 0) {
+      if (selectedConversationId) {
+        setSelectedConversationId(null);
+      }
+      return;
+    }
+
+    const firstConversation = conversations[0];
+    if (!firstConversation) {
+      return;
+    }
+
+    if (
+      !selectedConversationId ||
+      !conversations.some(
+        (conversation) => conversation.id === selectedConversationId,
+      )
+    ) {
+      setSelectedConversationId(firstConversation.id);
+    }
+  }, [conversationIdsKey, conversations, pageState, selectedConversationId]);
 
   return (
     <AppShell
       title={copy.pageTitle}
       subtitle={copy.pageSubtitle}
-      breadcrumbLabel={copy.messages}
+      breadcrumbLabel={copy.conversations}
       surface="customer"
       density="compact"
       labels={getCustomerShellLabels(locale)}
@@ -595,11 +630,11 @@ export function CustomerMessagesPage() {
       meta={
         account ? (
           <CustomerTopbarAnnouncement
-            eyebrow={copy.liveTraffic}
+            eyebrow={copy.conversationInbox}
             message={
               locale === 'ar'
-                ? 'راجع النشاط الصادر والوارد عبر مساحة العمل.'
-                : 'Review outbound and inbound activity across the workspace.'
+                ? 'راجع المحادثات وجهات الاتصال من مكان واحد.'
+                : 'Review conversations and contacts from one place.'
             }
             linkLabel={copy.refreshTopbar}
             linkHref="/messages"
@@ -619,7 +654,7 @@ export function CustomerMessagesPage() {
       footer={<Link href="/dashboard">{copy.backToDashboard}</Link>}
     >
       {pageState === 'loading' ? (
-        <InfoCard eyebrow={copy.messages} title={copy.loading}>
+        <InfoCard eyebrow={copy.conversations} title={copy.loading}>
           <p style={{ margin: 0 }}>{copy.loadingMessage}</p>
         </InfoCard>
       ) : null}
@@ -639,85 +674,61 @@ export function CustomerMessagesPage() {
       {pageState === 'ready' && account ? (
         <>
           <section
-            className="elite-customer-messages-hero"
-            aria-labelledby="customer-messages-command-center"
+            className="elite-customer-conversations-hero"
+            aria-labelledby="customer-conversations-title"
           >
-            <div className="elite-customer-messages-hero-copy">
-              <p className="elite-customer-messages-kicker">
-                {copy.deliveryHealth}
+            <div>
+              <p className="elite-customer-conversations-kicker">
+                {copy.conversationInbox}
               </p>
-              <h2 id="customer-messages-command-center">
-                {copy.messageCenter}
-              </h2>
-              <p>{copy.messageCenterSubtitle}</p>
-              <div className="elite-customer-messages-scope-row">
+              <h2 id="customer-conversations-title">{copy.pageTitle}</h2>
+              <p>{copy.pageSubtitle}</p>
+              <div className="elite-customer-conversations-scope">
                 <span>{selectedWorkspaceLabel}</span>
                 <span>{selectedInstanceLabel}</span>
                 <span>{selectedStatusLabel}</span>
               </div>
             </div>
-            <div
-              className="elite-customer-messages-hero-panel"
-              aria-label={copy.deliveryHealth}
-            >
-              <div>
-                <span>{copy.activeFilters}</span>
-                <strong>{activeFilterCount}</strong>
-              </div>
-              <div>
-                <span>{copy.queued}</span>
-                <strong>{queuedCount}</strong>
-              </div>
-              <div>
-                <span>{copy.attention}</span>
-                <strong>{attentionCount}</strong>
-              </div>
+            <div className="elite-customer-conversations-hero-card">
+              <strong>{conversations.length}</strong>
+              <span>{copy.conversations}</span>
+              <Link href={buildContactsHref(workspaceId, recipientFilter)}>
+                {copy.manageContacts}
+              </Link>
             </div>
           </section>
 
           <MetricGrid minItemWidth={150}>
             <MetricCard
-              label={copy.totalOutbound}
-              value={outboundMessages.length}
-              hint={`${copy.showing} ${outboundMessages.length}`}
+              label={copy.conversations}
+              value={conversations.length}
+              hint={`${allConversationEvents.length} events`}
               tone="info"
               emphasis="strong"
             />
             <MetricCard
-              label={copy.queued}
-              value={queuedCount}
-              hint={
-                latestQueued
-                  ? formatCustomerDate(locale, latestQueued.createdAt)
-                  : copy.noQueued
-              }
-              tone={queuedCount > 0 ? 'warning' : 'neutral'}
-            />
-            <MetricCard
-              label={copy.delivered}
-              value={deliveredCount}
-              hint={
-                latestDelivered?.sentAt
-                  ? formatCustomerDate(locale, latestDelivered.sentAt)
-                  : copy.noDelivered
-              }
-              tone="success"
-            />
-            <MetricCard
-              label={copy.inbound}
-              value={inboundMessages.length}
-              hint={
-                latestInbound
-                  ? formatCustomerDate(locale, latestInbound.receivedAt)
-                  : copy.noInboundActivity
-              }
+              label={copy.contacts}
+              value={contacts.length}
+              hint={copy.discoveredContacts}
               tone="info"
             />
             <MetricCard
-              label={copy.attention}
-              value={attentionCount}
-              hint={copy.deliveryHealth}
-              tone={attentionCount > 0 ? 'danger' : 'neutral'}
+              label={copy.queued}
+              value={queuedCount}
+              hint={copy.outbound}
+              tone={queuedCount > 0 ? 'warning' : 'neutral'}
+            />
+            <MetricCard
+              label={copy.outbound}
+              value={sentCount}
+              hint={translateCustomerEnum(locale, 'sent')}
+              tone="success"
+            />
+            <MetricCard
+              label={copy.failedSends}
+              value={failedCount}
+              hint={copy.outbound}
+              tone={failedCount > 0 ? 'danger' : 'neutral'}
             />
           </MetricGrid>
 
@@ -764,7 +775,7 @@ export function CustomerMessagesPage() {
                     setStatusFilter(event.target.value as MessageStatus | 'all')
                   }
                 >
-                  {customerMessageStatuses.map((status) => (
+                  {customerConversationStatuses.map((status) => (
                     <option key={status} value={status}>
                       {status === 'all'
                         ? copy.allStatuses
@@ -778,16 +789,26 @@ export function CustomerMessagesPage() {
                   id="customer-message-recipient-filter"
                   value={recipientFilter}
                   onChange={(event) => setRecipientFilter(event.target.value)}
-                  placeholder="9639..."
+                  placeholder={copy.searchPlaceholder}
                 />
               </Field>
-              <ActionButton
-                type="button"
-                tone="secondary"
-                onClick={() => void loadMessages()}
-              >
-                {copy.refreshExplorer}
-              </ActionButton>
+              <div className="elite-customer-messages-filter-actions">
+                <ActionButton
+                  type="button"
+                  tone="secondary"
+                  onClick={() => void loadMessages()}
+                >
+                  {copy.refreshExplorer}
+                </ActionButton>
+                <ActionButton
+                  type="button"
+                  tone="ghost"
+                  onClick={clearMessageFilters}
+                  disabled={activeFilterCount === 0}
+                >
+                  {copy.clearFilters}
+                </ActionButton>
+              </div>
             </div>
             <div
               className="elite-customer-messages-quick-filter"
@@ -795,7 +816,7 @@ export function CustomerMessagesPage() {
               aria-label={copy.statusQuickFilter}
             >
               <span>{copy.statusQuickFilter}</span>
-              {customerMessageStatuses.map((status) => (
+              {customerConversationStatuses.map((status) => (
                 <button
                   key={status}
                   type="button"
@@ -810,226 +831,150 @@ export function CustomerMessagesPage() {
             </div>
           </InfoCard>
 
-          <div className="elite-customer-messages-board">
-            <InfoCard
-              eyebrow={copy.outbound}
-              title={
-                locale === 'ar'
-                  ? 'أحدث الرسائل الصادرة'
-                  : 'Recent outbound messages'
-              }
-              subtitle={copy.outboundSubtitle}
-              className="elite-customer-messages-stream"
+          {errorMessage ? (
+            <NoticeBanner title={copy.conversationInbox} tone="danger">
+              <p style={{ margin: 0 }}>{errorMessage}</p>
+            </NoticeBanner>
+          ) : null}
+
+          <section className="elite-customer-conversations-shell">
+            <aside
+              className="elite-customer-conversations-list"
+              aria-label={copy.conversations}
             >
-              {outboundMessages.length === 0 ? (
-                <div className="elite-customer-messages-empty">
-                  <span aria-hidden="true">↗</span>
-                  <p>{copy.outboundEmpty}</p>
+              <div className="elite-customer-conversations-list-header">
+                <div>
+                  <span>{copy.conversations}</span>
+                  <strong>{conversations.length}</strong>
+                </div>
+                <Link href={buildContactsHref(workspaceId, recipientFilter)}>
+                  {copy.contacts}
+                </Link>
+              </div>
+              {conversations.length === 0 ? (
+                <div className="elite-customer-conversations-empty">
+                  <span aria-hidden="true">#</span>
+                  <p>{copy.conversationEmpty}</p>
                 </div>
               ) : (
-                <div className="elite-customer-messages-stack">
-                  {outboundMessages.map((message) => (
-                    <article
-                      key={message.id}
-                      className="elite-customer-message-card"
-                      data-status={message.status}
+                conversations.map((conversation) => (
+                  <button
+                    key={conversation.id}
+                    type="button"
+                    className="elite-customer-conversation-item"
+                    data-active={
+                      activeConversation?.id === conversation.id
+                        ? 'true'
+                        : 'false'
+                    }
+                    onClick={() => setSelectedConversationId(conversation.id)}
+                  >
+                    <span
+                      className="elite-customer-conversation-avatar"
+                      aria-hidden="true"
                     >
-                      <div className="elite-customer-message-card-header">
-                        <div
-                          className="elite-customer-message-avatar"
-                          aria-hidden="true"
-                        >
-                          {getMessageInitial(message.recipient)}
-                        </div>
-                        <div className="elite-customer-message-thread">
-                          <span>{message.publicMessageId}</span>
-                          <strong>
-                            {locale === 'ar'
-                              ? `إلى ${message.recipient}`
-                              : `to ${message.recipient}`}
-                          </strong>
-                        </div>
-                        <div className="elite-customer-message-badges">
-                          <StatusBadge tone={messageTone(message.status)}>
-                            {translateCustomerEnum(locale, message.status)}
-                          </StatusBadge>
-                          <StatusBadge tone="info">
-                            {message.instancePublicId}
-                          </StatusBadge>
-                        </div>
-                      </div>
-                      <p className="elite-customer-message-preview">
-                        {getOutboundPreview(message, copy.noPreview)}
-                      </p>
-                      <div
-                        className="elite-customer-message-progress"
-                        aria-hidden="true"
+                      {getCustomerContactInitial(conversation.contactLabel)}
+                    </span>
+                    <span className="elite-customer-conversation-copy">
+                      <strong>{conversation.contactLabel}</strong>
+                      <span>{conversation.lastPreview}</span>
+                    </span>
+                    <span className="elite-customer-conversation-meta">
+                      <time>
+                        {formatCustomerDate(
+                          locale,
+                          conversation.lastActivityAt,
+                        )}
+                      </time>
+                      {conversation.failedCount > 0 ? (
+                        <StatusBadge tone="danger">
+                          {conversation.failedCount}
+                        </StatusBadge>
+                      ) : conversation.queuedCount > 0 ? (
+                        <StatusBadge tone="warning">
+                          {conversation.queuedCount}
+                        </StatusBadge>
+                      ) : null}
+                    </span>
+                  </button>
+                ))
+              )}
+            </aside>
+
+            <div
+              className="elite-customer-conversation-pane"
+              aria-label={copy.activeConversation}
+            >
+              {activeConversation ? (
+                <>
+                  <header className="elite-customer-chat-header">
+                    <span
+                      className="elite-customer-chat-header-avatar"
+                      aria-hidden="true"
+                    >
+                      {getCustomerContactInitial(
+                        activeConversation.contactLabel,
+                      )}
+                    </span>
+                    <div>
+                      <strong>{activeConversation.contactLabel}</strong>
+                      <span>
+                        {activeConversation.contactId} ·{' '}
+                        {activeConversation.instancePublicId}
+                      </span>
+                    </div>
+                    <Link
+                      href={buildInstanceHref(activeConversation.instanceId)}
+                    >
+                      {copy.openInstance}
+                    </Link>
+                  </header>
+
+                  <div className="elite-customer-chat-thread">
+                    {activeConversation.events.map((event) => (
+                      <article
+                        key={event.id}
+                        className="elite-customer-chat-bubble"
+                        data-direction={event.direction}
+                        data-status={event.status ?? 'received'}
                       >
-                        <span
-                          style={{
-                            width: `${getStatusProgress(message.status)}%`,
-                          }}
-                        />
-                      </div>
-                      <div className="elite-customer-message-meta">
-                        <span>
-                          {locale === 'ar'
-                            ? `النوع ${translateCustomerEnum(locale, message.messageType)}`
-                            : `Type ${message.messageType}`}
-                        </span>
-                        <span>
-                          {locale === 'ar'
-                            ? `التأكيد ${translateCustomerEnum(locale, message.ack)}`
-                            : `Ack ${message.ack}`}
-                        </span>
-                        <span>
-                          {locale === 'ar'
-                            ? `أُدرجت ${formatCustomerDate(locale, message.createdAt)}`
-                            : `Queued ${formatCustomerDate(locale, message.createdAt)}`}
-                        </span>
-                        <span>
-                          {locale === 'ar'
-                            ? `مجدولة ${formatCustomerDate(locale, message.scheduledFor)}`
-                            : `Scheduled ${formatCustomerDate(locale, message.scheduledFor)}`}
-                        </span>
-                        {message.sentAt ? (
-                          <span>
-                            {locale === 'ar'
-                              ? `أُرسلت ${formatCustomerDate(locale, message.sentAt)}`
-                              : `Sent ${formatCustomerDate(locale, message.sentAt)}`}
-                          </span>
+                        <p>{event.preview}</p>
+                        {event.errorMessage ? (
+                          <strong>{event.errorMessage}</strong>
                         ) : null}
-                        {message.acknowledgedAt ? (
-                          <span>
-                            {locale === 'ar'
-                              ? `تم التأكيد ${formatCustomerDate(locale, message.acknowledgedAt)}`
-                              : `Acked ${formatCustomerDate(locale, message.acknowledgedAt)}`}
-                          </span>
-                        ) : null}
-                      </div>
-                      {message.referenceId || message.errorMessage ? (
-                        <div className="elite-customer-message-note">
-                          {message.referenceId ? (
-                            <span>
-                              {locale === 'ar'
-                                ? `المرجع ${message.referenceId}`
-                                : `Reference ${message.referenceId}`}
-                            </span>
-                          ) : null}
-                          {message.errorMessage ? (
-                            <strong>{message.errorMessage}</strong>
-                          ) : null}
+                        <div className="elite-customer-chat-bubble-meta">
+                          <StatusBadge
+                            tone={
+                              event.status
+                                ? messageTone(event.status)
+                                : directionTone(event.direction)
+                            }
+                          >
+                            {event.status
+                              ? translateCustomerEnum(locale, event.status)
+                              : event.direction === 'inbound'
+                                ? copy.inbound
+                                : copy.outbound}
+                          </StatusBadge>
+                          <span>{event.kind}</span>
+                          {event.ack ? <span>{event.ack}</span> : null}
+                          <time>
+                            {formatCustomerDate(locale, event.timestamp)}
+                          </time>
                         </div>
-                      ) : null}
-                    </article>
-                  ))}
-                </div>
-              )}
-            </InfoCard>
-
-            <InfoCard
-              eyebrow={copy.inbound}
-              title={
-                locale === 'ar'
-                  ? 'أحدث الرسائل الواردة'
-                  : 'Recent inbound messages'
-              }
-              subtitle={copy.inboundSubtitle}
-              className="elite-customer-messages-stream"
-            >
-              {inboundMessages.length === 0 ? (
-                <div className="elite-customer-messages-empty">
-                  <span aria-hidden="true">↙</span>
-                  <p>{copy.inboundEmpty}</p>
-                </div>
+                      </article>
+                    ))}
+                  </div>
+                </>
               ) : (
-                <div className="elite-customer-messages-stack">
-                  {inboundMessages.map((message) => (
-                    <article
-                      key={message.id}
-                      className="elite-customer-message-card"
-                      data-direction="inbound"
-                    >
-                      <div className="elite-customer-message-card-header">
-                        <div
-                          className="elite-customer-message-avatar"
-                          aria-hidden="true"
-                        >
-                          {getMessageInitial(
-                            message.pushName ?? message.sender,
-                          )}
-                        </div>
-                        <div className="elite-customer-message-thread">
-                          <span>{message.publicMessageId}</span>
-                          <strong>
-                            {locale === 'ar'
-                              ? `من ${message.sender}`
-                              : `from ${message.sender}`}
-                          </strong>
-                        </div>
-                        <div className="elite-customer-message-badges">
-                          <StatusBadge tone="info">
-                            {message.instancePublicId}
-                          </StatusBadge>
-                          <StatusBadge tone="neutral">
-                            {translateCustomerEnum(locale, message.kind)}
-                          </StatusBadge>
-                        </div>
-                      </div>
-                      <p className="elite-customer-message-preview">
-                        {getInboundPreview(message, copy.noPreview)}
-                      </p>
-                      <div className="elite-customer-message-meta">
-                        <span>
-                          {locale === 'ar'
-                            ? `تم الاستلام ${formatCustomerDate(locale, message.receivedAt)}`
-                            : `Received ${formatCustomerDate(locale, message.receivedAt)}`}
-                        </span>
-                        {message.sentAt ? (
-                          <span>
-                            {locale === 'ar'
-                              ? `أُرسلت ${formatCustomerDate(locale, message.sentAt)}`
-                              : `Sent ${formatCustomerDate(locale, message.sentAt)}`}
-                          </span>
-                        ) : null}
-                        <span>
-                          {locale === 'ar'
-                            ? `اسم الظهور ${message.pushName ?? 'غير معروف'}`
-                            : `Push name ${message.pushName ?? 'Unknown'}`}
-                        </span>
-                        <span>
-                          {locale === 'ar'
-                            ? `المحادثة ${message.chatId ?? 'غير معروف'}`
-                            : `Chat ${message.chatId ?? 'Unknown'}`}
-                        </span>
-                      </div>
-                      {message.mediaUrl || message.mimeType ? (
-                        <div className="elite-customer-message-note">
-                          {message.mediaUrl ? (
-                            <span>
-                              {locale === 'ar'
-                                ? `الوسائط ${message.mediaUrl}`
-                                : `Media ${message.mediaUrl}`}
-                            </span>
-                          ) : null}
-                          {message.mimeType ? (
-                            <strong>{message.mimeType}</strong>
-                          ) : null}
-                        </div>
-                      ) : null}
-                    </article>
-                  ))}
+                <div className="elite-customer-conversations-empty">
+                  <span aria-hidden="true">...</span>
+                  <p>{copy.threadReady}</p>
                 </div>
               )}
-            </InfoCard>
-          </div>
+            </div>
+          </section>
         </>
-      ) : null}
-
-      {errorMessage ? (
-        <NoticeBanner title={copy.apiIssue} tone="danger">
-          <p style={{ margin: 0 }}>{errorMessage}</p>
-        </NoticeBanner>
       ) : null}
     </AppShell>
   );

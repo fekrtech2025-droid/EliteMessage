@@ -11,6 +11,7 @@ type CustomerNavProps = {
     | 'dashboard'
     | 'settings'
     | 'messages'
+    | 'contacts'
     | 'subscription'
     | 'api-docs'
     | 'instance';
@@ -26,6 +27,7 @@ const navItems = [
     icon: 'dashboard',
   },
   { key: 'messages', href: '/messages', label: 'Messages', icon: 'messages' },
+  { key: 'contacts', href: '/contacts', label: 'Contacts', icon: 'contacts' },
   {
     key: 'api-docs',
     href: '/api-documents',
@@ -62,6 +64,17 @@ function NavGlyph({ kind }: { kind: NavIconKind }) {
           <path d="M4.2 5.6h11.6v7.1H9.7L6.2 15.5v-2.8H4.2z" />
           <path d="M6.3 8.1h7.4" />
           <path d="M6.3 10.2h4.8" />
+        </svg>
+      );
+    case 'contacts':
+      return (
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M5.2 4.2h8.4a2 2 0 0 1 2 2v7.6a2 2 0 0 1-2 2H5.2z" />
+          <path d="M5.2 6.4H3.8" />
+          <path d="M5.2 10H3.8" />
+          <path d="M5.2 13.6H3.8" />
+          <circle cx="10.2" cy="8.1" r="1.55" />
+          <path d="M7.9 12.9c.5-1.1 1.3-1.7 2.3-1.7s1.8.6 2.3 1.7" />
         </svg>
       );
     case 'api-docs':
@@ -158,6 +171,7 @@ export function CustomerNav({
         ? (
             {
               'api-docs': 'وثائق API',
+              contacts: 'جهات الاتصال',
               dashboard: 'لوحة التحكم',
               messages: 'الرسائل',
               settings: 'الإعدادات',
