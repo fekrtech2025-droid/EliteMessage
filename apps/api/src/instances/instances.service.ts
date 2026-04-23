@@ -8,6 +8,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import {
+  loadWorkspaceEnv,
+  parseApiEnv,
+  type ApiEnv,
+} from '@elite-message/config';
 import type {
   CreateInstanceRequest,
   CreateInstanceResponse,
@@ -74,6 +79,7 @@ const startNoOpStatuses = new Set<InstanceStatus>([
   'retrying',
   'authenticated',
 ]);
+const defaultInstanceOperationStaleAfterMs = 180_000;
 
 function getStartNoOpMessage(status: InstanceStatus) {
   switch (status) {
@@ -118,10 +124,15 @@ function resolveWebhookSecret(
 
 @Injectable()
 export class InstancesService {
+  private readonly env: ApiEnv;
+
   constructor(
     private readonly realtimeService: RealtimeService,
     private readonly auditLogsService: AuditLogsService,
-  ) {}
+  ) {
+    loadWorkspaceEnv();
+    this.env = parseApiEnv(process.env);
+  }
 
   async listCustomerInstances(
     userId: string,
@@ -1141,6 +1152,13 @@ export class InstancesService {
       };
     }
 
+    await this.recoverStaleInstanceOperation({
+      instanceId: input.instanceId,
+      publicId: input.publicId,
+      workspaceId: input.workspaceId,
+      currentSubstatus: input.currentSubstatus,
+    });
+
     const existingOperation = await prisma.instanceOperation.findFirst({
       where: {
         instanceId: input.instanceId,
@@ -1248,6 +1266,13 @@ export class InstancesService {
     actorId: string;
     extraAuditMetadata?: Record<string, unknown>;
   }): Promise<RequestInstanceActionResponse> {
+    await this.recoverStaleInstanceOperation({
+      instanceId: input.instanceId,
+      publicId: input.publicId,
+      workspaceId: input.workspaceId,
+      currentSubstatus: input.currentSubstatus,
+    });
+
     const existingOperation = await prisma.instanceOperation.findFirst({
       where: {
         instanceId: input.instanceId,
@@ -1556,6 +1581,196 @@ export class InstancesService {
     return value as Record<string, unknown>;
   }
 
+  private getOperationStaleAfterMs() {
+    return Math.max(
+      defaultInstanceOperationStaleAfterMs,
+      this.env.API_WORKER_STALE_AFTER_MS * 2,
+    );
+  }
+
+  private async isWorkerUnavailable(workerId: string | null, nowMs: number) {
+    if (!workerId) {
+      return true;
+    }
+
+    const worker = await prisma.workerHeartbeat.findUnique({
+      where: {
+        workerId,
+      },
+      select: {
+        lastSeenAt: true,
+      },
+    });
+
+    if (!worker) {
+      return true;
+    }
+
+    return (
+      nowMs - worker.lastSeenAt.getTime() > this.env.API_WORKER_STALE_AFTER_MS
+    );
+  }
+
+  private async recoverStaleInstanceOperation(input: {
+    instanceId: string;
+    publicId: string;
+    workspaceId: string;
+    currentSubstatus?: string | null;
+  }) {
+    const operation = await prisma.instanceOperation.findFirst({
+      where: {
+        instanceId: input.instanceId,
+        status: {
+          in: ['pending', 'running'],
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+
+    if (!operation) {
+      return false;
+    }
+
+    const operationStartedAt =
+      operation.status === 'running'
+        ? (operation.startedAt ?? operation.createdAt)
+        : operation.createdAt;
+    const nowMs = Date.now();
+    const operationAgeMs = nowMs - operationStartedAt.getTime();
+    const staleAfterMs = this.getOperationStaleAfterMs();
+    if (operationAgeMs < staleAfterMs) {
+      return false;
+    }
+
+    const instance = await prisma.instance.findUnique({
+      where: {
+        id: input.instanceId,
+      },
+      select: {
+        assignedWorkerId: true,
+        substatus: true,
+      },
+    });
+
+    if (!instance) {
+      return false;
+    }
+
+    const workerUnavailable = await this.isWorkerUnavailable(
+      instance.assignedWorkerId,
+      nowMs,
+    );
+    if (!workerUnavailable) {
+      return false;
+    }
+
+    const reason = instance.assignedWorkerId
+      ? `Assigned worker "${instance.assignedWorkerId}" heartbeat is stale or unavailable.`
+      : 'No worker is assigned to process instance operations.';
+    const message = `${operation.operationType} action auto-failed after stale operation timeout.`;
+    const now = new Date(nowMs);
+    const effectiveSubstatus = input.currentSubstatus ?? instance.substatus;
+    const nextSubstatus =
+      effectiveSubstatus === `${operation.operationType}_queued`
+        ? null
+        : effectiveSubstatus;
+
+    const updatedOperation = await prisma.$transaction(async (tx) => {
+      const updateResult = await tx.instanceOperation.updateMany({
+        where: {
+          id: operation.id,
+          status: {
+            in: ['pending', 'running'],
+          },
+        },
+        data: {
+          status: 'failed',
+          message,
+          errorMessage: reason,
+          completedAt: now,
+        },
+      });
+
+      if (updateResult.count !== 1) {
+        return null;
+      }
+
+      await tx.instance.update({
+        where: {
+          id: input.instanceId,
+        },
+        data: {
+          lastLifecycleEventAt: now,
+          substatus: nextSubstatus,
+        },
+      });
+
+      await tx.instanceLifecycleEvent.create({
+        data: {
+          instanceId: input.instanceId,
+          eventType: 'action_failed',
+          actorType: 'system',
+          actorId: 'system',
+          message,
+          fromStatus: null,
+          toStatus: null,
+          metadata: {
+            action: operation.operationType,
+            previousStatus: operation.status,
+            staleAgeMs: operationAgeMs,
+            staleAfterMs,
+            assignedWorkerId: instance.assignedWorkerId,
+            reason,
+            autoRecovered: true,
+          },
+        },
+      });
+
+      await this.auditLogsService.recordWithClient(tx, {
+        workspaceId: input.workspaceId,
+        instanceId: input.instanceId,
+        actorType: 'system',
+        actorId: 'system',
+        entityType: 'instance_operation',
+        entityId: operation.id,
+        action: 'instance.action.auto_failed',
+        summary: `Auto-failed stale ${operation.operationType} action.`,
+        metadata: {
+          previousStatus: operation.status,
+          staleAgeMs: operationAgeMs,
+          staleAfterMs,
+          assignedWorkerId: instance.assignedWorkerId,
+          reason,
+        },
+      });
+
+      return tx.instanceOperation.findUnique({
+        where: {
+          id: operation.id,
+        },
+      });
+    });
+
+    if (!updatedOperation) {
+      return false;
+    }
+
+    this.realtimeService.publishInstanceOperationUpdated({
+      instanceId: input.instanceId,
+      publicId: input.publicId,
+      operationId: updatedOperation.id,
+      status: updatedOperation.status,
+    });
+    this.realtimeService.publishInstanceLifecycleUpdated({
+      instanceId: input.instanceId,
+      publicId: input.publicId,
+    });
+
+    return true;
+  }
+
   private async loadCustomerScopedInstanceDetail(
     userId: string,
     instanceId: string,
@@ -1580,6 +1795,39 @@ export class InstancesService {
       throw new NotFoundException('Instance not found.');
     }
 
+    const recovered = await this.recoverStaleInstanceOperation({
+      instanceId: instance.id,
+      publicId: instance.publicId,
+      workspaceId: instance.workspaceId,
+      currentSubstatus: instance.substatus,
+    });
+
+    if (recovered) {
+      const refreshedInstance = await prisma.instance.findFirst({
+        where: {
+          id: instanceId,
+          workspace: {
+            memberships: {
+              some: {
+                userId,
+              },
+            },
+          },
+        },
+        include: detailInclude,
+      });
+
+      if (
+        !refreshedInstance ||
+        !refreshedInstance.settings ||
+        !refreshedInstance.runtimeState
+      ) {
+        throw new NotFoundException('Instance not found.');
+      }
+
+      return refreshedInstance;
+    }
+
     return instance;
   }
 
@@ -1595,6 +1843,32 @@ export class InstancesService {
 
     if (!instance || !instance.settings || !instance.runtimeState) {
       throw new NotFoundException('Instance not found.');
+    }
+
+    const recovered = await this.recoverStaleInstanceOperation({
+      instanceId: instance.id,
+      publicId: instance.publicId,
+      workspaceId: instance.workspaceId,
+      currentSubstatus: instance.substatus,
+    });
+
+    if (recovered) {
+      const refreshedInstance = await prisma.instance.findUnique({
+        where: {
+          id: instanceId,
+        },
+        include: detailInclude,
+      });
+
+      if (
+        !refreshedInstance ||
+        !refreshedInstance.settings ||
+        !refreshedInstance.runtimeState
+      ) {
+        throw new NotFoundException('Instance not found.');
+      }
+
+      return refreshedInstance;
     }
 
     return instance;
