@@ -96,6 +96,45 @@ const dashboardArabicCopy = {
   pageSubtitle:
     'أدر تهيئة مساحة العمل وبيانات اعتماد API ورؤية التشغيل من شِلّ العميل الموثق.',
   breadcrumbLabel: 'لوحة التحكم',
+  heroEyebrow: 'مركز التحكم',
+  heroTitle: 'ابدأ المحادثات بثقة أسرع',
+  heroBody:
+    'تابع اتصال واتساب، افتح المحادثات، أدر جهات الاتصال، وأنشئ بيانات اعتماد API من لوحة واحدة واضحة.',
+  heroPrimaryAction: 'افتح المحادثات',
+  heroSecondaryAction: 'إدارة جهات الاتصال',
+  heroTertiaryAction: 'مستندات API',
+  nextActionEyebrow: 'أفضل خطوة الآن',
+  nextActionNoInstanceTitle: 'أنشئ أول مثيل واتساب',
+  nextActionNoInstanceBody: 'ابدأ بتسمية المثيل ثم افتح صفحة التشغيل لمسح QR.',
+  nextActionAttentionTitle: 'راجع المثيل الذي يحتاج انتباهًا',
+  nextActionAttentionBody:
+    'هناك حالة تشغيل تحتاج متابعة قبل إرسال الرسائل بثبات.',
+  nextActionConnectedTitle: 'ابدأ إدارة المحادثات',
+  nextActionConnectedBody:
+    'لديك مثيل متصل. انتقل إلى صندوق المحادثات وجهات الاتصال.',
+  nextActionConnectTitle: 'أكمل ربط واتساب',
+  nextActionConnectBody: 'افتح تفاصيل التشغيل وامسح QR لتفعيل الإرسال.',
+  nextActionOpen: 'تنفيذ الخطوة',
+  setupPathTitle: 'مسار التجهيز',
+  setupWorkspace: 'مساحة العمل',
+  setupWorkspaceDetail: 'تم اختيار السياق',
+  setupInstance: 'المثيل',
+  setupInstanceDetail: 'قناة واتساب',
+  setupConnect: 'الربط',
+  setupConnectDetail: 'QR أو جلسة نشطة',
+  setupSend: 'الإرسال',
+  setupSendDetail: 'المحادثات والرسائل',
+  quickActionsEyebrow: 'اختصارات',
+  quickActionsTitle: 'الأعمال اليومية',
+  quickConversationsTitle: 'المحادثات',
+  quickConversationsBody: 'اعرض المحادثات الأخيرة بأسلوب قريب من تيليجرام.',
+  quickContactsTitle: 'جهات الاتصال',
+  quickContactsBody: 'ابحث في العملاء واربطهم بالمحادثات بسرعة.',
+  quickRuntimeTitle: 'تشغيل واتساب',
+  quickRuntimeBody: 'افتح QR والحالة والعمليات الخاصة بالمثيل.',
+  quickApiTitle: 'واجهة API',
+  quickApiBody: 'راجع المسارات والرموز اللازمة للتكامل.',
+  quickOpen: 'فتح',
   topbarEyebrow: 'تهيئة API',
   topbarMessage:
     'أنشئ بيانات اعتماد المثيل هنا، ثم انتقل مباشرة إلى مستندات API العامة وصفحات تفاصيل التشغيل.',
@@ -124,6 +163,8 @@ const dashboardArabicCopy = {
   metricAttentionHint: 'حالات QR أو إعادة المحاولة أو الانقطاع أو الانتهاء',
   metricWorkersLabel: 'العمال',
   metricWorkersHint: 'مثيلات مع توزيع على العمال',
+  metricDisconnectedLabel: 'غير متصلة',
+  metricDisconnectedHint: 'مثيلات متوقفة أو منقطعة',
   workspaceSlugLabel: 'المعرّف المختصر لمساحة العمل',
   roleLabel: 'الدور',
   activeAccountTokensLabel: 'رموز الحساب النشطة',
@@ -164,6 +205,8 @@ const dashboardArabicCopy = {
   selectedInstanceAccessTitle: 'وصول المثيل المحدد',
   latestEventLabel: 'آخر حدث',
   openRuntimeDetail: 'افتح تفاصيل التشغيل',
+  openConversations: 'افتح المحادثات',
+  scanQr: 'مسح QR',
   noInstanceSelectedTitle: 'لم يتم تحديد مثيل',
   noInstanceSelectedBody:
     'أنشئ مثيلًا لإظهار بيانات الاعتماد العامة وعناصر التحكم التشغيلية من شِلّ العميل.',
@@ -277,6 +320,9 @@ export function CustomerDashboardPage() {
   const attentionCount = workspaceInstances.filter((instance) =>
     ['qr', 'retrying', 'disconnected', 'expired'].includes(instance.status),
   ).length;
+  const disconnectedCount = workspaceInstances.filter((instance) =>
+    ['disconnected', 'stopped', 'expired'].includes(instance.status),
+  ).length;
   const assignedWorkerCount = workspaceInstances.filter((instance) =>
     Boolean(instance.assignedWorkerId),
   ).length;
@@ -286,6 +332,93 @@ export function CustomerDashboardPage() {
   const canManageAccountTokens = selectedWorkspace
     ? ['owner', 'admin'].includes(selectedWorkspace.role)
     : false;
+  const attentionInstance =
+    workspaceInstances.find((instance) =>
+      ['qr', 'retrying', 'disconnected', 'expired'].includes(instance.status),
+    ) ?? selectedInstance;
+  const selectedInstanceHref = selectedInstance
+    ? `/instances/${selectedInstance.id}`
+    : '#create-instance';
+  const nextDashboardAction = !workspaceInstances.length
+    ? {
+        href: '#create-instance',
+        title: text(
+          'Create your first WhatsApp instance',
+          dashboardArabicCopy.nextActionNoInstanceTitle,
+        ),
+        body: text(
+          'Name the instance first, then open runtime detail to scan the QR code.',
+          dashboardArabicCopy.nextActionNoInstanceBody,
+        ),
+      }
+    : attentionCount > 0 && attentionInstance
+      ? {
+          href: `/instances/${attentionInstance.id}`,
+          title: text(
+            'Review the instance that needs attention',
+            dashboardArabicCopy.nextActionAttentionTitle,
+          ),
+          body: text(
+            'A runtime state needs attention before messaging stays reliable.',
+            dashboardArabicCopy.nextActionAttentionBody,
+          ),
+        }
+      : authenticatedCount > 0
+        ? {
+            href: buildWorkspaceRoute('/messages', workspaceId),
+            title: text(
+              'Start managing conversations',
+              dashboardArabicCopy.nextActionConnectedTitle,
+            ),
+            body: text(
+              'You have a connected instance. Move into conversations and contacts.',
+              dashboardArabicCopy.nextActionConnectedBody,
+            ),
+          }
+        : {
+            href: selectedInstanceHref,
+            title: text(
+              'Finish connecting WhatsApp',
+              dashboardArabicCopy.nextActionConnectTitle,
+            ),
+            body: text(
+              'Open runtime detail and scan QR to activate sending.',
+              dashboardArabicCopy.nextActionConnectBody,
+            ),
+          };
+  const setupSteps = [
+    {
+      label: text('Workspace', dashboardArabicCopy.setupWorkspace),
+      detail: text(
+        'Context selected',
+        dashboardArabicCopy.setupWorkspaceDetail,
+      ),
+      state: selectedWorkspace ? 'done' : 'current',
+    },
+    {
+      label: text('Instance', dashboardArabicCopy.setupInstance),
+      detail: text('WhatsApp channel', dashboardArabicCopy.setupInstanceDetail),
+      state: workspaceInstances.length > 0 ? 'done' : 'current',
+    },
+    {
+      label: text('Connect', dashboardArabicCopy.setupConnect),
+      detail: text(
+        'QR or active session',
+        dashboardArabicCopy.setupConnectDetail,
+      ),
+      state:
+        authenticatedCount > 0
+          ? 'done'
+          : workspaceInstances.length > 0
+            ? 'current'
+            : 'next',
+    },
+    {
+      label: text('Send', dashboardArabicCopy.setupSend),
+      detail: text('Chats and messages', dashboardArabicCopy.setupSendDetail),
+      state: authenticatedCount > 0 ? 'current' : 'next',
+    },
+  ];
 
   function handleLoadFailure(message: string) {
     if (!mountedRef.current) {
@@ -910,7 +1043,187 @@ export function CustomerDashboardPage() {
             </NoticeBanner>
           ) : null}
 
+          <section className="elite-customer-dashboard-hero">
+            <div className="elite-customer-dashboard-hero-copy">
+              <p className="elite-customer-dashboard-kicker">
+                {text('Command center', dashboardArabicCopy.heroEyebrow)}
+              </p>
+              <h2>
+                {text(
+                  'Start conversations with confidence faster',
+                  dashboardArabicCopy.heroTitle,
+                )}
+              </h2>
+              <p>
+                {text(
+                  'Track WhatsApp connection, open conversations, manage contacts, and create API credentials from one clear workspace view.',
+                  dashboardArabicCopy.heroBody,
+                )}
+              </p>
+              <div className="elite-customer-dashboard-hero-actions">
+                <Link
+                  className="elite-customer-dashboard-action"
+                  data-variant="primary"
+                  href={buildWorkspaceRoute('/messages', workspaceId)}
+                >
+                  {text(
+                    'Open conversations',
+                    dashboardArabicCopy.heroPrimaryAction,
+                  )}
+                </Link>
+                <Link
+                  className="elite-customer-dashboard-action"
+                  href={buildWorkspaceRoute('/contacts', workspaceId)}
+                >
+                  {text(
+                    'Manage contacts',
+                    dashboardArabicCopy.heroSecondaryAction,
+                  )}
+                </Link>
+                <Link
+                  className="elite-customer-dashboard-action"
+                  href={buildWorkspaceRoute('/api-documents', workspaceId)}
+                >
+                  {text('API docs', dashboardArabicCopy.heroTertiaryAction)}
+                </Link>
+              </div>
+              <div className="elite-customer-dashboard-metric-strip">
+                <div>
+                  <span>
+                    {text(
+                      'Instances',
+                      dashboardArabicCopy.metricInstancesLabel,
+                    )}
+                  </span>
+                  <strong>{workspaceInstances.length}</strong>
+                </div>
+                <div>
+                  <span>
+                    {text('Linked', dashboardArabicCopy.metricLinkedLabel)}
+                  </span>
+                  <strong>{authenticatedCount}</strong>
+                </div>
+                <div>
+                  <span>
+                    {text(
+                      'Attention',
+                      dashboardArabicCopy.metricAttentionLabel,
+                    )}
+                  </span>
+                  <strong>{attentionCount}</strong>
+                </div>
+                <div>
+                  <span>
+                    {text(
+                      'Active tokens',
+                      dashboardArabicCopy.activeAccountTokensLabel,
+                    )}
+                  </span>
+                  <strong>{activeAccountTokenCount}</strong>
+                </div>
+              </div>
+            </div>
+
+            <aside className="elite-customer-dashboard-next">
+              <div>
+                <span>
+                  {text(
+                    'Best next step',
+                    dashboardArabicCopy.nextActionEyebrow,
+                  )}
+                </span>
+                <h3>{nextDashboardAction.title}</h3>
+                <p>{nextDashboardAction.body}</p>
+                <Link href={nextDashboardAction.href}>
+                  {text('Do this step', dashboardArabicCopy.nextActionOpen)}
+                </Link>
+              </div>
+              <div className="elite-customer-dashboard-setup">
+                <strong>
+                  {text('Setup path', dashboardArabicCopy.setupPathTitle)}
+                </strong>
+                <ol>
+                  {setupSteps.map((step) => (
+                    <li key={step.label} data-state={step.state}>
+                      <span>{step.label}</span>
+                      <small>{step.detail}</small>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </aside>
+          </section>
+
           <InfoCard
+            className="elite-customer-dashboard-quick-card"
+            eyebrow={text('Shortcuts', dashboardArabicCopy.quickActionsEyebrow)}
+            title={text('Daily work', dashboardArabicCopy.quickActionsTitle)}
+            density="compact"
+          >
+            <div className="elite-customer-dashboard-quick-grid">
+              <Link href={buildWorkspaceRoute('/messages', workspaceId)}>
+                <span>01</span>
+                <strong>
+                  {text(
+                    'Conversations',
+                    dashboardArabicCopy.quickConversationsTitle,
+                  )}
+                </strong>
+                <p>
+                  {text(
+                    'Review recent conversations in the Telegram-style inbox.',
+                    dashboardArabicCopy.quickConversationsBody,
+                  )}
+                </p>
+                <small>{text('Open', dashboardArabicCopy.quickOpen)}</small>
+              </Link>
+              <Link href={buildWorkspaceRoute('/contacts', workspaceId)}>
+                <span>02</span>
+                <strong>
+                  {text('Contacts', dashboardArabicCopy.quickContactsTitle)}
+                </strong>
+                <p>
+                  {text(
+                    'Search customers and connect them to conversations quickly.',
+                    dashboardArabicCopy.quickContactsBody,
+                  )}
+                </p>
+                <small>{text('Open', dashboardArabicCopy.quickOpen)}</small>
+              </Link>
+              <Link href={selectedInstanceHref}>
+                <span>03</span>
+                <strong>
+                  {text(
+                    'WhatsApp runtime',
+                    dashboardArabicCopy.quickRuntimeTitle,
+                  )}
+                </strong>
+                <p>
+                  {text(
+                    'Open QR, connection state, and instance operations.',
+                    dashboardArabicCopy.quickRuntimeBody,
+                  )}
+                </p>
+                <small>{text('Open', dashboardArabicCopy.quickOpen)}</small>
+              </Link>
+              <Link href={buildWorkspaceRoute('/api-documents', workspaceId)}>
+                <span>04</span>
+                <strong>
+                  {text('API', dashboardArabicCopy.quickApiTitle)}
+                </strong>
+                <p>
+                  {text(
+                    'Review endpoints and credentials needed for integration.',
+                    dashboardArabicCopy.quickApiBody,
+                  )}
+                </p>
+                <small>{text('Open', dashboardArabicCopy.quickOpen)}</small>
+              </Link>
+            </div>
+          </InfoCard>
+
+          <InfoCard
+            className="elite-customer-dashboard-overview"
             eyebrow={text(
               'Workspace overview',
               dashboardArabicCopy.workspaceOverviewEyebrow,
@@ -1009,6 +1322,18 @@ export function CustomerDashboardPage() {
                 />
                 <MetricCard
                   label={text(
+                    'Disconnected',
+                    dashboardArabicCopy.metricDisconnectedLabel,
+                  )}
+                  value={disconnectedCount}
+                  hint={text(
+                    'Stopped or disconnected instances',
+                    dashboardArabicCopy.metricDisconnectedHint,
+                  )}
+                  tone={disconnectedCount > 0 ? 'danger' : 'neutral'}
+                />
+                <MetricCard
+                  label={text(
                     'Workers',
                     dashboardArabicCopy.metricWorkersLabel,
                   )}
@@ -1062,6 +1387,8 @@ export function CustomerDashboardPage() {
 
           <SectionGrid minItemWidth={340}>
             <InfoCard
+              id="create-instance"
+              className="elite-customer-dashboard-create-card"
               eyebrow={text('Create', dashboardArabicCopy.createSectionEyebrow)}
               title={text(
                 'Create a new instance shell',
@@ -1127,6 +1454,7 @@ export function CustomerDashboardPage() {
             </InfoCard>
 
             <InfoCard
+              className="elite-customer-dashboard-token-card"
               eyebrow={text(
                 'Account API',
                 dashboardArabicCopy.accountApiEyebrow,
@@ -1433,6 +1761,7 @@ export function CustomerDashboardPage() {
           </SectionGrid>
 
           <InfoCard
+            className="elite-customer-dashboard-instances-card"
             eyebrow={text('Instances', dashboardArabicCopy.instancesEyebrow)}
             title={dashboardArabicCopy.workspaceInstancesTitle(
               workspaceInstances.length,
@@ -1447,24 +1776,37 @@ export function CustomerDashboardPage() {
               </p>
             ) : (
               <div
-                className="elite-section-grid"
+                className="elite-customer-dashboard-instance-grid"
                 style={{ '--elite-grid-min': '260px' } as CSSProperties}
               >
                 {workspaceInstances.map((instance: InstanceSummary) => (
-                  <article key={instance.id} className="elite-list-item">
-                    <div className="elite-list-title">
-                      <span>
-                        {instance.name} ({instance.publicId})
-                      </span>
-                      <StatusBadge tone={statusTone(instance.status)}>
-                        {translateCustomerEnum(locale, instance.status)}
-                        {instance.substatus
-                          ? ` · ${translateCustomerEnum(locale, instance.substatus)}`
-                          : ''}
-                      </StatusBadge>
+                  <article
+                    key={instance.id}
+                    className="elite-customer-dashboard-instance-card"
+                    data-status={instance.status}
+                    data-selected={
+                      selectedInstanceId === instance.id ? 'true' : 'false'
+                    }
+                  >
+                    <div className="elite-customer-dashboard-instance-header">
+                      <div className="elite-customer-dashboard-instance-avatar">
+                        {instance.name.trim().charAt(0).toUpperCase() || 'W'}
+                      </div>
+                      <div className="elite-customer-dashboard-instance-title">
+                        <strong>{instance.name}</strong>
+                        <span>{instance.publicId}</span>
+                      </div>
+                      <div className="elite-customer-dashboard-instance-status">
+                        <StatusBadge tone={statusTone(instance.status)}>
+                          {translateCustomerEnum(locale, instance.status)}
+                          {instance.substatus
+                            ? ` · ${translateCustomerEnum(locale, instance.substatus)}`
+                            : ''}
+                        </StatusBadge>
+                      </div>
                     </div>
 
-                    <div className="elite-list-meta">
+                    <div className="elite-customer-dashboard-instance-meta">
                       <span>
                         {text('Worker:', dashboardArabicCopy.workerLabel)}{' '}
                         {instance.assignedWorkerId
@@ -1481,34 +1823,30 @@ export function CustomerDashboardPage() {
                     </div>
 
                     <div
-                      className="elite-definition-grid"
+                      className="elite-customer-dashboard-instance-timing"
                       style={{ '--elite-grid-min': '120px' } as CSSProperties}
                     >
-                      <div className="elite-definition-item">
-                        <div className="elite-definition-label">
+                      <div>
+                        <span>
                           {text(
                             'Normal delay',
                             dashboardArabicCopy.normalDelayLabel,
                           )}
-                        </div>
-                        <div className="elite-definition-value">
-                          {instance.sendDelay}s
-                        </div>
+                        </span>
+                        <strong>{instance.sendDelay}s</strong>
                       </div>
-                      <div className="elite-definition-item">
-                        <div className="elite-definition-label">
+                      <div>
+                        <span>
                           {text(
                             'High queue delay',
                             dashboardArabicCopy.highQueueDelayLabel,
                           )}
-                        </div>
-                        <div className="elite-definition-value">
-                          {instance.sendDelayMax}s
-                        </div>
+                        </span>
+                        <strong>{instance.sendDelayMax}s</strong>
                       </div>
                     </div>
 
-                    <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                    <div className="elite-customer-dashboard-instance-actions">
                       <ActionButton
                         type="button"
                         tone={
@@ -1523,12 +1861,31 @@ export function CustomerDashboardPage() {
                           ? text('Selected', dashboardArabicCopy.selected)
                           : text('Select', dashboardArabicCopy.select)}
                       </ActionButton>
-                      <Link href={`/instances/${instance.id}`}>
+                      <Link
+                        className="elite-customer-dashboard-instance-link"
+                        href={`/instances/${instance.id}`}
+                      >
                         {text(
-                          'Open runtime detail',
-                          dashboardArabicCopy.openRuntimeDetail,
+                          instance.status === 'authenticated'
+                            ? 'Open runtime detail'
+                            : 'Scan QR',
+                          instance.status === 'authenticated'
+                            ? dashboardArabicCopy.openRuntimeDetail
+                            : dashboardArabicCopy.scanQr,
                         )}
                       </Link>
+                      {instance.status === 'authenticated' ? (
+                        <Link
+                          className="elite-customer-dashboard-instance-link"
+                          data-variant="soft"
+                          href={buildWorkspaceRoute('/messages', workspaceId)}
+                        >
+                          {text(
+                            'Open conversations',
+                            dashboardArabicCopy.openConversations,
+                          )}
+                        </Link>
+                      ) : null}
                     </div>
                   </article>
                 ))}
