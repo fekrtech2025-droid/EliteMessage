@@ -59,6 +59,10 @@ import {
   translateCustomerEnum,
 } from '../../lib/customer-locale';
 import {
+  formatCustomerSafeRuntimeText,
+  sanitizeCustomerDiagnostics,
+} from '../../lib/customer-runtime-errors';
+import {
   apiBaseUrl,
   clearStoredToken,
   readStoredToken,
@@ -136,9 +140,11 @@ function formatDiagnostics(value: unknown, locale: 'en' | 'ar') {
   }
 
   try {
-    return JSON.stringify(value, null, 2);
+    return JSON.stringify(sanitizeCustomerDiagnostics(value, locale), null, 2);
   } catch {
-    return String(value);
+    return (
+      formatCustomerSafeRuntimeText(String(value), locale) ?? String(value)
+    );
   }
 }
 
@@ -1651,9 +1657,12 @@ export function CustomerInstanceDetailPage({
                     {
                       label: locale === 'ar' ? 'خطأ التشغيل' : 'Runtime error',
                       value:
-                        readDiagnosticField(
-                          detail.runtime.sessionDiagnostics,
-                          'lastError',
+                        formatCustomerSafeRuntimeText(
+                          readDiagnosticField(
+                            detail.runtime.sessionDiagnostics,
+                            'lastError',
+                          ),
+                          locale,
                         ) ?? (locale === 'ar' ? 'لا يوجد' : 'None'),
                       tone: readDiagnosticField(
                         detail.runtime.sessionDiagnostics,
@@ -1666,8 +1675,10 @@ export function CustomerInstanceDetailPage({
                       label:
                         locale === 'ar' ? 'سبب الانقطاع' : 'Disconnect reason',
                       value:
-                        detail.runtime.disconnectReason ??
-                        (locale === 'ar' ? 'لا يوجد' : 'None'),
+                        formatCustomerSafeRuntimeText(
+                          detail.runtime.disconnectReason,
+                          locale,
+                        ) ?? (locale === 'ar' ? 'لا يوجد' : 'None'),
                     },
                     {
                       label:
@@ -2284,8 +2295,10 @@ export function CustomerInstanceDetailPage({
                     </div>
                     <div>
                       {locale === 'ar' ? 'الخطأ: ' : 'Error: '}
-                      {message.errorMessage ??
-                        (locale === 'ar' ? 'لا يوجد' : 'None')}
+                      {formatCustomerSafeRuntimeText(
+                        message.errorMessage,
+                        locale,
+                      ) ?? (locale === 'ar' ? 'لا يوجد' : 'None')}
                     </div>
                   </li>
                 ))}

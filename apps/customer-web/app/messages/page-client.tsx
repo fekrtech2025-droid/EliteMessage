@@ -47,6 +47,7 @@ import {
   getCustomerShellLabels,
   translateCustomerEnum,
 } from '../lib/customer-locale';
+import { formatCustomerSafeRuntimeText } from '../lib/customer-runtime-errors';
 import { apiBaseUrl, readStoredToken } from '../lib/session';
 
 type PageState = 'loading' | 'unauthenticated' | 'ready';
@@ -940,7 +941,12 @@ export function CustomerMessagesPage() {
                       >
                         <p>{event.preview}</p>
                         {event.errorMessage ? (
-                          <strong>{event.errorMessage}</strong>
+                          <strong>
+                            {formatCustomerSafeRuntimeText(
+                              event.errorMessage,
+                              locale,
+                            )}
+                          </strong>
                         ) : null}
                         <div className="elite-customer-chat-bubble-meta">
                           <StatusBadge

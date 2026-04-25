@@ -26,6 +26,7 @@ export declare class WhatsAppWebSessionRuntime implements SessionRuntime {
     private sendOutboundMessage;
     private completeOutboundMessageSend;
     private retryOutboundAfterBrowserRecovery;
+    private requeueOutboundAfterBrowserRecoveryFailure;
     private failOutboundMessage;
     private ensureClient;
     private cleanupStaleBrowserProcesses;

@@ -1411,6 +1411,7 @@ export const InternalUpdateOutboundMessageRequestSchema = z
     providerMessageId: z.string().min(1).optional(),
     message: z.string().min(1).optional(),
     errorMessage: z.string().min(1).optional(),
+    requeueAfterMs: z.number().int().nonnegative().optional(),
   })
   .refine(
     (value) =>
@@ -1419,7 +1420,8 @@ export const InternalUpdateOutboundMessageRequestSchema = z
         value.ack ||
         value.providerMessageId ||
         value.errorMessage ||
-        value.message,
+        value.message ||
+        value.requeueAfterMs !== undefined,
       ),
     {
       message: 'At least one outbound message field must be updated.',

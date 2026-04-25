@@ -1044,10 +1044,22 @@ export class MessagesService {
       throw new NotFoundException('Outbound message not found.');
     }
 
-    const nextStatus = input.status ?? existing.status;
-    const nextAck = input.ack ?? existing.ack;
+    const isRequeueRequest = input.requeueAfterMs !== undefined;
+    if (isRequeueRequest && input.status && input.status !== 'queue') {
+      throw new BadRequestException(
+        'A requeued outbound message must remain in the queue status.',
+      );
+    }
+
+    const nextStatus = isRequeueRequest
+      ? 'queue'
+      : (input.status ?? existing.status);
+    const nextAck = isRequeueRequest ? 'pending' : (input.ack ?? existing.ack);
     const ackChanged = nextAck !== existing.ack;
     const now = new Date();
+    const requeueScheduledFor = isRequeueRequest
+      ? new Date(now.getTime() + input.requeueAfterMs!)
+      : null;
     const shouldCreateAttempt =
       existing.status === 'queue' && nextStatus !== 'queue';
 
@@ -1069,19 +1081,31 @@ export class MessagesService {
         data: {
           status: nextStatus,
           ack: nextAck,
-          workerId: input.workerId,
-          providerMessageId: input.providerMessageId ?? undefined,
-          errorMessage:
-            input.errorMessage ??
-            (nextStatus === 'sent' ? null : existing.errorMessage),
+          workerId: isRequeueRequest ? null : input.workerId,
+          providerMessageId: isRequeueRequest
+            ? null
+            : (input.providerMessageId ?? undefined),
+          errorMessage: isRequeueRequest
+            ? null
+            : (input.errorMessage ??
+              (nextStatus === 'sent' ? null : existing.errorMessage)),
           processingWorkerId:
-            nextStatus === 'queue' ? existing.processingWorkerId : null,
+            isRequeueRequest || nextStatus !== 'queue'
+              ? null
+              : existing.processingWorkerId,
           processingStartedAt:
-            nextStatus === 'queue' ? existing.processingStartedAt : null,
-          sentAt:
-            nextStatus === 'sent' && !existing.sentAt ? now : existing.sentAt,
-          acknowledgedAt:
-            ackChanged && ['device', 'read', 'played'].includes(nextAck)
+            isRequeueRequest || nextStatus !== 'queue'
+              ? null
+              : existing.processingStartedAt,
+          scheduledFor: requeueScheduledFor ?? undefined,
+          sentAt: isRequeueRequest
+            ? null
+            : nextStatus === 'sent' && !existing.sentAt
+              ? now
+              : existing.sentAt,
+          acknowledgedAt: isRequeueRequest
+            ? null
+            : ackChanged && ['device', 'read', 'played'].includes(nextAck)
               ? now
               : existing.acknowledgedAt,
         },
@@ -1119,7 +1143,7 @@ export class MessagesService {
       );
     }
 
-    if (ackChanged) {
+    if (!isRequeueRequest && ackChanged) {
       await this.enqueueWebhookIfEnabled(instance, summary, 'message_ack');
     }
 

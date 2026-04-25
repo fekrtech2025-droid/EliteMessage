@@ -149,6 +149,18 @@ function isRecoverableBrowserFrameError(error: unknown) {
   ].some((fragment) => message.includes(fragment));
 }
 
+const customerSafeBrowserRecoveryMessage =
+  'WhatsApp Web is reconnecting after a temporary browser issue. Queued messages will retry automatically.';
+
+function calculateBrowserRecoveryRequeueDelayMs(
+  baseDelayMs: number,
+  recoveryAttempts: number,
+) {
+  const safeBaseDelayMs = Math.max(baseDelayMs, 5_000);
+  const exponent = Math.min(Math.max(recoveryAttempts, 1) - 1, 4);
+  return Math.min(safeBaseDelayMs * 2 ** exponent, 60_000);
+}
+
 function mapInboundKind(type: unknown) {
   switch (type) {
     case 'chat':
@@ -752,19 +764,18 @@ export class WhatsAppWebSessionRuntime implements SessionRuntime {
       );
     } catch (error) {
       const errorMessage = getErrorMessage(error);
-      entry.lastError = errorMessage;
 
-      if (
-        isRecoverableBrowserFrameError(error) &&
-        (await this.retryOutboundAfterBrowserRecovery(
+      if (isRecoverableBrowserFrameError(error)) {
+        entry.lastError = customerSafeBrowserRecoveryMessage;
+        await this.retryOutboundAfterBrowserRecovery(
           instanceId,
           message,
           errorMessage,
-        ))
-      ) {
+        );
         return;
       }
 
+      entry.lastError = errorMessage;
       await this.failOutboundMessage(instanceId, message, errorMessage);
     }
   }
@@ -839,7 +850,15 @@ export class WhatsAppWebSessionRuntime implements SessionRuntime {
   ) {
     const entry = this.managedInstances.get(instanceId);
     if (!entry || this.stopping) {
-      return false;
+      await this.requeueOutboundAfterBrowserRecoveryFailure(
+        instanceId,
+        message,
+        initialErrorMessage,
+        this.stopping
+          ? 'Worker is restarting before browser recovery could complete.'
+          : 'Worker assignment was not available for browser recovery.',
+      );
+      return true;
     }
 
     this.options.logger.warn(
@@ -856,16 +875,17 @@ export class WhatsAppWebSessionRuntime implements SessionRuntime {
 
     try {
       entry.desiredState = 'running';
+      entry.lastError = customerSafeBrowserRecoveryMessage;
       entry.recoveryAttempts += 1;
       entry.recoverAfterAt = null;
       this.recordClientEvent(entry, 'send_recovery_requested');
       await this.options.internalApi.updateInstanceRuntime(instanceId, {
         workerId: this.options.workerId,
         sessionBackend: 'whatsapp_web',
-        disconnectReason: initialErrorMessage,
+        disconnectReason: customerSafeBrowserRecoveryMessage,
         sessionDiagnostics: this.buildDiagnostics(instanceId, {
           phase: 'send_recovery_requested',
-          reason: initialErrorMessage,
+          reasonCode: 'recoverable_browser_send_failure',
         }),
       });
 
@@ -913,7 +933,7 @@ export class WhatsAppWebSessionRuntime implements SessionRuntime {
       const retryErrorMessage = getErrorMessage(retryError);
       const current = this.managedInstances.get(instanceId);
       if (current) {
-        current.lastError = retryErrorMessage;
+        current.lastError = customerSafeBrowserRecoveryMessage;
       }
 
       this.options.logger.warn(
@@ -929,13 +949,91 @@ export class WhatsAppWebSessionRuntime implements SessionRuntime {
         'worker.message.browser_recovery_retry_failed',
       );
 
-      await this.failOutboundMessage(
+      await this.requeueOutboundAfterBrowserRecoveryFailure(
         instanceId,
         message,
-        `Recoverable browser failure: ${initialErrorMessage}. Retry after reconnect failed: ${retryErrorMessage}`,
+        initialErrorMessage,
+        retryErrorMessage,
       );
       return true;
     }
+  }
+
+  private async requeueOutboundAfterBrowserRecoveryFailure(
+    instanceId: string,
+    message: OutboundMessageSummary,
+    initialErrorMessage: string,
+    retryErrorMessage: string,
+  ) {
+    const entry = this.managedInstances.get(instanceId);
+    const retryAfterMs = calculateBrowserRecoveryRequeueDelayMs(
+      this.options.env.WORKER_WA_AUTO_RECOVERY_DELAY_MS,
+      entry?.recoveryAttempts ?? 1,
+    );
+    const recoverAfterAt = new Date(
+      Date.now() + this.options.env.WORKER_WA_AUTO_RECOVERY_DELAY_MS,
+    );
+
+    await this.options.internalApi.updateOutboundMessage(
+      instanceId,
+      message.id,
+      {
+        workerId: this.options.workerId,
+        status: 'queue',
+        ack: 'pending',
+        message: customerSafeBrowserRecoveryMessage,
+        requeueAfterMs: retryAfterMs,
+      },
+    );
+
+    if (entry) {
+      entry.desiredState = 'running';
+      entry.recoverAfterAt = recoverAfterAt.getTime();
+      entry.lastError = customerSafeBrowserRecoveryMessage;
+      this.recordClientEvent(entry, 'send_recovery_retry_requeued');
+    }
+
+    await this.destroyClient(
+      instanceId,
+      `WhatsApp Web browser recovery did not reconnect after send failure: ${retryErrorMessage}`,
+    );
+
+    await this.transitionStatus(
+      instanceId,
+      'retrying',
+      'send_recovery_retry_pending',
+      customerSafeBrowserRecoveryMessage,
+    );
+    await this.options.internalApi.updateInstanceRuntime(instanceId, {
+      workerId: this.options.workerId,
+      qrCode: null,
+      qrExpiresAt: null,
+      sessionBackend: 'whatsapp_web',
+      currentSessionLabel: null,
+      disconnectReason: customerSafeBrowserRecoveryMessage,
+      lastDisconnectedAt: new Date().toISOString(),
+      sessionDiagnostics: this.buildDiagnostics(instanceId, {
+        phase: 'send_recovery_retry_pending',
+        reasonCode: 'recoverable_browser_reconnect_pending',
+        requeuedMessageId: message.id,
+        messageRetryAfterMs: retryAfterMs,
+        recoverAfterAt: recoverAfterAt.toISOString(),
+      }),
+    });
+
+    this.options.logger.warn(
+      {
+        correlationId: randomUUID(),
+        instanceId,
+        messageId: message.id,
+        publicMessageId: message.publicMessageId,
+        backend: 'whatsapp_web',
+        initialError: initialErrorMessage,
+        retryError: retryErrorMessage,
+        retryAfterMs,
+      },
+      'worker.message.requeued_after_browser_recovery_failure',
+    );
   }
 
   private async failOutboundMessage(
