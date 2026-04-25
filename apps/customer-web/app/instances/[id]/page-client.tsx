@@ -1317,6 +1317,73 @@ export function CustomerInstanceDetailPage({
     }
   }
 
+  const currentStatusTone = detail
+    ? statusTone(detail.instance.status)
+    : 'neutral';
+  const latestOperation = detail?.operations[0] ?? null;
+  const latestEvent = detail?.events[0] ?? null;
+  const activeToken =
+    detail?.tokens.find((token) => token.revokedAt === null) ??
+    detail?.tokens[0] ??
+    null;
+  const failedWebhookCount = webhookDeliveries.filter(
+    (delivery) => delivery.status === 'failed',
+  ).length;
+  const queuedMessageCount = messages.filter(
+    (message) => message.status === 'queue',
+  ).length;
+  const outboundIssueCount = messages.filter((message) =>
+    ['unsent', 'invalid', 'expired'].includes(message.status),
+  ).length;
+  const runtimePhaseLabel = detail
+    ? runtimeQrExpired
+      ? locale === 'ar'
+        ? 'QR منتهٍ'
+        : 'QR expired'
+      : detail.runtime.qrCode
+        ? locale === 'ar'
+          ? 'بانتظار المسح'
+          : 'Awaiting scan'
+        : detail.instance.status === 'authenticated'
+          ? locale === 'ar'
+            ? 'متصل'
+            : 'Connected'
+          : detail.instance.status === 'retrying'
+            ? locale === 'ar'
+              ? 'يعيد الاتصال'
+              : 'Reconnecting'
+            : translateCustomerEnum(locale, detail.instance.status)
+    : '';
+  const runtimePhaseDescription = detail
+    ? runtimeQrExpired
+      ? locale === 'ar'
+        ? 'انتهت صلاحية رمز QR. أنشئ رمزًا جديدًا من لوحة الأوامر.'
+        : 'The QR code expired. Generate a fresh code from the command panel.'
+      : detail.runtime.qrCode
+        ? locale === 'ar'
+          ? 'امسح الرمز من واتساب لإكمال الربط.'
+          : 'Scan the code from WhatsApp to finish linking.'
+        : detail.instance.status === 'authenticated'
+          ? locale === 'ar'
+            ? 'المثيل جاهز لإرسال واستقبال الرسائل.'
+            : 'This instance is ready to send and receive messages.'
+          : detail.instance.status === 'retrying'
+            ? locale === 'ar'
+              ? 'النظام يحاول استعادة جلسة واتساب دون حذف الربط.'
+              : 'The system is recovering WhatsApp Web without clearing the link.'
+            : locale === 'ar'
+              ? 'تابع حالة التشغيل أو ابدأ جلسة جديدة عند الحاجة.'
+              : 'Watch the runtime state or start a new session when needed.'
+    : '';
+  const workerLabel = detail?.assignedWorker
+    ? `${detail.assignedWorker.workerId} · ${translateCustomerEnum(
+        locale,
+        detail.assignedWorker.status,
+      )}`
+    : locale === 'ar'
+      ? 'لم يتم اختيار عامل بعد'
+      : 'No worker assigned yet';
+
   return (
     <AppShell
       title={copy.customerInstanceDetail}
@@ -1402,106 +1469,146 @@ export function CustomerInstanceDetailPage({
 
       {pageState === 'ready' && detail ? (
         <>
-          <InfoCard
+          <section
             id="instance-summary"
-            eyebrow={locale === 'ar' ? 'المثيل' : 'Instance'}
-            title={`${detail.instance.name} (${detail.instance.publicId})`}
+            className="elite-customer-instance-hero"
+            data-status={detail.instance.status}
+            aria-labelledby="customer-instance-title"
           >
-            <div style={{ display: 'grid', gap: 16 }}>
+            <div className="elite-customer-instance-hero-copy">
+              <p className="elite-customer-instance-kicker">
+                {locale === 'ar'
+                  ? 'مركز تشغيل واتساب'
+                  : 'WhatsApp command center'}
+              </p>
+              <h2 id="customer-instance-title">{detail.instance.name}</h2>
+              <p>
+                {runtimePhaseDescription}{' '}
+                {locale === 'ar'
+                  ? 'كل عناصر الربط والإرسال والاسترداد موجودة هنا بشكل مركز.'
+                  : 'Linking, delivery, recovery, and diagnostics are grouped here in one focused workspace.'}
+              </p>
+              <div className="elite-customer-instance-scope">
+                <span>{detail.instance.workspaceName}</span>
+                <span>{detail.instance.publicId}</span>
+                <span>{workerLabel}</span>
+              </div>
+            </div>
+
+            <div className="elite-customer-instance-status-card">
               <div
-                style={{
-                  display: 'flex',
-                  flexWrap: 'wrap',
-                  gap: 10,
-                  alignItems: 'center',
-                }}
+                className="elite-customer-instance-orb"
+                data-tone={currentStatusTone}
+                aria-hidden="true"
               >
-                <StatusBadge tone="neutral">
-                  {detail.instance.workspaceName}
+                {detail.instance.name.slice(0, 2).toUpperCase()}
+              </div>
+              <div className="elite-customer-instance-status-copy">
+                <span>{locale === 'ar' ? 'الحالة الآن' : 'Current state'}</span>
+                <strong>{runtimePhaseLabel}</strong>
+                <StatusBadge tone={currentStatusTone}>
+                  {translateCustomerEnum(locale, detail.instance.status)}
                 </StatusBadge>
-                <StatusBadge tone={detail.assignedWorker ? 'info' : 'warning'}>
-                  {detail.assignedWorker
-                    ? `${detail.assignedWorker.workerId} (${translateCustomerEnum(locale, detail.assignedWorker.status)})`
-                    : locale === 'ar'
-                      ? 'غير معيّن'
-                      : 'Unassigned'}
-                </StatusBadge>
-                {detail.pendingOperation ? (
-                  <StatusBadge
-                    tone={operationTone(detail.pendingOperation.status)}
-                  >
-                    {translateCustomerEnum(
-                      locale,
-                      detail.pendingOperation.action,
-                    )}{' '}
-                    (
-                    {translateCustomerEnum(
-                      locale,
-                      detail.pendingOperation.status,
-                    )}
-                    )
-                  </StatusBadge>
+                {detail.instance.substatus ? (
+                  <small>
+                    {translateCustomerEnum(locale, detail.instance.substatus)}
+                  </small>
                 ) : null}
               </div>
-              <MetricGrid minItemWidth={150}>
-                <MetricCard
-                  label={locale === 'ar' ? 'الصادرة' : 'Outbound'}
-                  value={messages.length}
-                  hint={
-                    locale === 'ar'
-                      ? 'أحدث الرسائل الموضوعة في الطابور'
-                      : 'Recent queued messages'
-                  }
-                />
-                <MetricCard
-                  label={copy.inbound}
-                  value={inboundMessages.length}
-                  hint={
-                    locale === 'ar'
-                      ? 'أحدث الرسائل المستلمة'
-                      : 'Recent received messages'
-                  }
-                  tone="info"
-                />
-                <MetricCard
-                  label={copy.webhooks}
-                  value={webhookDeliveries.length}
-                  hint={
-                    locale === 'ar'
-                      ? 'أحدث محاولات التسليم'
-                      : 'Recent delivery attempts'
-                  }
-                  tone={
-                    webhookDeliveries.some(
-                      (delivery) => delivery.status === 'failed',
-                    )
-                      ? 'warning'
-                      : 'neutral'
-                  }
-                />
-                <MetricCard
-                  label={locale === 'ar' ? 'دورة الحياة' : 'Lifecycle'}
-                  value={detail.events.length}
-                  hint={
-                    locale === 'ar'
-                      ? `آخر حدث ${formatCustomerDate(locale, detail.instance.latestEventAt)}`
-                      : `Last event ${formatCustomerDate(locale, detail.instance.latestEventAt)}`
-                  }
-                />
-              </MetricGrid>
+              <div className="elite-customer-instance-status-meta">
+                <span>
+                  {locale === 'ar'
+                    ? `آخر عملية: ${
+                        latestOperation
+                          ? translateCustomerEnum(
+                              locale,
+                              latestOperation.action,
+                            )
+                          : 'لا يوجد'
+                      }`
+                    : `Latest operation: ${
+                        latestOperation
+                          ? translateCustomerEnum(
+                              locale,
+                              latestOperation.action,
+                            )
+                          : 'None'
+                      }`}
+                </span>
+                <span>
+                  {locale === 'ar'
+                    ? `آخر حدث: ${
+                        latestEvent
+                          ? formatCustomerDate(locale, latestEvent.createdAt)
+                          : 'لا يوجد'
+                      }`
+                    : `Latest event: ${
+                        latestEvent
+                          ? formatCustomerDate(locale, latestEvent.createdAt)
+                          : 'None'
+                      }`}
+                </span>
+              </div>
             </div>
-          </InfoCard>
+          </section>
+
+          <div className="elite-customer-instance-metric-rail">
+            <MetricGrid minItemWidth={160}>
+              <MetricCard
+                label={
+                  locale === 'ar' ? 'رسائل قيد الطابور' : 'Queued messages'
+                }
+                value={queuedMessageCount}
+                hint={
+                  locale === 'ar'
+                    ? `${messages.length} رسالة صادرة حديثة`
+                    : `${messages.length} recent outbound messages`
+                }
+                tone={queuedMessageCount > 0 ? 'warning' : 'neutral'}
+                emphasis="strong"
+              />
+              <MetricCard
+                label={locale === 'ar' ? 'مشاكل الإرسال' : 'Delivery issues'}
+                value={outboundIssueCount}
+                hint={
+                  locale === 'ar'
+                    ? 'تُخفى أخطاء المتصفح التقنية عن العميل'
+                    : 'Technical browser errors stay customer-safe'
+                }
+                tone={outboundIssueCount > 0 ? 'danger' : 'success'}
+                emphasis="strong"
+              />
+              <MetricCard
+                label={copy.inbound}
+                value={inboundMessages.length}
+                hint={
+                  locale === 'ar'
+                    ? 'آخر الرسائل المستلمة'
+                    : 'Latest received messages'
+                }
+                tone="info"
+                emphasis="strong"
+              />
+              <MetricCard
+                label={copy.webhooks}
+                value={failedWebhookCount}
+                hint={
+                  locale === 'ar'
+                    ? `${webhookDeliveries.length} محاولة حديثة`
+                    : `${webhookDeliveries.length} recent attempts`
+                }
+                tone={failedWebhookCount > 0 ? 'warning' : 'success'}
+                emphasis="strong"
+              />
+            </MetricGrid>
+          </div>
 
           <InstanceApiAccessCard
             instanceId={detail.instance.id}
             publicId={detail.instance.publicId}
             instanceName={detail.instance.name}
             token={instanceAccess?.token ?? null}
-            tokenPrefix={
-              detail.tokens.find((token) => token.revokedAt === null)?.prefix ??
-              detail.tokens[0]?.prefix ??
-              null
-            }
+            tokenPrefix={activeToken?.prefix ?? null}
             connected={detail.instance.status === 'authenticated'}
             lastAuthenticatedAt={detail.runtime.lastAuthenticatedAt}
             action={
@@ -1522,1077 +1629,1116 @@ export function CustomerInstanceDetailPage({
             }
           />
 
-          <InfoCard
-            id="instance-runtime"
-            eyebrow={copy.runtime}
-            title={copy.runtimeState}
-          >
-            <div className="elite-toolbar" style={{ marginBottom: 16 }}>
-              <ActionButton
-                type="button"
-                tone="ghost"
-                disabled={
-                  !detail.runtime.lastScreenshotPath || screenshotOpening
-                }
-                onClick={() => {
-                  void openLatestScreenshot();
-                }}
-              >
-                {screenshotOpening
-                  ? copy.openingScreenshot
-                  : copy.openLatestScreenshot}
-              </ActionButton>
-            </div>
-            <SectionGrid minItemWidth={320}>
-              <div style={{ display: 'grid', gap: 16 }}>
-                <DefinitionGrid
-                  minItemWidth={150}
-                  items={[
-                    {
-                      label: locale === 'ar' ? 'الواجهة الخلفية' : 'Backend',
-                      value: detail.runtime.sessionBackend,
-                      tone: 'info',
-                    },
-                    {
-                      label: locale === 'ar' ? 'اسم الجلسة' : 'Session label',
-                      value:
-                        detail.runtime.currentSessionLabel ??
-                        (locale === 'ar' ? 'غير مرتبط' : 'Not linked'),
-                    },
-                    {
-                      label: locale === 'ar' ? 'انتهاء QR' : 'QR expires',
-                      value: formatCustomerDate(
-                        locale,
-                        detail.runtime.qrExpiresAt,
-                      ),
-                      tone: detail.runtime.qrCode ? 'warning' : 'neutral',
-                    },
-                    {
-                      label: locale === 'ar' ? 'آخر تشغيل' : 'Last started',
-                      value: formatCustomerDate(
-                        locale,
-                        detail.runtime.lastStartedAt,
-                      ),
-                    },
-                    {
-                      label: locale === 'ar' ? 'آخر مصادقة' : 'Last auth',
-                      value: formatCustomerDate(
-                        locale,
-                        detail.runtime.lastAuthenticatedAt,
-                      ),
-                      tone: detail.runtime.lastAuthenticatedAt
-                        ? 'success'
-                        : 'neutral',
-                    },
-                    {
-                      label: locale === 'ar' ? 'آخر انقطاع' : 'Last disconnect',
-                      value: formatCustomerDate(
-                        locale,
-                        detail.runtime.lastDisconnectedAt,
-                      ),
-                    },
-                    {
-                      label:
-                        locale === 'ar' ? 'آخر رسالة واردة' : 'Last inbound',
-                      value: formatCustomerDate(
-                        locale,
-                        detail.runtime.lastInboundMessageAt,
-                      ),
-                    },
-                    {
-                      label: locale === 'ar' ? 'لقطة الشاشة' : 'Screenshot',
-                      value:
-                        detail.runtime.lastScreenshotPath ??
-                        (locale === 'ar' ? 'لا يوجد' : 'None'),
-                    },
-                    {
-                      label:
-                        locale === 'ar' ? 'الحالة المطلوبة' : 'Desired state',
-                      value:
-                        readDiagnosticField(
-                          detail.runtime.sessionDiagnostics,
-                          'desiredState',
-                        ) ?? (locale === 'ar' ? 'غير معروف' : 'Unknown'),
-                    },
-                    {
-                      label:
-                        locale === 'ar' ? 'محاولات البدء' : 'Startup attempts',
-                      value:
-                        readDiagnosticField(
-                          detail.runtime.sessionDiagnostics,
-                          'startupAttempts',
-                        ) ?? '0',
-                    },
-                    {
-                      label:
-                        locale === 'ar'
-                          ? 'محاولات الاسترداد'
-                          : 'Recovery attempts',
-                      value:
-                        readDiagnosticField(
-                          detail.runtime.sessionDiagnostics,
-                          'recoveryAttempts',
-                        ) ?? '0',
-                    },
-                    {
-                      label:
-                        locale === 'ar'
-                          ? 'آخر حدث للعميل'
-                          : 'Last client event',
-                      value:
-                        readDiagnosticField(
-                          detail.runtime.sessionDiagnostics,
-                          'lastClientEvent',
-                        ) ?? (locale === 'ar' ? 'غير معروف' : 'Unknown'),
-                    },
-                    {
-                      label:
-                        locale === 'ar' ? 'الاسترداد بعد' : 'Recover after',
-                      value:
-                        readDiagnosticField(
-                          detail.runtime.sessionDiagnostics,
-                          'recoverAfterAt',
-                        ) ?? (locale === 'ar' ? 'لا يوجد' : 'None'),
-                    },
-                    {
-                      label: locale === 'ar' ? 'خطأ التشغيل' : 'Runtime error',
-                      value:
-                        formatCustomerSafeRuntimeText(
-                          readDiagnosticField(
-                            detail.runtime.sessionDiagnostics,
-                            'lastError',
-                          ),
-                          locale,
-                        ) ?? (locale === 'ar' ? 'لا يوجد' : 'None'),
-                      tone: readDiagnosticField(
-                        detail.runtime.sessionDiagnostics,
-                        'lastError',
-                      )
-                        ? 'danger'
-                        : 'neutral',
-                    },
-                    {
-                      label:
-                        locale === 'ar' ? 'سبب الانقطاع' : 'Disconnect reason',
-                      value:
-                        formatCustomerSafeRuntimeText(
-                          detail.runtime.disconnectReason,
-                          locale,
-                        ) ?? (locale === 'ar' ? 'لا يوجد' : 'None'),
-                    },
-                    {
-                      label:
-                        locale === 'ar'
-                          ? 'العملية المعلقة'
-                          : 'Pending operation',
-                      value: detail.pendingOperation
-                        ? `${translateCustomerEnum(locale, detail.pendingOperation.action)} (${translateCustomerEnum(locale, detail.pendingOperation.status)})`
-                        : locale === 'ar'
-                          ? 'لا يوجد'
-                          : 'None',
-                      tone: detail.pendingOperation
-                        ? operationTone(detail.pendingOperation.status)
-                        : 'neutral',
-                    },
-                  ]}
-                />
-                <pre className="elite-mono-panel">
-                  {formatDiagnostics(detail.runtime.sessionDiagnostics, locale)}
-                </pre>
-              </div>
-              <div style={{ display: 'grid', gap: 16 }}>
-                {detail.runtime.sessionBackend === 'placeholder' &&
-                detail.runtime.qrCode ? (
-                  <NoticeBanner
-                    title={
-                      locale === 'ar' ? 'QR تجريبي فقط' : 'Simulated QR only'
-                    }
-                    tone="warning"
-                  >
-                    <p style={{ margin: 0 }}>
-                      {locale === 'ar'
-                        ? 'هذا المثيل يعمل على واجهة خلفية تجريبية. حمولة QR الخاصة به مخصصة للمحاكاة المحلية فقط ولا يمكن مسحها عبر واتساب.'
-                        : 'This instance is running on the placeholder backend. Its QR payload is only for local simulation and cannot be scanned by WhatsApp.'}
-                    </p>
-                  </NoticeBanner>
-                ) : null}
-                {detail.runtime.qrCode &&
-                detail.runtime.sessionBackend !== 'placeholder' ? (
-                  <QrPayloadView
-                    payload={detail.runtime.qrCode}
-                    alt={`WhatsApp QR for ${detail.instance.publicId}`}
-                    expiresAt={detail.runtime.qrExpiresAt}
-                  />
-                ) : detail.runtime.qrCode ? (
-                  <details>
-                    <summary style={{ cursor: 'pointer', fontWeight: 600 }}>
-                      {locale === 'ar'
-                        ? 'عرض الحمولة الخام'
-                        : 'Show raw placeholder payload'}
-                    </summary>
-                    <pre className="elite-mono-panel">
-                      {detail.runtime.qrCode}
-                    </pre>
-                  </details>
-                ) : (
-                  <NoticeBanner
-                    title={
-                      locale === 'ar' ? 'لا يوجد QR منشور' : 'No QR published'
-                    }
-                    tone="neutral"
-                  >
-                    <p style={{ margin: 0 }}>
-                      {locale === 'ar'
-                        ? 'هذا المثيل مرتبط بالفعل أو لا ينتظر المسح حاليًا.'
-                        : 'This instance is either already linked or not currently waiting for scan.'}
-                    </p>
-                  </NoticeBanner>
-                )}
-              </div>
-            </SectionGrid>
-          </InfoCard>
-
-          <InfoCard
-            id="instance-actions"
-            eyebrow={copy.actions}
-            title={copy.runtimeActions}
-          >
-            {conflictActive ? (
-              <NoticeBanner
-                title={
-                  locale === 'ar'
-                    ? 'تم اكتشاف تعارض في الجلسة'
-                    : 'Session conflict detected'
-                }
-                tone="warning"
-              >
-                <p style={{ margin: 0 }}>
-                  {locale === 'ar'
-                    ? 'أبلغ واتساب عن جلسة أخرى لجهاز مرتبط. استخدم الاستحواذ لاسترداد هذا التشغيل.'
-                    : 'WhatsApp reported another linked-device session. Use takeover to recover this runtime.'}
-                </p>
-              </NoticeBanner>
-            ) : null}
-            <div className="elite-toolbar">
-              {(
-                [
-                  ...(conflictActive ? (['takeover'] as const) : []),
-                  'start',
-                  'restart',
-                  'stop',
-                  'logout',
-                  'clear',
-                ] as const
-              ).map((action) => (
+          <div className="elite-customer-instance-control-grid">
+            <InfoCard
+              id="instance-runtime"
+              eyebrow={copy.runtime}
+              title={copy.runtimeState}
+              className="elite-customer-instance-runtime-card"
+            >
+              <div className="elite-customer-instance-card-toolbar">
                 <ActionButton
-                  key={action}
                   type="button"
-                  tone={
-                    action === 'clear' || action === 'logout'
-                      ? 'danger'
-                      : action === 'stop'
-                        ? 'ghost'
-                        : action === 'takeover'
-                          ? 'secondary'
-                          : 'primary'
-                  }
+                  tone="ghost"
                   disabled={
-                    Boolean(hasPendingOperation) ||
-                    actionSubmitting !== null ||
-                    settingsSubmitting
+                    !detail.runtime.lastScreenshotPath || screenshotOpening
                   }
                   onClick={() => {
-                    void requestAction(
-                      runtimeQrExpired && action === 'start'
-                        ? 'restart'
-                        : action,
-                    );
+                    void openLatestScreenshot();
                   }}
                 >
-                  {runtimeQrExpired && action === 'start'
-                    ? actionSubmitting === 'restart'
-                      ? locale === 'ar'
-                        ? 'جارٍ إنشاء QR جديد...'
-                        : 'Generating fresh QR...'
-                      : locale === 'ar'
-                        ? 'إنشاء QR جديد'
-                        : 'Generate fresh QR'
-                    : actionSubmitting === action
-                      ? `${translateCustomerEnum(locale, action)}...`
-                      : translateCustomerEnum(locale, action)}
+                  {screenshotOpening
+                    ? copy.openingScreenshot
+                    : copy.openLatestScreenshot}
                 </ActionButton>
-              ))}
-            </div>
-            {runtimeQrExpired ? (
-              <NoticeBanner
-                title={locale === 'ar' ? 'انتهت صلاحية QR' : 'QR expired'}
-                tone="warning"
-              >
-                <p style={{ margin: 0 }}>
-                  {locale === 'ar'
-                    ? 'انتهت صلاحية رمز QR الحالي. استخدم إنشاء QR جديد لبدء جلسة واتساب جديدة.'
-                    : 'The current QR code has expired. Use Generate fresh QR to restart the WhatsApp session and publish a new scannable code.'}
-                </p>
-              </NoticeBanner>
-            ) : null}
-            <NoticeBanner
-              title={locale === 'ar' ? 'طابور العمليات' : 'Operation queue'}
-              tone={hasPendingOperation ? 'warning' : 'info'}
-            >
-              <div style={{ display: 'grid', gap: 12 }}>
-                <p style={{ margin: 0 }}>
-                  {locale === 'ar'
-                    ? 'يمكن أن تكون عملية واحدة فقط معلقة أو قيد التشغيل في الوقت نفسه.'
-                    : 'Only one operation can be pending or running at a time.'}
-                </p>
-                {detail?.pendingOperation ? (
-                  <p style={{ margin: 0 }}>
-                    {locale === 'ar'
-                      ? `الإجراء الحالي: ${translateCustomerEnum(
-                          locale,
-                          detail.pendingOperation.action,
-                        )} (${translateCustomerEnum(
-                          locale,
-                          detail.pendingOperation.status,
-                        )}).`
-                      : `Current queued action: ${detail.pendingOperation.action} (${detail.pendingOperation.status}).`}
-                  </p>
-                ) : null}
-                {canCancelPendingOperation ? (
-                  <div>
-                    <ActionButton
-                      type="button"
-                      tone="danger"
-                      disabled={actionSubmitting !== null || settingsSubmitting}
-                      onClick={() => {
-                        void cancelQueuedAction();
-                      }}
-                    >
-                      {actionSubmitting === 'cancel'
-                        ? copy.cancellingQueuedAction
-                        : copy.cancelQueuedAction}
-                    </ActionButton>
-                  </div>
-                ) : hasPendingOperation ? (
-                  <p style={{ margin: 0 }}>
-                    {locale === 'ar'
-                      ? 'بعد أن يبدأ العامل تنفيذ العملية لا يمكن إلغاؤها من لوحة التحكم.'
-                      : 'Once the worker starts the action, it can no longer be cancelled from the dashboard.'}
-                  </p>
-                ) : null}
               </div>
-            </NoticeBanner>
-          </InfoCard>
+              <SectionGrid minItemWidth={320}>
+                <div style={{ display: 'grid', gap: 16 }}>
+                  <DefinitionGrid
+                    minItemWidth={150}
+                    items={[
+                      {
+                        label: locale === 'ar' ? 'الواجهة الخلفية' : 'Backend',
+                        value: detail.runtime.sessionBackend,
+                        tone: 'info',
+                      },
+                      {
+                        label: locale === 'ar' ? 'اسم الجلسة' : 'Session label',
+                        value:
+                          detail.runtime.currentSessionLabel ??
+                          (locale === 'ar' ? 'غير مرتبط' : 'Not linked'),
+                      },
+                      {
+                        label: locale === 'ar' ? 'انتهاء QR' : 'QR expires',
+                        value: formatCustomerDate(
+                          locale,
+                          detail.runtime.qrExpiresAt,
+                        ),
+                        tone: detail.runtime.qrCode ? 'warning' : 'neutral',
+                      },
+                      {
+                        label: locale === 'ar' ? 'آخر تشغيل' : 'Last started',
+                        value: formatCustomerDate(
+                          locale,
+                          detail.runtime.lastStartedAt,
+                        ),
+                      },
+                      {
+                        label: locale === 'ar' ? 'آخر مصادقة' : 'Last auth',
+                        value: formatCustomerDate(
+                          locale,
+                          detail.runtime.lastAuthenticatedAt,
+                        ),
+                        tone: detail.runtime.lastAuthenticatedAt
+                          ? 'success'
+                          : 'neutral',
+                      },
+                      {
+                        label:
+                          locale === 'ar' ? 'آخر انقطاع' : 'Last disconnect',
+                        value: formatCustomerDate(
+                          locale,
+                          detail.runtime.lastDisconnectedAt,
+                        ),
+                      },
+                      {
+                        label:
+                          locale === 'ar' ? 'آخر رسالة واردة' : 'Last inbound',
+                        value: formatCustomerDate(
+                          locale,
+                          detail.runtime.lastInboundMessageAt,
+                        ),
+                      },
+                      {
+                        label: locale === 'ar' ? 'لقطة الشاشة' : 'Screenshot',
+                        value:
+                          detail.runtime.lastScreenshotPath ??
+                          (locale === 'ar' ? 'لا يوجد' : 'None'),
+                      },
+                      {
+                        label:
+                          locale === 'ar' ? 'الحالة المطلوبة' : 'Desired state',
+                        value:
+                          readDiagnosticField(
+                            detail.runtime.sessionDiagnostics,
+                            'desiredState',
+                          ) ?? (locale === 'ar' ? 'غير معروف' : 'Unknown'),
+                      },
+                      {
+                        label:
+                          locale === 'ar'
+                            ? 'محاولات البدء'
+                            : 'Startup attempts',
+                        value:
+                          readDiagnosticField(
+                            detail.runtime.sessionDiagnostics,
+                            'startupAttempts',
+                          ) ?? '0',
+                      },
+                      {
+                        label:
+                          locale === 'ar'
+                            ? 'محاولات الاسترداد'
+                            : 'Recovery attempts',
+                        value:
+                          readDiagnosticField(
+                            detail.runtime.sessionDiagnostics,
+                            'recoveryAttempts',
+                          ) ?? '0',
+                      },
+                      {
+                        label:
+                          locale === 'ar'
+                            ? 'آخر حدث للعميل'
+                            : 'Last client event',
+                        value:
+                          readDiagnosticField(
+                            detail.runtime.sessionDiagnostics,
+                            'lastClientEvent',
+                          ) ?? (locale === 'ar' ? 'غير معروف' : 'Unknown'),
+                      },
+                      {
+                        label:
+                          locale === 'ar' ? 'الاسترداد بعد' : 'Recover after',
+                        value:
+                          readDiagnosticField(
+                            detail.runtime.sessionDiagnostics,
+                            'recoverAfterAt',
+                          ) ?? (locale === 'ar' ? 'لا يوجد' : 'None'),
+                      },
+                      {
+                        label:
+                          locale === 'ar' ? 'خطأ التشغيل' : 'Runtime error',
+                        value:
+                          formatCustomerSafeRuntimeText(
+                            readDiagnosticField(
+                              detail.runtime.sessionDiagnostics,
+                              'lastError',
+                            ),
+                            locale,
+                          ) ?? (locale === 'ar' ? 'لا يوجد' : 'None'),
+                        tone: readDiagnosticField(
+                          detail.runtime.sessionDiagnostics,
+                          'lastError',
+                        )
+                          ? 'danger'
+                          : 'neutral',
+                      },
+                      {
+                        label:
+                          locale === 'ar'
+                            ? 'سبب الانقطاع'
+                            : 'Disconnect reason',
+                        value:
+                          formatCustomerSafeRuntimeText(
+                            detail.runtime.disconnectReason,
+                            locale,
+                          ) ?? (locale === 'ar' ? 'لا يوجد' : 'None'),
+                      },
+                      {
+                        label:
+                          locale === 'ar'
+                            ? 'العملية المعلقة'
+                            : 'Pending operation',
+                        value: detail.pendingOperation
+                          ? `${translateCustomerEnum(locale, detail.pendingOperation.action)} (${translateCustomerEnum(locale, detail.pendingOperation.status)})`
+                          : locale === 'ar'
+                            ? 'لا يوجد'
+                            : 'None',
+                        tone: detail.pendingOperation
+                          ? operationTone(detail.pendingOperation.status)
+                          : 'neutral',
+                      },
+                    ]}
+                  />
+                  <pre className="elite-mono-panel">
+                    {formatDiagnostics(
+                      detail.runtime.sessionDiagnostics,
+                      locale,
+                    )}
+                  </pre>
+                </div>
+                <div style={{ display: 'grid', gap: 16 }}>
+                  {detail.runtime.sessionBackend === 'placeholder' &&
+                  detail.runtime.qrCode ? (
+                    <NoticeBanner
+                      title={
+                        locale === 'ar' ? 'QR تجريبي فقط' : 'Simulated QR only'
+                      }
+                      tone="warning"
+                    >
+                      <p style={{ margin: 0 }}>
+                        {locale === 'ar'
+                          ? 'هذا المثيل يعمل على واجهة خلفية تجريبية. حمولة QR الخاصة به مخصصة للمحاكاة المحلية فقط ولا يمكن مسحها عبر واتساب.'
+                          : 'This instance is running on the placeholder backend. Its QR payload is only for local simulation and cannot be scanned by WhatsApp.'}
+                      </p>
+                    </NoticeBanner>
+                  ) : null}
+                  {detail.runtime.qrCode &&
+                  detail.runtime.sessionBackend !== 'placeholder' ? (
+                    <div
+                      className="elite-customer-instance-qr-stage"
+                      data-expired={runtimeQrExpired ? 'true' : 'false'}
+                    >
+                      <QrPayloadView
+                        payload={detail.runtime.qrCode}
+                        alt={`WhatsApp QR for ${detail.instance.publicId}`}
+                        expiresAt={detail.runtime.qrExpiresAt}
+                      />
+                    </div>
+                  ) : detail.runtime.qrCode ? (
+                    <details>
+                      <summary style={{ cursor: 'pointer', fontWeight: 600 }}>
+                        {locale === 'ar'
+                          ? 'عرض الحمولة الخام'
+                          : 'Show raw placeholder payload'}
+                      </summary>
+                      <pre className="elite-mono-panel">
+                        {detail.runtime.qrCode}
+                      </pre>
+                    </details>
+                  ) : (
+                    <NoticeBanner
+                      title={
+                        locale === 'ar' ? 'لا يوجد QR منشور' : 'No QR published'
+                      }
+                      tone="neutral"
+                    >
+                      <p style={{ margin: 0 }}>
+                        {locale === 'ar'
+                          ? 'هذا المثيل مرتبط بالفعل أو لا ينتظر المسح حاليًا.'
+                          : 'This instance is either already linked or not currently waiting for scan.'}
+                      </p>
+                    </NoticeBanner>
+                  )}
+                </div>
+              </SectionGrid>
+            </InfoCard>
 
-          <InfoCard
-            id="instance-settings"
-            eyebrow={copy.settings}
-            title={copy.runtimeSettings}
-          >
-            <form
-              onSubmit={updateSettings}
-              style={{ display: 'grid', gap: 16 }}
+            <InfoCard
+              id="instance-actions"
+              eyebrow={copy.actions}
+              title={copy.runtimeActions}
+              className="elite-customer-instance-actions-card"
             >
-              <Field
-                label="sendDelay"
-                hint={
-                  locale === 'ar'
-                    ? 'فاصل الإرسال العادي بالثواني.'
-                    : 'Normal send spacing in seconds.'
-                }
-              >
-                <TextInput
-                  value={settingsForm.sendDelay}
-                  onChange={(event) =>
-                    setSettingsForm((current) => ({
-                      ...current,
-                      sendDelay: Number(event.target.value),
-                    }))
-                  }
-                  type="number"
-                  min={0}
-                  max={300}
-                  required
-                />
-              </Field>
-              <Field
-                label="sendDelayMax"
-                hint={
-                  locale === 'ar'
-                    ? 'يُطبّق عند ارتفاع ضغط الطابور.'
-                    : 'Applied when queue pressure is high.'
-                }
-              >
-                <TextInput
-                  value={settingsForm.sendDelayMax}
-                  onChange={(event) =>
-                    setSettingsForm((current) => ({
-                      ...current,
-                      sendDelayMax: Number(event.target.value),
-                    }))
-                  }
-                  type="number"
-                  min={0}
-                  max={300}
-                  required
-                />
-              </Field>
-              <Field
-                label={locale === 'ar' ? 'رابط Webhook' : 'Webhook URL'}
-                hint={
-                  locale === 'ar'
-                    ? 'نقطة نهاية اختيارية لأحداث الإنشاء والتأكيد والوارد.'
-                    : 'Optional endpoint for create, ack, and inbound events.'
-                }
-              >
-                <TextInput
-                  value={settingsForm.webhookUrl}
-                  onChange={(event) =>
-                    setSettingsForm((current) => ({
-                      ...current,
-                      webhookUrl: event.target.value,
-                    }))
-                  }
-                  placeholder="https://example.com/webhook"
-                  type="url"
-                />
-              </Field>
-              <Field
-                label={
-                  locale === 'ar'
-                    ? 'سر توقيع Webhook'
-                    : 'Webhook signing secret'
-                }
-                hint={
-                  locale === 'ar'
-                    ? 'تتضمن طلبات Webhook الصادرة الرؤوس x-elite-message-timestamp و x-elite-message-signature.'
-                    : 'Outgoing webhooks include x-elite-message-timestamp and x-elite-message-signature headers.'
-                }
-              >
-                <TextInput value={detail.settings.webhookSecret} readOnly />
-              </Field>
-              <CheckboxField
-                checked={settingsForm.webhookMessageReceived}
-                onChange={(event) =>
-                  setSettingsForm((current) => ({
-                    ...current,
-                    webhookMessageReceived: event.target.checked,
-                  }))
-                }
-                label={
-                  locale === 'ar'
-                    ? 'Webhook عند استلام الرسالة'
-                    : 'Webhook on message received'
-                }
-              />
-              <CheckboxField
-                checked={settingsForm.webhookMessageCreate}
-                onChange={(event) =>
-                  setSettingsForm((current) => ({
-                    ...current,
-                    webhookMessageCreate: event.target.checked,
-                  }))
-                }
-                label={
-                  locale === 'ar'
-                    ? 'Webhook عند إنشاء الرسالة'
-                    : 'Webhook on message create'
-                }
-              />
-              <CheckboxField
-                checked={settingsForm.webhookMessageAck}
-                onChange={(event) =>
-                  setSettingsForm((current) => ({
-                    ...current,
-                    webhookMessageAck: event.target.checked,
-                  }))
-                }
-                label={
-                  locale === 'ar'
-                    ? 'Webhook عند تأكيد الرسالة'
-                    : 'Webhook on message ack'
-                }
-              />
-              <ActionButton
-                type="submit"
-                disabled={settingsSubmitting || actionSubmitting !== null}
-              >
-                {settingsSubmitting
-                  ? locale === 'ar'
-                    ? 'جارٍ الحفظ...'
-                    : 'Saving...'
-                  : locale === 'ar'
-                    ? 'حفظ الإعدادات'
-                    : 'Save settings'}
-              </ActionButton>
-            </form>
-          </InfoCard>
-
-          <InfoCard
-            id="instance-compose"
-            eyebrow={locale === 'ar' ? 'إرسال' : 'Send'}
-            title={
-              locale === 'ar'
-                ? 'ضع الرسائل الصادرة في الطابور'
-                : 'Queue outbound messages'
-            }
-          >
-            <SectionGrid minItemWidth={320}>
-              <form
-                onSubmit={sendChatMessage}
-                style={{ display: 'grid', gap: 16 }}
-              >
+              {conflictActive ? (
                 <NoticeBanner
-                  title={locale === 'ar' ? 'رسالة نصية' : 'Chat message'}
-                  tone="info"
+                  title={
+                    locale === 'ar'
+                      ? 'تم اكتشاف تعارض في الجلسة'
+                      : 'Session conflict detected'
+                  }
+                  tone="warning"
                 >
                   <p style={{ margin: 0 }}>
                     {locale === 'ar'
-                      ? 'ضع إرسال نص عادي عبر التشغيل النشط في الطابور.'
-                      : 'Queue plain text delivery through the active runtime.'}
+                      ? 'أبلغ واتساب عن جلسة أخرى لجهاز مرتبط. استخدم الاستحواذ لاسترداد هذا التشغيل.'
+                      : 'WhatsApp reported another linked-device session. Use takeover to recover this runtime.'}
                   </p>
                 </NoticeBanner>
-                <Field label={locale === 'ar' ? 'المستلم' : 'Recipient'}>
-                  <TextInput
-                    value={chatForm.to}
-                    onChange={(event) =>
-                      setChatForm((current) => ({
-                        ...current,
-                        to: event.target.value,
-                      }))
+              ) : null}
+              <div className="elite-customer-instance-action-grid">
+                {(
+                  [
+                    ...(conflictActive ? (['takeover'] as const) : []),
+                    'start',
+                    'restart',
+                    'stop',
+                    'logout',
+                    'clear',
+                  ] as const
+                ).map((action) => (
+                  <ActionButton
+                    key={action}
+                    type="button"
+                    tone={
+                      action === 'clear' || action === 'logout'
+                        ? 'danger'
+                        : action === 'stop'
+                          ? 'ghost'
+                          : action === 'takeover'
+                            ? 'secondary'
+                            : 'primary'
                     }
-                    placeholder="9639..."
-                    required
-                  />
-                </Field>
-                <Field label={locale === 'ar' ? 'المحتوى' : 'Body'}>
-                  <TextAreaInput
-                    value={chatForm.body}
-                    onChange={(event) =>
-                      setChatForm((current) => ({
-                        ...current,
-                        body: event.target.value,
-                      }))
+                    disabled={
+                      Boolean(hasPendingOperation) ||
+                      actionSubmitting !== null ||
+                      settingsSubmitting
                     }
-                    rows={4}
-                    required
-                  />
-                </Field>
-                <Field
-                  label={locale === 'ar' ? 'معرّف المرجع' : 'Reference ID'}
-                >
-                  <TextInput
-                    value={chatForm.referenceId}
-                    onChange={(event) =>
-                      setChatForm((current) => ({
-                        ...current,
-                        referenceId: event.target.value,
-                      }))
-                    }
-                    placeholder="optional-reference"
-                  />
-                </Field>
-                <Field label={locale === 'ar' ? 'الأولوية' : 'Priority'}>
-                  <TextInput
-                    value={chatForm.priority}
-                    onChange={(event) =>
-                      setChatForm((current) => ({
-                        ...current,
-                        priority: Number(event.target.value) || 100,
-                      }))
-                    }
-                    type="number"
-                    min={1}
-                    max={999}
-                    required
-                  />
-                </Field>
-                <ActionButton
-                  type="submit"
-                  disabled={messageSubmitting !== null}
-                >
-                  {messageSubmitting === 'chat'
-                    ? locale === 'ar'
-                      ? 'جارٍ وضع الرسالة النصية في الطابور...'
-                      : 'Queueing chat...'
-                    : locale === 'ar'
-                      ? 'ضع الرسالة النصية في الطابور'
-                      : 'Queue chat message'}
-                </ActionButton>
-              </form>
-
-              <form
-                onSubmit={sendImageMessage}
-                style={{ display: 'grid', gap: 16 }}
-              >
+                    onClick={() => {
+                      void requestAction(
+                        runtimeQrExpired && action === 'start'
+                          ? 'restart'
+                          : action,
+                      );
+                    }}
+                  >
+                    {runtimeQrExpired && action === 'start'
+                      ? actionSubmitting === 'restart'
+                        ? locale === 'ar'
+                          ? 'جارٍ إنشاء QR جديد...'
+                          : 'Generating fresh QR...'
+                        : locale === 'ar'
+                          ? 'إنشاء QR جديد'
+                          : 'Generate fresh QR'
+                      : actionSubmitting === action
+                        ? `${translateCustomerEnum(locale, action)}...`
+                        : translateCustomerEnum(locale, action)}
+                  </ActionButton>
+                ))}
+              </div>
+              {runtimeQrExpired ? (
                 <NoticeBanner
-                  title={locale === 'ar' ? 'رسالة صورة' : 'Image message'}
-                  tone="info"
+                  title={locale === 'ar' ? 'انتهت صلاحية QR' : 'QR expired'}
+                  tone="warning"
                 >
                   <p style={{ margin: 0 }}>
                     {locale === 'ar'
-                      ? 'ارفع ملف صورة وضعه في الطابور عبر التشغيل النشط مع تعليق اختياري.'
-                      : 'Upload an image file and queue it through the active runtime with an optional caption.'}
+                      ? 'انتهت صلاحية رمز QR الحالي. استخدم إنشاء QR جديد لبدء جلسة واتساب جديدة.'
+                      : 'The current QR code has expired. Use Generate fresh QR to restart the WhatsApp session and publish a new scannable code.'}
                   </p>
                 </NoticeBanner>
-                <Field label={locale === 'ar' ? 'المستلم' : 'Recipient'}>
-                  <TextInput
-                    value={imageForm.to}
-                    onChange={(event) =>
-                      setImageForm((current) => ({
-                        ...current,
-                        to: event.target.value,
-                      }))
-                    }
-                    placeholder="9639..."
-                    required
-                  />
-                </Field>
+              ) : null}
+              <NoticeBanner
+                title={locale === 'ar' ? 'طابور العمليات' : 'Operation queue'}
+                tone={hasPendingOperation ? 'warning' : 'info'}
+              >
+                <div style={{ display: 'grid', gap: 12 }}>
+                  <p style={{ margin: 0 }}>
+                    {locale === 'ar'
+                      ? 'يمكن أن تكون عملية واحدة فقط معلقة أو قيد التشغيل في الوقت نفسه.'
+                      : 'Only one operation can be pending or running at a time.'}
+                  </p>
+                  {detail?.pendingOperation ? (
+                    <p style={{ margin: 0 }}>
+                      {locale === 'ar'
+                        ? `الإجراء الحالي: ${translateCustomerEnum(
+                            locale,
+                            detail.pendingOperation.action,
+                          )} (${translateCustomerEnum(
+                            locale,
+                            detail.pendingOperation.status,
+                          )}).`
+                        : `Current queued action: ${detail.pendingOperation.action} (${detail.pendingOperation.status}).`}
+                    </p>
+                  ) : null}
+                  {canCancelPendingOperation ? (
+                    <div>
+                      <ActionButton
+                        type="button"
+                        tone="danger"
+                        disabled={
+                          actionSubmitting !== null || settingsSubmitting
+                        }
+                        onClick={() => {
+                          void cancelQueuedAction();
+                        }}
+                      >
+                        {actionSubmitting === 'cancel'
+                          ? copy.cancellingQueuedAction
+                          : copy.cancelQueuedAction}
+                      </ActionButton>
+                    </div>
+                  ) : hasPendingOperation ? (
+                    <p style={{ margin: 0 }}>
+                      {locale === 'ar'
+                        ? 'بعد أن يبدأ العامل تنفيذ العملية لا يمكن إلغاؤها من لوحة التحكم.'
+                        : 'Once the worker starts the action, it can no longer be cancelled from the dashboard.'}
+                    </p>
+                  ) : null}
+                </div>
+              </NoticeBanner>
+            </InfoCard>
+          </div>
+
+          <div className="elite-customer-instance-forms-grid">
+            <InfoCard
+              id="instance-settings"
+              eyebrow={copy.settings}
+              title={copy.runtimeSettings}
+              className="elite-customer-instance-settings-card"
+            >
+              <form
+                onSubmit={updateSettings}
+                style={{ display: 'grid', gap: 16 }}
+              >
                 <Field
-                  label={locale === 'ar' ? 'ملف الصورة' : 'Image file'}
+                  label="sendDelay"
                   hint={
                     locale === 'ar'
-                      ? 'يتم تخزين الرفع على تشغيل القرص الخارجي ويُعرض عبر رابط أصل عام يمكن للعامل الوصول إليه.'
-                      : 'The upload is stored on the external-volume runtime and exposed through a worker-fetchable public asset URL.'
+                      ? 'فاصل الإرسال العادي بالثواني.'
+                      : 'Normal send spacing in seconds.'
                   }
                 >
-                  <input
-                    data-elite-control
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => {
-                      setImageFile(event.target.files?.[0] ?? null);
-                    }}
-                    required
-                  />
-                  <span className="elite-field-hint">
-                    {imageFile
-                      ? locale === 'ar'
-                        ? `تم اختيار ${imageFile.name}`
-                        : `Selected ${imageFile.name}`
-                      : locale === 'ar'
-                        ? 'اختر ملف PNG أو JPG أو WEBP أو صورة مشابهة.'
-                        : 'Choose a PNG, JPG, WEBP, or similar image file.'}
-                  </span>
-                </Field>
-                <Field label={locale === 'ar' ? 'التعليق' : 'Caption'}>
-                  <TextAreaInput
-                    value={imageForm.caption}
-                    onChange={(event) =>
-                      setImageForm((current) => ({
-                        ...current,
-                        caption: event.target.value,
-                      }))
-                    }
-                    rows={3}
-                  />
-                </Field>
-                <Field
-                  label={locale === 'ar' ? 'معرّف المرجع' : 'Reference ID'}
-                >
                   <TextInput
-                    value={imageForm.referenceId}
+                    value={settingsForm.sendDelay}
                     onChange={(event) =>
-                      setImageForm((current) => ({
+                      setSettingsForm((current) => ({
                         ...current,
-                        referenceId: event.target.value,
-                      }))
-                    }
-                    placeholder="optional-reference"
-                  />
-                </Field>
-                <Field label={locale === 'ar' ? 'الأولوية' : 'Priority'}>
-                  <TextInput
-                    value={imageForm.priority}
-                    onChange={(event) =>
-                      setImageForm((current) => ({
-                        ...current,
-                        priority: Number(event.target.value) || 100,
+                        sendDelay: Number(event.target.value),
                       }))
                     }
                     type="number"
-                    min={1}
-                    max={999}
+                    min={0}
+                    max={300}
                     required
                   />
                 </Field>
+                <Field
+                  label="sendDelayMax"
+                  hint={
+                    locale === 'ar'
+                      ? 'يُطبّق عند ارتفاع ضغط الطابور.'
+                      : 'Applied when queue pressure is high.'
+                  }
+                >
+                  <TextInput
+                    value={settingsForm.sendDelayMax}
+                    onChange={(event) =>
+                      setSettingsForm((current) => ({
+                        ...current,
+                        sendDelayMax: Number(event.target.value),
+                      }))
+                    }
+                    type="number"
+                    min={0}
+                    max={300}
+                    required
+                  />
+                </Field>
+                <Field
+                  label={locale === 'ar' ? 'رابط Webhook' : 'Webhook URL'}
+                  hint={
+                    locale === 'ar'
+                      ? 'نقطة نهاية اختيارية لأحداث الإنشاء والتأكيد والوارد.'
+                      : 'Optional endpoint for create, ack, and inbound events.'
+                  }
+                >
+                  <TextInput
+                    value={settingsForm.webhookUrl}
+                    onChange={(event) =>
+                      setSettingsForm((current) => ({
+                        ...current,
+                        webhookUrl: event.target.value,
+                      }))
+                    }
+                    placeholder="https://example.com/webhook"
+                    type="url"
+                  />
+                </Field>
+                <Field
+                  label={
+                    locale === 'ar'
+                      ? 'سر توقيع Webhook'
+                      : 'Webhook signing secret'
+                  }
+                  hint={
+                    locale === 'ar'
+                      ? 'تتضمن طلبات Webhook الصادرة الرؤوس x-elite-message-timestamp و x-elite-message-signature.'
+                      : 'Outgoing webhooks include x-elite-message-timestamp and x-elite-message-signature headers.'
+                  }
+                >
+                  <TextInput value={detail.settings.webhookSecret} readOnly />
+                </Field>
+                <CheckboxField
+                  checked={settingsForm.webhookMessageReceived}
+                  onChange={(event) =>
+                    setSettingsForm((current) => ({
+                      ...current,
+                      webhookMessageReceived: event.target.checked,
+                    }))
+                  }
+                  label={
+                    locale === 'ar'
+                      ? 'Webhook عند استلام الرسالة'
+                      : 'Webhook on message received'
+                  }
+                />
+                <CheckboxField
+                  checked={settingsForm.webhookMessageCreate}
+                  onChange={(event) =>
+                    setSettingsForm((current) => ({
+                      ...current,
+                      webhookMessageCreate: event.target.checked,
+                    }))
+                  }
+                  label={
+                    locale === 'ar'
+                      ? 'Webhook عند إنشاء الرسالة'
+                      : 'Webhook on message create'
+                  }
+                />
+                <CheckboxField
+                  checked={settingsForm.webhookMessageAck}
+                  onChange={(event) =>
+                    setSettingsForm((current) => ({
+                      ...current,
+                      webhookMessageAck: event.target.checked,
+                    }))
+                  }
+                  label={
+                    locale === 'ar'
+                      ? 'Webhook عند تأكيد الرسالة'
+                      : 'Webhook on message ack'
+                  }
+                />
                 <ActionButton
                   type="submit"
-                  disabled={messageSubmitting !== null}
+                  disabled={settingsSubmitting || actionSubmitting !== null}
                 >
-                  {messageSubmitting === 'image'
+                  {settingsSubmitting
                     ? locale === 'ar'
-                      ? 'جارٍ وضع الصورة في الطابور...'
-                      : 'Queueing image...'
+                      ? 'جارٍ الحفظ...'
+                      : 'Saving...'
                     : locale === 'ar'
-                      ? 'ضع رسالة الصورة في الطابور'
-                      : 'Queue image message'}
+                      ? 'حفظ الإعدادات'
+                      : 'Save settings'}
                 </ActionButton>
               </form>
-            </SectionGrid>
-          </InfoCard>
+            </InfoCard>
 
-          <InfoCard
-            id="instance-messages"
-            eyebrow={copy.messages}
-            title={copy.recentMessages}
-          >
-            {messages.length === 0 ? (
-              <p style={{ margin: 0 }}>
-                {locale === 'ar'
-                  ? 'لم يتم وضع أي رسائل صادرة في الطابور بعد.'
-                  : 'No outbound messages have been queued yet.'}
-              </p>
-            ) : (
-              <ul className="elite-list">
-                {messages.map((message) => (
-                  <li key={message.id} className="elite-list-item">
-                    <div className="elite-list-title">
-                      <span>
-                        {locale === 'ar'
-                          ? `${message.publicMessageId} إلى ${message.recipient}`
-                          : `${message.publicMessageId} to ${message.recipient}`}
-                      </span>
-                      <StatusBadge tone={statusTone(message.status)}>
-                        {translateCustomerEnum(locale, message.status)}
-                      </StatusBadge>
-                      <StatusBadge tone={ackTone(message.ack)}>
-                        {translateCustomerEnum(locale, message.ack)}
-                      </StatusBadge>
-                    </div>
-                    <div>
-                      {locale === 'ar' ? 'المعاينة: ' : 'Preview: '}
-                      {formatMessagePreview(message, locale)}
-                    </div>
-                    <div className="elite-list-meta">
-                      <span>
-                        {locale === 'ar'
-                          ? `النوع ${translateCustomerEnum(locale, message.messageType)}`
-                          : `Type ${message.messageType}`}
-                      </span>
-                      <span>
-                        {locale === 'ar'
-                          ? `الأولوية ${message.priority}`
-                          : `Priority ${message.priority}`}
-                      </span>
-                      <span>
-                        {locale === 'ar'
-                          ? `مجدولة ${formatCustomerDate(locale, message.scheduledFor)}`
-                          : `Scheduled ${formatCustomerDate(locale, message.scheduledFor)}`}
-                      </span>
-                    </div>
-                    <div className="elite-list-meta">
-                      <span>
-                        {locale === 'ar'
-                          ? `العامل ${message.workerId ?? message.processingWorkerId ?? 'لم يُعيَّن بعد'}`
-                          : `Worker ${message.workerId ?? message.processingWorkerId ?? 'Not assigned yet'}`}
-                      </span>
-                      <span>
-                        {locale === 'ar'
-                          ? `المرجع ${message.referenceId ?? 'لا يوجد'}`
-                          : `Reference ${message.referenceId ?? 'None'}`}
-                      </span>
-                    </div>
-                    <div>
-                      {locale === 'ar' ? 'الخطأ: ' : 'Error: '}
-                      {formatCustomerSafeRuntimeText(
-                        message.errorMessage,
-                        locale,
-                      ) ?? (locale === 'ar' ? 'لا يوجد' : 'None')}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </InfoCard>
+            <InfoCard
+              id="instance-compose"
+              eyebrow={locale === 'ar' ? 'إرسال' : 'Send'}
+              title={
+                locale === 'ar'
+                  ? 'ضع الرسائل الصادرة في الطابور'
+                  : 'Queue outbound messages'
+              }
+              className="elite-customer-instance-compose-card"
+            >
+              <SectionGrid minItemWidth={320}>
+                <form
+                  onSubmit={sendChatMessage}
+                  style={{ display: 'grid', gap: 16 }}
+                >
+                  <NoticeBanner
+                    title={locale === 'ar' ? 'رسالة نصية' : 'Chat message'}
+                    tone="info"
+                  >
+                    <p style={{ margin: 0 }}>
+                      {locale === 'ar'
+                        ? 'ضع إرسال نص عادي عبر التشغيل النشط في الطابور.'
+                        : 'Queue plain text delivery through the active runtime.'}
+                    </p>
+                  </NoticeBanner>
+                  <Field label={locale === 'ar' ? 'المستلم' : 'Recipient'}>
+                    <TextInput
+                      value={chatForm.to}
+                      onChange={(event) =>
+                        setChatForm((current) => ({
+                          ...current,
+                          to: event.target.value,
+                        }))
+                      }
+                      placeholder="9639..."
+                      required
+                    />
+                  </Field>
+                  <Field label={locale === 'ar' ? 'المحتوى' : 'Body'}>
+                    <TextAreaInput
+                      value={chatForm.body}
+                      onChange={(event) =>
+                        setChatForm((current) => ({
+                          ...current,
+                          body: event.target.value,
+                        }))
+                      }
+                      rows={4}
+                      required
+                    />
+                  </Field>
+                  <Field
+                    label={locale === 'ar' ? 'معرّف المرجع' : 'Reference ID'}
+                  >
+                    <TextInput
+                      value={chatForm.referenceId}
+                      onChange={(event) =>
+                        setChatForm((current) => ({
+                          ...current,
+                          referenceId: event.target.value,
+                        }))
+                      }
+                      placeholder="optional-reference"
+                    />
+                  </Field>
+                  <Field label={locale === 'ar' ? 'الأولوية' : 'Priority'}>
+                    <TextInput
+                      value={chatForm.priority}
+                      onChange={(event) =>
+                        setChatForm((current) => ({
+                          ...current,
+                          priority: Number(event.target.value) || 100,
+                        }))
+                      }
+                      type="number"
+                      min={1}
+                      max={999}
+                      required
+                    />
+                  </Field>
+                  <ActionButton
+                    type="submit"
+                    disabled={messageSubmitting !== null}
+                  >
+                    {messageSubmitting === 'chat'
+                      ? locale === 'ar'
+                        ? 'جارٍ وضع الرسالة النصية في الطابور...'
+                        : 'Queueing chat...'
+                      : locale === 'ar'
+                        ? 'ضع الرسالة النصية في الطابور'
+                        : 'Queue chat message'}
+                  </ActionButton>
+                </form>
 
-          <InfoCard eyebrow={copy.inbound} title={copy.recentInboundMessages}>
-            {inboundMessages.length === 0 ? (
-              <p style={{ margin: 0 }}>
-                {locale === 'ar'
-                  ? 'لم يتم تسجيل أي رسائل واردة بعد.'
-                  : 'No inbound messages have been recorded yet.'}
-              </p>
-            ) : (
-              <ul className="elite-list">
-                {inboundMessages.map((message) => (
-                  <li key={message.id} className="elite-list-item">
-                    <div className="elite-list-title">
-                      <span>
-                        {locale === 'ar'
-                          ? `${message.publicMessageId} من ${message.sender}`
-                          : `${message.publicMessageId} from ${message.sender}`}
-                      </span>
-                      <StatusBadge tone="info">
-                        {translateCustomerEnum(locale, message.kind)}
-                      </StatusBadge>
-                    </div>
-                    <div>
-                      {locale === 'ar' ? 'المحتوى: ' : 'Body: '}
-                      {message.body ??
-                        (locale === 'ar' ? 'لا يوجد نص' : 'No text body')}
-                    </div>
-                    <div className="elite-list-meta">
-                      <span>
-                        {locale === 'ar'
-                          ? `المحادثة ${message.chatId ?? 'غير معروف'}`
-                          : `Chat ${message.chatId ?? 'Unknown'}`}
-                      </span>
-                      <span>
-                        {locale === 'ar'
-                          ? `الاسم الظاهر ${message.pushName ?? 'غير معروف'}`
-                          : `Push ${message.pushName ?? 'Unknown'}`}
-                      </span>
-                      <span>
-                        {locale === 'ar'
-                          ? `من جهتي ${translateCustomerBoolean(locale, message.fromMe)}`
-                          : `From me ${translateCustomerBoolean(locale, message.fromMe)}`}
-                      </span>
-                    </div>
-                    <div className="elite-list-meta">
-                      <span>
-                        {locale === 'ar'
-                          ? `تم الاستلام ${formatCustomerDate(locale, message.receivedAt)}`
-                          : `Received ${formatCustomerDate(locale, message.receivedAt)}`}
-                      </span>
-                      <span>
-                        {locale === 'ar'
-                          ? `أُرسلت في ${formatCustomerDate(locale, message.sentAt)}`
-                          : `Sent at ${formatCustomerDate(locale, message.sentAt)}`}
-                      </span>
-                      <span>
-                        {locale === 'ar'
-                          ? `المزوّد ${message.providerMessageId ?? 'لا يوجد'}`
-                          : `Provider ${message.providerMessageId ?? 'None'}`}
-                      </span>
-                    </div>
-                    <div>
-                      {locale === 'ar' ? 'مسار الوسائط: ' : 'Media path: '}
-                      {message.mediaUrl ??
-                        (locale === 'ar' ? 'لا يوجد' : 'None')}{' '}
-                      | MIME:{' '}
-                      {message.mimeType ??
-                        (locale === 'ar' ? 'غير معروف' : 'Unknown')}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </InfoCard>
+                <form
+                  onSubmit={sendImageMessage}
+                  style={{ display: 'grid', gap: 16 }}
+                >
+                  <NoticeBanner
+                    title={locale === 'ar' ? 'رسالة صورة' : 'Image message'}
+                    tone="info"
+                  >
+                    <p style={{ margin: 0 }}>
+                      {locale === 'ar'
+                        ? 'ارفع ملف صورة وضعه في الطابور عبر التشغيل النشط مع تعليق اختياري.'
+                        : 'Upload an image file and queue it through the active runtime with an optional caption.'}
+                    </p>
+                  </NoticeBanner>
+                  <Field label={locale === 'ar' ? 'المستلم' : 'Recipient'}>
+                    <TextInput
+                      value={imageForm.to}
+                      onChange={(event) =>
+                        setImageForm((current) => ({
+                          ...current,
+                          to: event.target.value,
+                        }))
+                      }
+                      placeholder="9639..."
+                      required
+                    />
+                  </Field>
+                  <Field
+                    label={locale === 'ar' ? 'ملف الصورة' : 'Image file'}
+                    hint={
+                      locale === 'ar'
+                        ? 'يتم تخزين الرفع على تشغيل القرص الخارجي ويُعرض عبر رابط أصل عام يمكن للعامل الوصول إليه.'
+                        : 'The upload is stored on the external-volume runtime and exposed through a worker-fetchable public asset URL.'
+                    }
+                  >
+                    <input
+                      data-elite-control
+                      type="file"
+                      accept="image/*"
+                      onChange={(event) => {
+                        setImageFile(event.target.files?.[0] ?? null);
+                      }}
+                      required
+                    />
+                    <span className="elite-field-hint">
+                      {imageFile
+                        ? locale === 'ar'
+                          ? `تم اختيار ${imageFile.name}`
+                          : `Selected ${imageFile.name}`
+                        : locale === 'ar'
+                          ? 'اختر ملف PNG أو JPG أو WEBP أو صورة مشابهة.'
+                          : 'Choose a PNG, JPG, WEBP, or similar image file.'}
+                    </span>
+                  </Field>
+                  <Field label={locale === 'ar' ? 'التعليق' : 'Caption'}>
+                    <TextAreaInput
+                      value={imageForm.caption}
+                      onChange={(event) =>
+                        setImageForm((current) => ({
+                          ...current,
+                          caption: event.target.value,
+                        }))
+                      }
+                      rows={3}
+                    />
+                  </Field>
+                  <Field
+                    label={locale === 'ar' ? 'معرّف المرجع' : 'Reference ID'}
+                  >
+                    <TextInput
+                      value={imageForm.referenceId}
+                      onChange={(event) =>
+                        setImageForm((current) => ({
+                          ...current,
+                          referenceId: event.target.value,
+                        }))
+                      }
+                      placeholder="optional-reference"
+                    />
+                  </Field>
+                  <Field label={locale === 'ar' ? 'الأولوية' : 'Priority'}>
+                    <TextInput
+                      value={imageForm.priority}
+                      onChange={(event) =>
+                        setImageForm((current) => ({
+                          ...current,
+                          priority: Number(event.target.value) || 100,
+                        }))
+                      }
+                      type="number"
+                      min={1}
+                      max={999}
+                      required
+                    />
+                  </Field>
+                  <ActionButton
+                    type="submit"
+                    disabled={messageSubmitting !== null}
+                  >
+                    {messageSubmitting === 'image'
+                      ? locale === 'ar'
+                        ? 'جارٍ وضع الصورة في الطابور...'
+                        : 'Queueing image...'
+                      : locale === 'ar'
+                        ? 'ضع رسالة الصورة في الطابور'
+                        : 'Queue image message'}
+                  </ActionButton>
+                </form>
+              </SectionGrid>
+            </InfoCard>
+          </div>
 
-          <InfoCard
-            id="instance-webhooks"
-            eyebrow={copy.webhooks}
-            title={copy.recentWebhooks}
-          >
-            {webhookDeliveries.length === 0 ? (
-              <p style={{ margin: 0 }}>
-                {locale === 'ar'
-                  ? 'لم يتم تسجيل أي عمليات تسليم Webhook بعد.'
-                  : 'No webhook deliveries have been recorded yet.'}
-              </p>
-            ) : (
-              <ul className="elite-list">
-                {webhookDeliveries.map((delivery) => (
-                  <li key={delivery.id} className="elite-list-item">
-                    <div className="elite-list-title">
-                      <span>{delivery.eventType}</span>
-                      <StatusBadge tone={webhookTone(delivery.status)}>
-                        {translateCustomerEnum(locale, delivery.status)}
-                      </StatusBadge>
-                    </div>
-                    <div>
-                      {locale === 'ar' ? 'الرابط الهدف: ' : 'Target URL: '}
-                      {delivery.targetUrl}
-                    </div>
-                    <div className="elite-list-meta">
-                      <span>
-                        {locale === 'ar'
-                          ? `الرسالة ${delivery.publicMessageId ?? 'لا توجد رسالة مرتبطة'}`
-                          : `Message ${delivery.publicMessageId ?? 'No linked message'}`}
-                      </span>
-                      <span>
-                        {locale === 'ar'
-                          ? `المحاولات ${delivery.attemptCount}`
-                          : `Attempts ${delivery.attemptCount}`}
-                      </span>
-                      <span>
-                        {locale === 'ar'
-                          ? `المحاولة التالية ${formatCustomerDate(locale, delivery.nextAttemptAt)}`
-                          : `Next attempt ${formatCustomerDate(locale, delivery.nextAttemptAt)}`}
-                      </span>
-                    </div>
-                    <div className="elite-list-meta">
-                      <span>
-                        {locale === 'ar'
-                          ? `آخر استجابة ${delivery.responseStatusCode ?? 'لا يوجد'}`
-                          : `Last response ${delivery.responseStatusCode ?? 'None'}`}
-                      </span>
-                      <span>
-                        {locale === 'ar'
-                          ? `الخطأ ${delivery.errorMessage ?? 'لا يوجد'}`
-                          : `Error ${delivery.errorMessage ?? 'None'}`}
-                      </span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </InfoCard>
-
-          <InfoCard
-            eyebrow={locale === 'ar' ? 'العمليات' : 'Operations'}
-            title={copy.recentOperations}
-          >
-            {detail.operations.length === 0 ? (
-              <p style={{ margin: 0 }}>
-                {locale === 'ar'
-                  ? 'لم يتم تسجيل أي عمليات بعد.'
-                  : 'No operations have been recorded yet.'}
-              </p>
-            ) : (
-              <ul className="elite-list">
-                {detail.operations.map((operation) => (
-                  <li key={operation.id} className="elite-list-item">
-                    <div className="elite-list-title">
-                      <span>
-                        {translateCustomerEnum(locale, operation.action)}
-                      </span>
-                      <StatusBadge tone={operationTone(operation.status)}>
-                        {translateCustomerEnum(locale, operation.status)}
-                      </StatusBadge>
-                    </div>
-                    <div className="elite-list-meta">
-                      <span>
-                        {locale === 'ar'
-                          ? `طُلبت بواسطة ${operation.requestedByActorType}`
-                          : `Requested by ${operation.requestedByActorType}`}
-                      </span>
-                      <span>
-                        {locale === 'ar'
-                          ? `العامل الهدف ${operation.targetWorkerId ?? 'تعيين تلقائي'}`
-                          : `Target worker ${operation.targetWorkerId ?? 'Automatic assignment'}`}
-                      </span>
-                    </div>
-                    <div className="elite-list-meta">
-                      <span>
-                        {locale === 'ar'
-                          ? `بدأت ${formatCustomerDate(locale, operation.startedAt)}`
-                          : `Started ${formatCustomerDate(locale, operation.startedAt)}`}
-                      </span>
-                      <span>
-                        {locale === 'ar'
-                          ? `اكتملت ${formatCustomerDate(locale, operation.completedAt)}`
-                          : `Completed ${formatCustomerDate(locale, operation.completedAt)}`}
-                      </span>
-                    </div>
-                    <div>
-                      {locale === 'ar' ? 'الرسالة: ' : 'Message: '}
-                      {operation.message ??
-                        (locale === 'ar' ? 'لا يوجد' : 'None')}
-                    </div>
-                    <div>
-                      {locale === 'ar' ? 'الخطأ: ' : 'Error: '}
-                      {operation.errorMessage ??
-                        (locale === 'ar' ? 'لا يوجد' : 'None')}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </InfoCard>
-
-          <InfoCard
-            eyebrow={copy.tokens}
-            title={
-              locale === 'ar'
-                ? 'سجل رموز API للمثيل'
-                : 'Instance API token history'
-            }
-          >
-            {detail.tokens.length === 0 ? (
-              <p style={{ margin: 0 }}>
-                {locale === 'ar'
-                  ? 'لم يتم إنشاء أي رموز API للمثيل.'
-                  : 'No instance API tokens have been created.'}
-              </p>
-            ) : (
-              <ul className="elite-list">
-                {detail.tokens.map((token) => (
-                  <li key={token.id} className="elite-list-item">
-                    <div className="elite-list-title">
-                      <span>{token.name}</span>
-                      <StatusBadge
-                        tone={token.revokedAt ? 'danger' : 'success'}
-                      >
-                        {translateCustomerEnum(
+          <div className="elite-customer-instance-activity-grid">
+            <InfoCard
+              id="instance-messages"
+              eyebrow={copy.messages}
+              title={copy.recentMessages}
+              className="elite-customer-instance-activity-card elite-customer-instance-activity-card-wide"
+            >
+              {messages.length === 0 ? (
+                <p style={{ margin: 0 }}>
+                  {locale === 'ar'
+                    ? 'لم يتم وضع أي رسائل صادرة في الطابور بعد.'
+                    : 'No outbound messages have been queued yet.'}
+                </p>
+              ) : (
+                <ul className="elite-list">
+                  {messages.map((message) => (
+                    <li key={message.id} className="elite-list-item">
+                      <div className="elite-list-title">
+                        <span>
+                          {locale === 'ar'
+                            ? `${message.publicMessageId} إلى ${message.recipient}`
+                            : `${message.publicMessageId} to ${message.recipient}`}
+                        </span>
+                        <StatusBadge tone={statusTone(message.status)}>
+                          {translateCustomerEnum(locale, message.status)}
+                        </StatusBadge>
+                        <StatusBadge tone={ackTone(message.ack)}>
+                          {translateCustomerEnum(locale, message.ack)}
+                        </StatusBadge>
+                      </div>
+                      <div>
+                        {locale === 'ar' ? 'المعاينة: ' : 'Preview: '}
+                        {formatMessagePreview(message, locale)}
+                      </div>
+                      <div className="elite-list-meta">
+                        <span>
+                          {locale === 'ar'
+                            ? `النوع ${translateCustomerEnum(locale, message.messageType)}`
+                            : `Type ${message.messageType}`}
+                        </span>
+                        <span>
+                          {locale === 'ar'
+                            ? `الأولوية ${message.priority}`
+                            : `Priority ${message.priority}`}
+                        </span>
+                        <span>
+                          {locale === 'ar'
+                            ? `مجدولة ${formatCustomerDate(locale, message.scheduledFor)}`
+                            : `Scheduled ${formatCustomerDate(locale, message.scheduledFor)}`}
+                        </span>
+                      </div>
+                      <div className="elite-list-meta">
+                        <span>
+                          {locale === 'ar'
+                            ? `العامل ${message.workerId ?? message.processingWorkerId ?? 'لم يُعيَّن بعد'}`
+                            : `Worker ${message.workerId ?? message.processingWorkerId ?? 'Not assigned yet'}`}
+                        </span>
+                        <span>
+                          {locale === 'ar'
+                            ? `المرجع ${message.referenceId ?? 'لا يوجد'}`
+                            : `Reference ${message.referenceId ?? 'None'}`}
+                        </span>
+                      </div>
+                      <div>
+                        {locale === 'ar' ? 'الخطأ: ' : 'Error: '}
+                        {formatCustomerSafeRuntimeText(
+                          message.errorMessage,
                           locale,
-                          token.revokedAt ? 'revoked' : 'active',
-                        )}
-                      </StatusBadge>
-                    </div>
-                    <div>
-                      {locale === 'ar' ? 'البادئة: ' : 'Prefix: '}
-                      <code>{token.prefix}</code>
-                    </div>
-                    <div className="elite-list-meta">
-                      <span>
-                        {locale === 'ar'
-                          ? `أُنشئ ${formatCustomerDate(locale, token.createdAt)}`
-                          : `Created ${formatCustomerDate(locale, token.createdAt)}`}
-                      </span>
-                      <span>
-                        {locale === 'ar'
-                          ? `أُلغي ${formatCustomerDate(locale, token.revokedAt)}`
-                          : `Revoked ${formatCustomerDate(locale, token.revokedAt)}`}
-                      </span>
-                      <span>
-                        {locale === 'ar'
-                          ? `آخر استخدام ${formatCustomerDate(locale, token.lastUsedAt)}`
-                          : `Last used ${formatCustomerDate(locale, token.lastUsedAt)}`}
-                      </span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </InfoCard>
+                        ) ?? (locale === 'ar' ? 'لا يوجد' : 'None')}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </InfoCard>
 
-          <InfoCard
-            id="instance-events"
-            eyebrow={copy.events}
-            title={copy.recentEvents}
-          >
-            {detail.events.length === 0 ? (
-              <p style={{ margin: 0 }}>
-                {locale === 'ar'
-                  ? 'لم يتم تسجيل أي أحداث لدورة الحياة بعد.'
-                  : 'No lifecycle events have been recorded yet.'}
-              </p>
-            ) : (
-              <ul className="elite-list">
-                {detail.events.map((event) => (
-                  <li key={event.id} className="elite-list-item">
-                    <div className="elite-list-title">
-                      <span>{event.eventType}</span>
-                      <StatusBadge tone="neutral">
-                        {event.actorType}
-                      </StatusBadge>
-                    </div>
-                    <div>{event.message}</div>
-                    <div className="elite-list-meta">
-                      <span>
-                        {locale === 'ar'
-                          ? `${event.fromStatus ?? 'غير متاح'} إلى ${event.toStatus ?? 'غير متاح'}`
-                          : `${event.fromStatus ?? 'n/a'} to ${event.toStatus ?? 'n/a'}`}
-                      </span>
-                      <span>{formatCustomerDate(locale, event.createdAt)}</span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </InfoCard>
+            <InfoCard
+              eyebrow={copy.inbound}
+              title={copy.recentInboundMessages}
+              className="elite-customer-instance-activity-card"
+            >
+              {inboundMessages.length === 0 ? (
+                <p style={{ margin: 0 }}>
+                  {locale === 'ar'
+                    ? 'لم يتم تسجيل أي رسائل واردة بعد.'
+                    : 'No inbound messages have been recorded yet.'}
+                </p>
+              ) : (
+                <ul className="elite-list">
+                  {inboundMessages.map((message) => (
+                    <li key={message.id} className="elite-list-item">
+                      <div className="elite-list-title">
+                        <span>
+                          {locale === 'ar'
+                            ? `${message.publicMessageId} من ${message.sender}`
+                            : `${message.publicMessageId} from ${message.sender}`}
+                        </span>
+                        <StatusBadge tone="info">
+                          {translateCustomerEnum(locale, message.kind)}
+                        </StatusBadge>
+                      </div>
+                      <div>
+                        {locale === 'ar' ? 'المحتوى: ' : 'Body: '}
+                        {message.body ??
+                          (locale === 'ar' ? 'لا يوجد نص' : 'No text body')}
+                      </div>
+                      <div className="elite-list-meta">
+                        <span>
+                          {locale === 'ar'
+                            ? `المحادثة ${message.chatId ?? 'غير معروف'}`
+                            : `Chat ${message.chatId ?? 'Unknown'}`}
+                        </span>
+                        <span>
+                          {locale === 'ar'
+                            ? `الاسم الظاهر ${message.pushName ?? 'غير معروف'}`
+                            : `Push ${message.pushName ?? 'Unknown'}`}
+                        </span>
+                        <span>
+                          {locale === 'ar'
+                            ? `من جهتي ${translateCustomerBoolean(locale, message.fromMe)}`
+                            : `From me ${translateCustomerBoolean(locale, message.fromMe)}`}
+                        </span>
+                      </div>
+                      <div className="elite-list-meta">
+                        <span>
+                          {locale === 'ar'
+                            ? `تم الاستلام ${formatCustomerDate(locale, message.receivedAt)}`
+                            : `Received ${formatCustomerDate(locale, message.receivedAt)}`}
+                        </span>
+                        <span>
+                          {locale === 'ar'
+                            ? `أُرسلت في ${formatCustomerDate(locale, message.sentAt)}`
+                            : `Sent at ${formatCustomerDate(locale, message.sentAt)}`}
+                        </span>
+                        <span>
+                          {locale === 'ar'
+                            ? `المزوّد ${message.providerMessageId ?? 'لا يوجد'}`
+                            : `Provider ${message.providerMessageId ?? 'None'}`}
+                        </span>
+                      </div>
+                      <div>
+                        {locale === 'ar' ? 'مسار الوسائط: ' : 'Media path: '}
+                        {message.mediaUrl ??
+                          (locale === 'ar' ? 'لا يوجد' : 'None')}{' '}
+                        | MIME:{' '}
+                        {message.mimeType ??
+                          (locale === 'ar' ? 'غير معروف' : 'Unknown')}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </InfoCard>
+
+            <InfoCard
+              id="instance-webhooks"
+              eyebrow={copy.webhooks}
+              title={copy.recentWebhooks}
+              className="elite-customer-instance-activity-card"
+            >
+              {webhookDeliveries.length === 0 ? (
+                <p style={{ margin: 0 }}>
+                  {locale === 'ar'
+                    ? 'لم يتم تسجيل أي عمليات تسليم Webhook بعد.'
+                    : 'No webhook deliveries have been recorded yet.'}
+                </p>
+              ) : (
+                <ul className="elite-list">
+                  {webhookDeliveries.map((delivery) => (
+                    <li key={delivery.id} className="elite-list-item">
+                      <div className="elite-list-title">
+                        <span>{delivery.eventType}</span>
+                        <StatusBadge tone={webhookTone(delivery.status)}>
+                          {translateCustomerEnum(locale, delivery.status)}
+                        </StatusBadge>
+                      </div>
+                      <div>
+                        {locale === 'ar' ? 'الرابط الهدف: ' : 'Target URL: '}
+                        {delivery.targetUrl}
+                      </div>
+                      <div className="elite-list-meta">
+                        <span>
+                          {locale === 'ar'
+                            ? `الرسالة ${delivery.publicMessageId ?? 'لا توجد رسالة مرتبطة'}`
+                            : `Message ${delivery.publicMessageId ?? 'No linked message'}`}
+                        </span>
+                        <span>
+                          {locale === 'ar'
+                            ? `المحاولات ${delivery.attemptCount}`
+                            : `Attempts ${delivery.attemptCount}`}
+                        </span>
+                        <span>
+                          {locale === 'ar'
+                            ? `المحاولة التالية ${formatCustomerDate(locale, delivery.nextAttemptAt)}`
+                            : `Next attempt ${formatCustomerDate(locale, delivery.nextAttemptAt)}`}
+                        </span>
+                      </div>
+                      <div className="elite-list-meta">
+                        <span>
+                          {locale === 'ar'
+                            ? `آخر استجابة ${delivery.responseStatusCode ?? 'لا يوجد'}`
+                            : `Last response ${delivery.responseStatusCode ?? 'None'}`}
+                        </span>
+                        <span>
+                          {locale === 'ar'
+                            ? `الخطأ ${delivery.errorMessage ?? 'لا يوجد'}`
+                            : `Error ${delivery.errorMessage ?? 'None'}`}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </InfoCard>
+          </div>
+
+          <div className="elite-customer-instance-history-grid">
+            <InfoCard
+              eyebrow={locale === 'ar' ? 'العمليات' : 'Operations'}
+              title={copy.recentOperations}
+              className="elite-customer-instance-history-card"
+            >
+              {detail.operations.length === 0 ? (
+                <p style={{ margin: 0 }}>
+                  {locale === 'ar'
+                    ? 'لم يتم تسجيل أي عمليات بعد.'
+                    : 'No operations have been recorded yet.'}
+                </p>
+              ) : (
+                <ul className="elite-list">
+                  {detail.operations.map((operation) => (
+                    <li key={operation.id} className="elite-list-item">
+                      <div className="elite-list-title">
+                        <span>
+                          {translateCustomerEnum(locale, operation.action)}
+                        </span>
+                        <StatusBadge tone={operationTone(operation.status)}>
+                          {translateCustomerEnum(locale, operation.status)}
+                        </StatusBadge>
+                      </div>
+                      <div className="elite-list-meta">
+                        <span>
+                          {locale === 'ar'
+                            ? `طُلبت بواسطة ${operation.requestedByActorType}`
+                            : `Requested by ${operation.requestedByActorType}`}
+                        </span>
+                        <span>
+                          {locale === 'ar'
+                            ? `العامل الهدف ${operation.targetWorkerId ?? 'تعيين تلقائي'}`
+                            : `Target worker ${operation.targetWorkerId ?? 'Automatic assignment'}`}
+                        </span>
+                      </div>
+                      <div className="elite-list-meta">
+                        <span>
+                          {locale === 'ar'
+                            ? `بدأت ${formatCustomerDate(locale, operation.startedAt)}`
+                            : `Started ${formatCustomerDate(locale, operation.startedAt)}`}
+                        </span>
+                        <span>
+                          {locale === 'ar'
+                            ? `اكتملت ${formatCustomerDate(locale, operation.completedAt)}`
+                            : `Completed ${formatCustomerDate(locale, operation.completedAt)}`}
+                        </span>
+                      </div>
+                      <div>
+                        {locale === 'ar' ? 'الرسالة: ' : 'Message: '}
+                        {operation.message ??
+                          (locale === 'ar' ? 'لا يوجد' : 'None')}
+                      </div>
+                      <div>
+                        {locale === 'ar' ? 'الخطأ: ' : 'Error: '}
+                        {operation.errorMessage ??
+                          (locale === 'ar' ? 'لا يوجد' : 'None')}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </InfoCard>
+
+            <InfoCard
+              eyebrow={copy.tokens}
+              title={
+                locale === 'ar'
+                  ? 'سجل رموز API للمثيل'
+                  : 'Instance API token history'
+              }
+              className="elite-customer-instance-history-card"
+            >
+              {detail.tokens.length === 0 ? (
+                <p style={{ margin: 0 }}>
+                  {locale === 'ar'
+                    ? 'لم يتم إنشاء أي رموز API للمثيل.'
+                    : 'No instance API tokens have been created.'}
+                </p>
+              ) : (
+                <ul className="elite-list">
+                  {detail.tokens.map((token) => (
+                    <li key={token.id} className="elite-list-item">
+                      <div className="elite-list-title">
+                        <span>{token.name}</span>
+                        <StatusBadge
+                          tone={token.revokedAt ? 'danger' : 'success'}
+                        >
+                          {translateCustomerEnum(
+                            locale,
+                            token.revokedAt ? 'revoked' : 'active',
+                          )}
+                        </StatusBadge>
+                      </div>
+                      <div>
+                        {locale === 'ar' ? 'البادئة: ' : 'Prefix: '}
+                        <code>{token.prefix}</code>
+                      </div>
+                      <div className="elite-list-meta">
+                        <span>
+                          {locale === 'ar'
+                            ? `أُنشئ ${formatCustomerDate(locale, token.createdAt)}`
+                            : `Created ${formatCustomerDate(locale, token.createdAt)}`}
+                        </span>
+                        <span>
+                          {locale === 'ar'
+                            ? `أُلغي ${formatCustomerDate(locale, token.revokedAt)}`
+                            : `Revoked ${formatCustomerDate(locale, token.revokedAt)}`}
+                        </span>
+                        <span>
+                          {locale === 'ar'
+                            ? `آخر استخدام ${formatCustomerDate(locale, token.lastUsedAt)}`
+                            : `Last used ${formatCustomerDate(locale, token.lastUsedAt)}`}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </InfoCard>
+
+            <InfoCard
+              id="instance-events"
+              eyebrow={copy.events}
+              title={copy.recentEvents}
+              className="elite-customer-instance-history-card"
+            >
+              {detail.events.length === 0 ? (
+                <p style={{ margin: 0 }}>
+                  {locale === 'ar'
+                    ? 'لم يتم تسجيل أي أحداث لدورة الحياة بعد.'
+                    : 'No lifecycle events have been recorded yet.'}
+                </p>
+              ) : (
+                <ul className="elite-list">
+                  {detail.events.map((event) => (
+                    <li key={event.id} className="elite-list-item">
+                      <div className="elite-list-title">
+                        <span>{event.eventType}</span>
+                        <StatusBadge tone="neutral">
+                          {event.actorType}
+                        </StatusBadge>
+                      </div>
+                      <div>{event.message}</div>
+                      <div className="elite-list-meta">
+                        <span>
+                          {locale === 'ar'
+                            ? `${event.fromStatus ?? 'غير متاح'} إلى ${event.toStatus ?? 'غير متاح'}`
+                            : `${event.fromStatus ?? 'n/a'} to ${event.toStatus ?? 'n/a'}`}
+                        </span>
+                        <span>
+                          {formatCustomerDate(locale, event.createdAt)}
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </InfoCard>
+          </div>
         </>
       ) : null}
 
