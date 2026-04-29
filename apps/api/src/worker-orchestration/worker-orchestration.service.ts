@@ -7,6 +7,7 @@ import {
 import type {
   AdminWorkerDetailResponse,
   AdminOverviewResponse,
+  InstanceStatus,
   InstanceStatusPayload,
   InternalClaimNextInstanceResponse,
   InternalReleaseInstanceRequest,
@@ -33,6 +34,15 @@ import { RealtimeService } from '../realtime/realtime.service';
 function generateWebhookSecret() {
   return randomBytes(32).toString('hex');
 }
+
+const queuedMessageAssignableStatuses = [
+  'authenticated',
+  'standby',
+  'retrying',
+  'initialize',
+  'booting',
+  'loading',
+] satisfies InstanceStatus[];
 
 @Injectable()
 export class WorkerOrchestrationService {
@@ -264,7 +274,9 @@ export class WorkerOrchestrationService {
                 },
                 instance: {
                   assignedWorkerId: null,
-                  status: 'authenticated',
+                  status: {
+                    in: queuedMessageAssignableStatuses,
+                  },
                 },
               },
               orderBy: [

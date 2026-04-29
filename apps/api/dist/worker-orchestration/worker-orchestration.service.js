@@ -10,10 +10,22 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.WorkerOrchestrationService = void 0;
+const node_crypto_1 = require("node:crypto");
 const common_1 = require("@nestjs/common");
 const db_1 = require("@elite-message/db");
 const presenters_1 = require("../common/presenters");
 const realtime_service_1 = require("../realtime/realtime.service");
+function generateWebhookSecret() {
+    return (0, node_crypto_1.randomBytes)(32).toString('hex');
+}
+const queuedMessageAssignableStatuses = [
+    'authenticated',
+    'standby',
+    'retrying',
+    'initialize',
+    'booting',
+    'loading',
+];
 let WorkerOrchestrationService = class WorkerOrchestrationService {
     realtimeService;
     constructor(realtimeService) {
@@ -202,29 +214,59 @@ let WorkerOrchestrationService = class WorkerOrchestrationService {
                         instanceId: true,
                     },
                 });
-                if (!candidateOperation) {
+                const candidateQueuedMessage = candidateOperation
+                    ? null
+                    : await tx.outboundMessage.findFirst({
+                        where: {
+                            status: 'queue',
+                            processingWorkerId: null,
+                            scheduledFor: {
+                                lte: new Date(),
+                            },
+                            instance: {
+                                assignedWorkerId: null,
+                                status: {
+                                    in: queuedMessageAssignableStatuses,
+                                },
+                            },
+                        },
+                        orderBy: [
+                            { priority: 'asc' },
+                            { scheduledFor: 'asc' },
+                            { createdAt: 'asc' },
+                        ],
+                        select: {
+                            instanceId: true,
+                        },
+                    });
+                const candidateInstanceId = candidateOperation?.instanceId ??
+                    candidateQueuedMessage?.instanceId ??
+                    null;
+                if (!candidateInstanceId) {
                     return null;
                 }
                 await tx.instanceRuntimeState.upsert({
                     where: {
-                        instanceId: candidateOperation.instanceId,
+                        instanceId: candidateInstanceId,
                     },
                     update: {},
                     create: {
-                        instanceId: candidateOperation.instanceId,
+                        instanceId: candidateInstanceId,
                     },
                 });
                 const now = new Date();
                 const claimed = await tx.instance.updateMany({
                     where: {
-                        id: candidateOperation.instanceId,
+                        id: candidateInstanceId,
                         assignedWorkerId: null,
                     },
                     data: {
                         assignedWorkerId: workerId,
                         lastHeartbeatAt: now,
                         lastLifecycleEventAt: now,
-                        substatus: 'worker_claimed',
+                        substatus: candidateOperation
+                            ? 'worker_claimed'
+                            : 'worker_claimed_for_messages',
                     },
                 });
                 if (claimed.count !== 1) {
@@ -232,17 +274,22 @@ let WorkerOrchestrationService = class WorkerOrchestrationService {
                 }
                 await tx.instanceLifecycleEvent.create({
                     data: {
-                        instanceId: candidateOperation.instanceId,
+                        instanceId: candidateInstanceId,
                         eventType: 'worker_assigned',
                         actorType: 'worker',
                         actorId: workerId,
-                        message: `Worker ${workerId} claimed the instance.`,
+                        message: candidateOperation
+                            ? `Worker ${workerId} claimed the instance.`
+                            : `Worker ${workerId} claimed the instance to send queued messages.`,
                         metadata: {
                             workerId,
+                            reason: candidateOperation
+                                ? 'pending_operation'
+                                : 'queued_outbound_message',
                         },
                     },
                 });
-                return candidateOperation.instanceId;
+                return candidateInstanceId;
             });
             if (!claimedInstanceId) {
                 continue;
@@ -641,6 +688,7 @@ let WorkerOrchestrationService = class WorkerOrchestrationService {
                 update: {},
                 create: {
                     instanceId,
+                    webhookSecret: generateWebhookSecret(),
                 },
             });
             await tx.instanceRuntimeState.upsert({

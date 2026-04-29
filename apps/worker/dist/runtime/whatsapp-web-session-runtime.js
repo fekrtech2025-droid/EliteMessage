@@ -110,12 +110,19 @@ function shouldAutoRecover(status) {
         'booting',
     ].includes(status);
 }
+function shouldReconnectForQueuedMessages(instance) {
+    return (instance.substatus === 'worker_claimed_for_messages' &&
+        !['stopped', 'expired'].includes(instance.status));
+}
 function inferDesiredState(instance) {
     if (instance.pendingOperation &&
         ['start', 'restart'].includes(instance.pendingOperation.action)) {
         return 'running';
     }
     if (shouldAutoRecover(instance.status)) {
+        return 'running';
+    }
+    if (shouldReconnectForQueuedMessages(instance)) {
         return 'running';
     }
     return 'stopped';
@@ -324,7 +331,8 @@ class WhatsAppWebSessionRuntime {
             }
             const canAutoRecover = entry.desiredState === 'running' &&
                 !entry.snapshot.pendingOperation &&
-                shouldAutoRecover(entry.snapshot.status) &&
+                (shouldAutoRecover(entry.snapshot.status) ||
+                    shouldReconnectForQueuedMessages(entry.snapshot)) &&
                 (!entry.recoverAfterAt || entry.recoverAfterAt <= Date.now());
             if (!entry.client && !entry.clientPromise && canAutoRecover) {
                 entry.clientPromise = this.ensureClient(instanceId)
