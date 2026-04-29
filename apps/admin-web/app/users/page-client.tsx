@@ -13,6 +13,7 @@ import {
   AppShell,
   DefinitionGrid,
   InfoCard,
+  LoadingState,
   NoticeBanner,
   SectionGrid,
   StatusBadge,
@@ -219,11 +220,10 @@ export function AdminUsersPage() {
       footer={<a href="/">Back to dashboard</a>}
     >
       {pageState === 'loading' ? (
-        <InfoCard eyebrow="Users" title="Loading admin users">
-          <p style={{ margin: 0 }}>
-            Refreshing the admin session and loading user records.
-          </p>
-        </InfoCard>
+        <LoadingState
+          title="Loading admin users"
+          description="Refreshing the admin session and loading user records."
+        />
       ) : null}
 
       {pageState === 'unauthenticated' ? (

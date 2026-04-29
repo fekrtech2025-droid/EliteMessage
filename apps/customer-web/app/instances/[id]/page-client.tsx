@@ -34,6 +34,7 @@ import {
   DefinitionGrid,
   Field,
   InfoCard,
+  LoadingState,
   MetricCard,
   MetricGrid,
   NoticeBanner,
@@ -62,6 +63,7 @@ import {
   formatCustomerSafeRuntimeText,
   sanitizeCustomerDiagnostics,
 } from '../../lib/customer-runtime-errors';
+import { getCustomerOutboundDeliveryView } from '../../lib/customer-conversations';
 import {
   apiBaseUrl,
   clearStoredToken,
@@ -1439,16 +1441,14 @@ export function CustomerInstanceDetailPage({
       }
     >
       {pageState === 'loading' ? (
-        <InfoCard
-          eyebrow={locale === 'ar' ? 'المثيل' : 'Instance'}
+        <LoadingState
           title={copy.loadingDetail}
-        >
-          <p style={{ margin: 0 }}>
-            {locale === 'ar'
+          description={
+            locale === 'ar'
               ? 'يتم تحميل حالة التشغيل وأحداث دورة الحياة والرموز والعمليات المعلقة.'
-              : 'Loading runtime state, lifecycle events, tokens, and pending operations.'}
-          </p>
-        </InfoCard>
+              : 'Loading runtime state, lifecycle events, tokens, and pending operations.'
+          }
+        />
       ) : null}
 
       {pageState === 'unauthenticated' ? (
@@ -2378,63 +2378,69 @@ export function CustomerInstanceDetailPage({
                 </p>
               ) : (
                 <ul className="elite-list">
-                  {messages.map((message) => (
-                    <li key={message.id} className="elite-list-item">
-                      <div className="elite-list-title">
-                        <span>
-                          {locale === 'ar'
-                            ? `${message.publicMessageId} إلى ${message.recipient}`
-                            : `${message.publicMessageId} to ${message.recipient}`}
-                        </span>
-                        <StatusBadge tone={statusTone(message.status)}>
-                          {translateCustomerEnum(locale, message.status)}
-                        </StatusBadge>
-                        <StatusBadge tone={ackTone(message.ack)}>
-                          {translateCustomerEnum(locale, message.ack)}
-                        </StatusBadge>
-                      </div>
-                      <div>
-                        {locale === 'ar' ? 'المعاينة: ' : 'Preview: '}
-                        {formatMessagePreview(message, locale)}
-                      </div>
-                      <div className="elite-list-meta">
-                        <span>
-                          {locale === 'ar'
-                            ? `النوع ${translateCustomerEnum(locale, message.messageType)}`
-                            : `Type ${message.messageType}`}
-                        </span>
-                        <span>
-                          {locale === 'ar'
-                            ? `الأولوية ${message.priority}`
-                            : `Priority ${message.priority}`}
-                        </span>
-                        <span>
-                          {locale === 'ar'
-                            ? `مجدولة ${formatCustomerDate(locale, message.scheduledFor)}`
-                            : `Scheduled ${formatCustomerDate(locale, message.scheduledFor)}`}
-                        </span>
-                      </div>
-                      <div className="elite-list-meta">
-                        <span>
-                          {locale === 'ar'
-                            ? `العامل ${message.workerId ?? message.processingWorkerId ?? 'لم يُعيَّن بعد'}`
-                            : `Worker ${message.workerId ?? message.processingWorkerId ?? 'Not assigned yet'}`}
-                        </span>
-                        <span>
-                          {locale === 'ar'
-                            ? `المرجع ${message.referenceId ?? 'لا يوجد'}`
-                            : `Reference ${message.referenceId ?? 'None'}`}
-                        </span>
-                      </div>
-                      <div>
-                        {locale === 'ar' ? 'الخطأ: ' : 'Error: '}
-                        {formatCustomerSafeRuntimeText(
-                          message.errorMessage,
-                          locale,
-                        ) ?? (locale === 'ar' ? 'لا يوجد' : 'None')}
-                      </div>
-                    </li>
-                  ))}
+                  {messages.map((message) => {
+                    const deliveryView = getCustomerOutboundDeliveryView(
+                      message,
+                      locale,
+                    );
+                    const safeError = formatCustomerSafeRuntimeText(
+                      message.errorMessage,
+                      locale,
+                    );
+
+                    return (
+                      <li key={message.id} className="elite-list-item">
+                        <div className="elite-list-title">
+                          <span>
+                            {locale === 'ar'
+                              ? `${message.publicMessageId} إلى ${message.recipient}`
+                              : `${message.publicMessageId} to ${message.recipient}`}
+                          </span>
+                          <StatusBadge tone={deliveryView.tone}>
+                            {deliveryView.label}
+                          </StatusBadge>
+                          {deliveryView.showAck ? (
+                            <StatusBadge tone={ackTone(message.ack)}>
+                              {translateCustomerEnum(locale, message.ack)}
+                            </StatusBadge>
+                          ) : null}
+                        </div>
+                        <div>
+                          {locale === 'ar' ? 'المعاينة: ' : 'Preview: '}
+                          {formatMessagePreview(message, locale)}
+                        </div>
+                        <p style={{ margin: 0 }}>{deliveryView.detail}</p>
+                        <div className="elite-list-meta">
+                          <span>
+                            {locale === 'ar'
+                              ? `النوع ${translateCustomerEnum(locale, message.messageType)}`
+                              : `Type ${translateCustomerEnum(locale, message.messageType)}`}
+                          </span>
+                          <span>
+                            {locale === 'ar'
+                              ? `الأولوية ${message.priority}`
+                              : `Priority ${message.priority}`}
+                          </span>
+                          <span>
+                            {locale === 'ar'
+                              ? `مجدولة ${formatCustomerDate(locale, message.scheduledFor)}`
+                              : `Scheduled ${formatCustomerDate(locale, message.scheduledFor)}`}
+                          </span>
+                          <span>
+                            {locale === 'ar'
+                              ? `المرجع ${message.referenceId ?? 'لا يوجد'}`
+                              : `Reference ${message.referenceId ?? 'None'}`}
+                          </span>
+                        </div>
+                        {safeError ? (
+                          <div>
+                            {locale === 'ar' ? 'ملاحظة: ' : 'Note: '}
+                            {safeError}
+                          </div>
+                        ) : null}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </InfoCard>

@@ -70,6 +70,8 @@ type EmptyStateProps = {
   title: string;
   description: ReactNode;
   action?: ReactNode;
+  icon?: ReactNode;
+  tone?: Tone;
 };
 
 type AnchorNavProps = {
@@ -78,6 +80,41 @@ type AnchorNavProps = {
     href: string;
   }>;
 };
+
+type LoadingStateProps = {
+  title: string;
+  description?: ReactNode;
+  rows?: number;
+};
+
+type ErrorStateProps = PropsWithChildren<{
+  title: string;
+  action?: ReactNode;
+  tone?: Extract<Tone, 'warning' | 'danger'>;
+}>;
+
+type FilterBarProps = PropsWithChildren<{
+  title?: ReactNode;
+  actions?: ReactNode;
+}>;
+
+type RecordListProps = PropsWithChildren<{
+  'aria-label'?: string;
+}>;
+
+type RecordItemProps = PropsWithChildren<{
+  title: ReactNode;
+  meta?: ReactNode;
+  badges?: ReactNode;
+  action?: ReactNode;
+  tone?: Tone;
+}>;
+
+type ResponsiveColumnsProps = PropsWithChildren<{
+  sidebar?: ReactNode;
+  sidebarLabel?: string;
+  contentLabel?: string;
+}>;
 
 function cssVarStyle(name: string, value: string): CSSProperties {
   return {
@@ -243,11 +280,24 @@ export function CheckboxField({ label, hint, ...props }: CheckboxFieldProps) {
   );
 }
 
-export function EmptyState({ title, description, action }: EmptyStateProps) {
+export function EmptyState({
+  title,
+  description,
+  action,
+  icon,
+  tone = 'neutral',
+}: EmptyStateProps) {
   return (
-    <div className="elite-empty-state">
-      <h3>{title}</h3>
-      <p>{description}</p>
+    <div className="elite-empty-state" data-tone={tone}>
+      {icon ? (
+        <div className="elite-empty-state-icon" aria-hidden="true">
+          {icon}
+        </div>
+      ) : null}
+      <div className="elite-empty-state-copy">
+        <h3>{title}</h3>
+        <p>{description}</p>
+      </div>
       {action ? <div className="elite-toolbar">{action}</div> : null}
     </div>
   );
@@ -262,5 +312,132 @@ export function AnchorNav({ items }: AnchorNavProps) {
         </a>
       ))}
     </nav>
+  );
+}
+
+export function LoadingState({
+  title,
+  description,
+  rows = 3,
+}: LoadingStateProps) {
+  const dotCount = Math.max(3, rows);
+
+  return (
+    <div className="elite-loading-state" role="status" aria-live="polite">
+      <span className="elite-sr-only">
+        {title}
+        {description ? ` ${description}` : ''}
+      </span>
+      <div className="elite-loading-animation" aria-hidden="true">
+        <span className="elite-loading-core" />
+        <span className="elite-loading-ring" />
+        <span className="elite-loading-ring elite-loading-ring-offset" />
+        <span className="elite-loading-dots">
+          {Array.from({ length: dotCount }).map((_, index) => (
+            <span
+              key={index}
+              style={
+                {
+                  '--elite-dot-angle': `${(360 / dotCount) * index}deg`,
+                  '--elite-dot-delay': `${index * 90}ms`,
+                } as CSSProperties
+              }
+            />
+          ))}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+export function ErrorState({
+  title,
+  action,
+  tone = 'danger',
+  children,
+}: ErrorStateProps) {
+  return (
+    <div className="elite-error-state" data-tone={tone} role="alert">
+      <div className="elite-error-state-copy">
+        <h3>{title}</h3>
+        <div>{children}</div>
+      </div>
+      {action ? <div className="elite-toolbar">{action}</div> : null}
+    </div>
+  );
+}
+
+export function FilterBar({ title, actions, children }: FilterBarProps) {
+  return (
+    <div className="elite-filter-bar">
+      {title || actions ? (
+        <div className="elite-filter-bar-header">
+          {title ? <strong>{title}</strong> : <span />}
+          {actions ? <div className="elite-toolbar">{actions}</div> : null}
+        </div>
+      ) : null}
+      <div className="elite-filter-bar-grid">{children}</div>
+    </div>
+  );
+}
+
+export function RecordList({
+  children,
+  'aria-label': ariaLabel,
+}: RecordListProps) {
+  return (
+    <div className="elite-record-list" aria-label={ariaLabel}>
+      {children}
+    </div>
+  );
+}
+
+export function RecordItem({
+  title,
+  meta,
+  badges,
+  action,
+  tone = 'neutral',
+  children,
+}: RecordItemProps) {
+  return (
+    <article className="elite-record-item" data-tone={tone}>
+      <div className="elite-record-item-main">
+        <div className="elite-record-item-title">
+          <strong>{title}</strong>
+          {badges ? (
+            <span className="elite-record-item-badges">{badges}</span>
+          ) : null}
+        </div>
+        {meta ? <div className="elite-record-item-meta">{meta}</div> : null}
+        {children ? (
+          <div className="elite-record-item-body">{children}</div>
+        ) : null}
+      </div>
+      {action ? <div className="elite-record-item-action">{action}</div> : null}
+    </article>
+  );
+}
+
+export function ResponsiveColumns({
+  sidebar,
+  sidebarLabel,
+  contentLabel,
+  children,
+}: ResponsiveColumnsProps) {
+  return (
+    <section className="elite-responsive-columns">
+      {sidebar ? (
+        <aside
+          className="elite-responsive-columns-sidebar"
+          aria-label={sidebarLabel}
+        >
+          {sidebar}
+        </aside>
+      ) : null}
+      <div className="elite-responsive-columns-main" aria-label={contentLabel}>
+        {children}
+      </div>
+    </section>
   );
 }

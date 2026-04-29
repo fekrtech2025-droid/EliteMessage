@@ -19,6 +19,7 @@ import {
   AppShell,
   Field,
   InfoCard,
+  LoadingState,
   MetricCard,
   MetricGrid,
   NoticeBanner,
@@ -406,11 +407,10 @@ export function AdminMessagesPage() {
       footer={<a href="/">Back to dashboard</a>}
     >
       {pageState === 'loading' ? (
-        <InfoCard eyebrow="Messages" title="Loading message explorer">
-          <p style={{ margin: 0 }}>
-            Refreshing the admin session and loading global message data.
-          </p>
-        </InfoCard>
+        <LoadingState
+          title="Loading message explorer"
+          description="Refreshing the admin session and loading global message data."
+        />
       ) : null}
 
       {pageState === 'unauthenticated' ? (

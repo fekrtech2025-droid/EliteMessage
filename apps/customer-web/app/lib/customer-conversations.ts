@@ -3,6 +3,8 @@ import type {
   MessageStatus,
   OutboundMessageSummary,
 } from '@elite-message/contracts';
+import type { CustomerLocale } from './customer-locale';
+import { translateCustomerEnum } from './customer-locale';
 
 export type CustomerConversationEvent = {
   id: string;
@@ -49,6 +51,15 @@ export type CustomerContact = {
   failedCount: number;
 };
 
+type CustomerTone = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+
+export type CustomerOutboundDeliveryView = {
+  label: string;
+  tone: CustomerTone;
+  detail: string;
+  showAck: boolean;
+};
+
 function getTimestampValue(value: string) {
   const parsed = Date.parse(value);
   return Number.isFinite(parsed) ? parsed : 0;
@@ -89,6 +100,124 @@ export function getInboundMessagePreview(
   const preview = message.body?.trim() || message.mediaUrl?.trim() || '';
 
   return preview || fallback;
+}
+
+export function getCustomerOutboundDeliveryView(
+  message: OutboundMessageSummary,
+  locale: CustomerLocale,
+): CustomerOutboundDeliveryView {
+  if (message.status === 'queue') {
+    const scheduledAt = Date.parse(message.scheduledFor);
+    const isScheduledForLater =
+      Number.isFinite(scheduledAt) && scheduledAt > Date.now() + 5_000;
+    const isBeingProcessed = Boolean(
+      message.processingWorkerId || message.workerId,
+    );
+
+    if (isScheduledForLater) {
+      return {
+        label: locale === 'ar' ? 'مجدولة للإرسال' : 'Scheduled to send',
+        tone: 'info',
+        detail:
+          locale === 'ar'
+            ? 'سيتم إرسال الرسالة تلقائياً في موعدها.'
+            : 'This message will send automatically at its scheduled time.',
+        showAck: false,
+      };
+    }
+
+    if (isBeingProcessed) {
+      return {
+        label: locale === 'ar' ? 'جارٍ الإرسال' : 'Sending',
+        tone: 'warning',
+        detail:
+          locale === 'ar'
+            ? 'واتساب يعالج هذه الرسالة الآن.'
+            : 'WhatsApp is processing this message now.',
+        showAck: false,
+      };
+    }
+
+    return {
+      label: locale === 'ar' ? 'يتم التحضير للإرسال' : 'Preparing to send',
+      tone: 'warning',
+      detail:
+        locale === 'ar'
+          ? 'سنرسل الرسالة تلقائياً عندما يصبح الاتصال جاهزاً.'
+          : 'We will send this automatically as soon as the connection is ready.',
+      showAck: false,
+    };
+  }
+
+  if (message.status === 'sent') {
+    return {
+      label: translateCustomerEnum(locale, 'sent'),
+      tone: 'success',
+      detail:
+        message.ack === 'pending'
+          ? locale === 'ar'
+            ? 'تم الإرسال وننتظر تأكيد التسليم من واتساب.'
+            : 'Sent, waiting for WhatsApp delivery confirmation.'
+          : locale === 'ar'
+            ? `تأكيد التسليم: ${translateCustomerEnum(locale, message.ack)}.`
+            : `Delivery confirmation: ${translateCustomerEnum(locale, message.ack)}.`,
+      showAck: message.ack !== 'pending',
+    };
+  }
+
+  if (message.status === 'unsent') {
+    return {
+      label: locale === 'ar' ? 'تحتاج متابعة' : 'Needs attention',
+      tone: 'danger',
+      detail:
+        locale === 'ar'
+          ? 'لم يتم إرسال الرسالة. يمكنك إعادة المحاولة بعد التأكد من اتصال واتساب.'
+          : 'The message was not sent. You can retry after WhatsApp is connected.',
+      showAck: false,
+    };
+  }
+
+  if (message.status === 'invalid') {
+    return {
+      label: locale === 'ar' ? 'رسالة غير صالحة' : 'Invalid message',
+      tone: 'danger',
+      detail:
+        locale === 'ar'
+          ? 'راجع رقم المستلم أو محتوى الرسالة ثم أرسلها من جديد.'
+          : 'Check the recipient or message content, then send it again.',
+      showAck: false,
+    };
+  }
+
+  if (message.status === 'expired') {
+    return {
+      label: translateCustomerEnum(locale, 'expired'),
+      tone: 'danger',
+      detail:
+        locale === 'ar'
+          ? 'انتهت صلاحية هذه الرسالة قبل إرسالها.'
+          : 'This message expired before it could be sent.',
+      showAck: false,
+    };
+  }
+
+  return {
+    label: translateCustomerEnum(locale, message.status),
+    tone: 'neutral',
+    detail: translateCustomerEnum(locale, message.status),
+    showAck: false,
+  };
+}
+
+export function getCustomerConversationEventDeliveryView(
+  event: CustomerConversationEvent,
+  locale: CustomerLocale,
+) {
+  if (event.direction !== 'outbound' || !('recipient' in event.source)) {
+    return null;
+  }
+
+  return getCustomerOutboundDeliveryView(event.source, locale);
 }
 
 export function buildCustomerConversationEvents(input: {

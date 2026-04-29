@@ -1482,12 +1482,46 @@ main[data-elite-shell] .elite-customer-topbar-menu-logout[data-tone="secondary"]
 
 main[data-elite-shell] .elite-empty-state {
   display: grid;
-  gap: 0.7rem;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.85rem 1rem;
+  align-items: flex-start;
   padding: clamp(20px, 4vw, 34px);
   border-radius: 22px;
   border: 1px dashed var(--elite-line-strong);
   background: rgba(255, 255, 255, 0.58);
   text-align: left;
+}
+
+main[data-elite-shell] .elite-empty-state[data-tone="info"] {
+  border-color: rgba(37, 99, 235, 0.22);
+  background: rgba(239, 246, 255, 0.74);
+}
+
+main[data-elite-shell] .elite-empty-state[data-tone="warning"] {
+  border-color: rgba(180, 83, 9, 0.22);
+  background: rgba(255, 247, 237, 0.78);
+}
+
+main[data-elite-shell] .elite-empty-state[data-tone="danger"] {
+  border-color: rgba(185, 28, 28, 0.22);
+  background: rgba(254, 242, 242, 0.78);
+}
+
+main[data-elite-shell] .elite-empty-state-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.65rem;
+  height: 2.65rem;
+  border-radius: 18px;
+  background: var(--elite-accent-soft);
+  color: var(--elite-accent-2);
+  font-weight: 900;
+}
+
+main[data-elite-shell] .elite-empty-state-copy {
+  display: grid;
+  gap: 0.45rem;
 }
 
 main[data-elite-shell] .elite-empty-state h3 {
@@ -1499,6 +1533,307 @@ main[data-elite-shell] .elite-empty-state p {
   margin: 0;
   color: var(--elite-muted);
   line-height: 1.6;
+}
+
+main[data-elite-shell] .elite-empty-state .elite-toolbar {
+  grid-column: 1 / -1;
+}
+
+main[data-elite-shell] .elite-loading-state,
+main[data-elite-shell] .elite-error-state,
+main[data-elite-shell] .elite-filter-bar,
+main[data-elite-shell] .elite-record-item {
+  border: 1px solid var(--elite-line);
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: var(--elite-shadow-sm);
+}
+
+main[data-elite-shell] .elite-loading-state,
+main[data-elite-shell] .elite-error-state {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(20px, 3vw, 30px);
+  border-radius: 24px;
+}
+
+main[data-elite-shell] .elite-loading-state {
+  min-height: min(42vh, 360px);
+  place-items: center;
+  background:
+    radial-gradient(circle at 50% 42%, var(--elite-accent-soft), transparent 38%),
+    rgba(255, 255, 255, 0.72);
+}
+
+main[data-elite-shell] .elite-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+main[data-elite-shell] .elite-loading-animation {
+  position: relative;
+  width: clamp(84px, 12vw, 132px);
+  height: clamp(84px, 12vw, 132px);
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 20px 28px rgba(15, 23, 42, 0.12));
+}
+
+main[data-elite-shell] .elite-loading-core {
+  width: 34%;
+  height: 34%;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 32% 30%, rgba(255, 255, 255, 0.9), transparent 33%),
+    linear-gradient(135deg, var(--elite-accent), var(--elite-accent-2));
+  box-shadow:
+    0 0 0 10px var(--elite-accent-soft),
+    0 18px 32px rgba(15, 23, 42, 0.16);
+  animation: elite-loader-pulse 1.45s ease-in-out infinite;
+}
+
+main[data-elite-shell] .elite-loading-ring {
+  position: absolute;
+  inset: 8%;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  border-top-color: var(--elite-accent);
+  border-right-color: rgba(15, 118, 110, 0.24);
+  animation: elite-loader-spin 1.1s linear infinite;
+}
+
+main[data-elite-shell] .elite-loading-ring-offset {
+  inset: 20%;
+  border-top-color: var(--elite-warm);
+  border-right-color: rgba(180, 83, 9, 0.2);
+  animation-duration: 1.6s;
+  animation-direction: reverse;
+}
+
+main[data-elite-shell] .elite-loading-dots {
+  position: absolute;
+  inset: -3%;
+  animation: elite-loader-spin 3.2s linear infinite;
+}
+
+main[data-elite-shell] .elite-loading-dots span {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 999px;
+  background: var(--elite-accent);
+  opacity: 0.8;
+  transform:
+    rotate(var(--elite-dot-angle))
+    translateX(clamp(44px, 6vw, 70px));
+  animation: elite-loader-dot 1.4s ease-in-out infinite;
+  animation-delay: var(--elite-dot-delay);
+}
+
+main[data-elite-shell] .elite-loading-copy,
+main[data-elite-shell] .elite-error-state-copy {
+  display: grid;
+  gap: 0.55rem;
+}
+
+main[data-elite-shell] .elite-loading-copy h3,
+main[data-elite-shell] .elite-error-state-copy h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+main[data-elite-shell] .elite-loading-copy p,
+main[data-elite-shell] .elite-error-state-copy p {
+  margin: 0;
+  color: var(--elite-muted);
+  line-height: 1.6;
+}
+
+main[data-elite-shell] .elite-error-state {
+  border-color: rgba(185, 28, 28, 0.18);
+  background: linear-gradient(135deg, rgba(254, 242, 242, 0.94), rgba(255, 255, 255, 0.82));
+}
+
+main[data-elite-shell] .elite-error-state[data-tone="warning"] {
+  border-color: rgba(180, 83, 9, 0.2);
+  background: linear-gradient(135deg, rgba(255, 247, 237, 0.96), rgba(255, 255, 255, 0.82));
+}
+
+main[data-elite-shell] .elite-skeleton-stack {
+  display: grid;
+  gap: 0.65rem;
+}
+
+main[data-elite-shell] .elite-skeleton-line {
+  display: block;
+  height: 0.95rem;
+  max-width: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(15, 23, 42, 0.06), rgba(255, 255, 255, 0.78), rgba(15, 23, 42, 0.06));
+  background-size: 220% 100%;
+  animation: elite-skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+main[data-elite-shell] .elite-skeleton-line:nth-child(2) {
+  width: 78%;
+}
+
+main[data-elite-shell] .elite-skeleton-line:nth-child(3) {
+  width: 58%;
+}
+
+@keyframes elite-skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+@keyframes elite-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes elite-loader-pulse {
+  0%,
+  100% {
+    transform: scale(0.92);
+    opacity: 0.82;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes elite-loader-dot {
+  0%,
+  100% {
+    opacity: 0.28;
+    scale: 0.72;
+  }
+  50% {
+    opacity: 0.92;
+    scale: 1;
+  }
+}
+
+main[data-elite-shell] .elite-filter-bar {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 24px;
+  backdrop-filter: blur(14px);
+}
+
+main[data-elite-shell] .elite-filter-bar-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+main[data-elite-shell] .elite-filter-bar-header > strong {
+  color: var(--elite-ink);
+  font-size: 1rem;
+}
+
+main[data-elite-shell] .elite-filter-bar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.9rem;
+  align-items: end;
+}
+
+main[data-elite-shell] .elite-record-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+main[data-elite-shell] .elite-record-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 1.05rem;
+  border-radius: 22px;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+main[data-elite-shell] .elite-record-item:hover {
+  border-color: var(--elite-line-strong);
+  box-shadow: var(--elite-shadow-md);
+  transform: translateY(-1px);
+}
+
+main[data-elite-shell] .elite-record-item[data-tone="success"] {
+  border-color: rgba(21, 128, 61, 0.18);
+}
+
+main[data-elite-shell] .elite-record-item[data-tone="warning"] {
+  border-color: rgba(180, 83, 9, 0.2);
+}
+
+main[data-elite-shell] .elite-record-item[data-tone="danger"] {
+  border-color: rgba(185, 28, 28, 0.2);
+}
+
+main[data-elite-shell] .elite-record-item-main,
+main[data-elite-shell] .elite-record-item-body {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+main[data-elite-shell] .elite-record-item-title,
+main[data-elite-shell] .elite-record-item-meta,
+main[data-elite-shell] .elite-record-item-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+main[data-elite-shell] .elite-record-item-title > strong {
+  overflow-wrap: anywhere;
+  font-weight: 850;
+}
+
+main[data-elite-shell] .elite-record-item-meta {
+  color: var(--elite-muted);
+  font-size: 0.88rem;
+}
+
+main[data-elite-shell] .elite-record-item-action {
+  display: flex;
+  justify-content: flex-end;
+}
+
+main[data-elite-shell] .elite-responsive-columns {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.42fr) minmax(0, 1fr);
+  gap: var(--elite-content-gap);
+  align-items: start;
+}
+
+main[data-elite-shell] .elite-responsive-columns-sidebar,
+main[data-elite-shell] .elite-responsive-columns-main {
+  min-width: 0;
 }
 
 main[data-elite-shell] .elite-anchor-nav {
@@ -3422,6 +3757,10 @@ html[data-elite-theme="dark"] main[data-elite-shell] .elite-definition-item,
 html[data-elite-theme="dark"] main[data-elite-shell] .elite-notice,
 html[data-elite-theme="dark"] main[data-elite-shell] .elite-list-item,
 html[data-elite-theme="dark"] main[data-elite-shell] .elite-empty-state,
+html[data-elite-theme="dark"] main[data-elite-shell] .elite-loading-state,
+html[data-elite-theme="dark"] main[data-elite-shell] .elite-error-state,
+html[data-elite-theme="dark"] main[data-elite-shell] .elite-filter-bar,
+html[data-elite-theme="dark"] main[data-elite-shell] .elite-record-item,
 html[data-elite-theme="dark"] main[data-elite-shell] .elite-anchor-nav a,
 html[data-elite-theme="dark"] main[data-elite-shell] .elite-page-secondary-nav,
 html[data-elite-theme="dark"] main[data-elite-shell] .elite-auth-highlight,
@@ -3853,6 +4192,25 @@ html[data-elite-theme="dark"] main[data-elite-shell][data-nav-collapsed="true"] 
   main[data-elite-shell] .elite-page-header-row {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  main[data-elite-shell] .elite-empty-state,
+  main[data-elite-shell] .elite-record-item,
+  main[data-elite-shell] .elite-responsive-columns {
+    grid-template-columns: 1fr;
+  }
+
+  main[data-elite-shell] .elite-empty-state-icon {
+    width: 2.35rem;
+    height: 2.35rem;
+  }
+
+  main[data-elite-shell] .elite-record-item-action {
+    justify-content: flex-start;
+  }
+
+  main[data-elite-shell] .elite-filter-bar-grid {
+    grid-template-columns: 1fr;
   }
 
   main[data-elite-shell] .elite-page-breadcrumbs {

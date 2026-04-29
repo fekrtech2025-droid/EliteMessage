@@ -17,6 +17,7 @@ import {
   AppShell,
   Field,
   InfoCard,
+  LoadingState,
   MetricCard,
   MetricGrid,
   NoticeBanner,
@@ -354,9 +355,7 @@ export function CustomerProfilePage() {
       footer={<Link href="/dashboard">{copy.backToDashboard}</Link>}
     >
       {pageState === 'loading' ? (
-        <InfoCard eyebrow={copy.profile} title={copy.loading}>
-          <p style={{ margin: 0 }}>{copy.loadingMessage}</p>
-        </InfoCard>
+        <LoadingState title={copy.loading} description={copy.loadingMessage} />
       ) : null}
 
       {pageState === 'unauthenticated' ? (

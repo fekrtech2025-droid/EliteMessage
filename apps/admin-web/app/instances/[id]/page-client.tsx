@@ -29,6 +29,7 @@ import {
   DefinitionGrid,
   Field,
   InfoCard,
+  LoadingState,
   MetricCard,
   MetricGrid,
   NoticeBanner,
@@ -722,11 +723,10 @@ export function AdminInstanceDetailPage({
       }
     >
       {pageState === 'loading' ? (
-        <InfoCard eyebrow="Instance" title="Loading detail">
-          <p style={{ margin: 0 }}>
-            Fetching the instance record, runtime state, and worker assignment.
-          </p>
-        </InfoCard>
+        <LoadingState
+          title="Loading detail"
+          description="Fetching the instance record, runtime state, and worker assignment."
+        />
       ) : null}
 
       {pageState === 'unauthenticated' ? (

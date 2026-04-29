@@ -24,6 +24,7 @@ import {
   AuthSplitLayout,
   Field,
   InfoCard,
+  LoadingState,
   MetricCard,
   MetricGrid,
   NoticeBanner,
@@ -618,12 +619,10 @@ export function AdminDashboardPage() {
       }
     >
       {pageState === 'loading' ? (
-        <InfoCard eyebrow="Session" title="Connecting to the admin API">
-          <p style={{ margin: 0 }}>
-            Checking for a refresh session and loading the current overview
-            snapshot.
-          </p>
-        </InfoCard>
+        <LoadingState
+          title="Connecting to the admin API"
+          description="Checking for a refresh session and loading the current overview snapshot."
+        />
       ) : null}
 
       {pageState === 'unauthenticated' ? (

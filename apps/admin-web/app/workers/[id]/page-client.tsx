@@ -10,6 +10,7 @@ import {
   AppShell,
   DefinitionGrid,
   InfoCard,
+  LoadingState,
   NoticeBanner,
   SectionGrid,
   StatusBadge,
@@ -128,11 +129,10 @@ export function AdminWorkerDetailPage({
       footer={<a href="/workers">Back to workers</a>}
     >
       {pageState === 'loading' ? (
-        <InfoCard eyebrow="Worker" title="Loading worker detail">
-          <p style={{ margin: 0 }}>
-            Refreshing the admin session and loading the selected worker.
-          </p>
-        </InfoCard>
+        <LoadingState
+          title="Loading worker detail"
+          description="Refreshing the admin session and loading the selected worker."
+        />
       ) : null}
 
       {pageState === 'unauthenticated' ? (

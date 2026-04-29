@@ -15,6 +15,7 @@ import {
   DefinitionGrid,
   Field,
   InfoCard,
+  LoadingState,
   NoticeBanner,
   SectionGrid,
   StatusBadge,
@@ -292,11 +293,10 @@ export function AdminWorkspacesPage() {
       footer={<a href="/">Back to dashboard</a>}
     >
       {pageState === 'loading' ? (
-        <InfoCard eyebrow="Workspaces" title="Loading tenant explorer">
-          <p style={{ margin: 0 }}>
-            Refreshing the admin session and loading workspace records.
-          </p>
-        </InfoCard>
+        <LoadingState
+          title="Loading tenant explorer"
+          description="Refreshing the admin session and loading workspace records."
+        />
       ) : null}
 
       {pageState === 'unauthenticated' ? (

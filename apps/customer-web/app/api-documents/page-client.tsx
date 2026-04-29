@@ -12,6 +12,7 @@ import {
   DefinitionGrid,
   Field,
   InfoCard,
+  LoadingState,
   NoticeBanner,
   SelectInput,
   StatusBadge,
@@ -1556,12 +1557,10 @@ export function CustomerApiDocumentsPage() {
       footer={<Link href="/dashboard">{copy.backToDashboard}</Link>}
     >
       {pageState === 'loading' ? (
-        <InfoCard
-          eyebrow={locale === 'ar' ? 'المستندات' : 'Docs'}
+        <LoadingState
           title={copy.loadingApiReference}
-        >
-          <p style={{ margin: 0 }}>{copy.loadingMessage}</p>
-        </InfoCard>
+          description={copy.loadingMessage}
+        />
       ) : null}
 
       {pageState === 'unauthenticated' ? (

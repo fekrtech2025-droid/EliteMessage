@@ -11,6 +11,7 @@ import {
   DefinitionGrid,
   Field,
   InfoCard,
+  LoadingState,
   NoticeBanner,
   SelectInput,
 } from '@elite-message/ui';
@@ -272,12 +273,7 @@ export function CustomerSubscriptionPage() {
       footer={<Link href="/dashboard">{copy.backToDashboard}</Link>}
     >
       {pageState === 'loading' ? (
-        <InfoCard
-          eyebrow={locale === 'ar' ? 'الاشتراك' : 'Subscription'}
-          title={copy.loading}
-        >
-          <p style={{ margin: 0 }}>{copy.loadingMessage}</p>
-        </InfoCard>
+        <LoadingState title={copy.loading} description={copy.loadingMessage} />
       ) : null}
 
       {pageState === 'unauthenticated' ? (

@@ -11,6 +11,7 @@ import {
   AppShell,
   DefinitionGrid,
   InfoCard,
+  LoadingState,
   NoticeBanner,
   StatusBadge,
 } from '@elite-message/ui';
@@ -106,11 +107,10 @@ export function AdminWorkersPage() {
       footer={<a href="/">Back to dashboard</a>}
     >
       {pageState === 'loading' ? (
-        <InfoCard eyebrow="Workers" title="Loading worker explorer">
-          <p style={{ margin: 0 }}>
-            Refreshing the admin session and loading worker heartbeat data.
-          </p>
-        </InfoCard>
+        <LoadingState
+          title="Loading worker explorer"
+          description="Refreshing the admin session and loading worker heartbeat data."
+        />
       ) : null}
 
       {pageState === 'unauthenticated' ? (

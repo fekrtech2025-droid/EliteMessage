@@ -20,6 +20,7 @@ import {
   AppShell,
   Field,
   InfoCard,
+  LoadingState,
   NoticeBanner,
   SelectInput,
   StatusBadge,
@@ -514,9 +515,10 @@ export function CustomerSettingsPage() {
       footer={<Link href="/dashboard">{copy.backToDashboard}</Link>}
     >
       {pageState === 'loading' ? (
-        <InfoCard eyebrow={copy.settings} title={copy.loadingAccount}>
-          <p style={{ margin: 0 }}>{copy.loadingMessage}</p>
-        </InfoCard>
+        <LoadingState
+          title={copy.loadingAccount}
+          description={copy.loadingMessage}
+        />
       ) : null}
 
       {pageState === 'unauthenticated' ? (

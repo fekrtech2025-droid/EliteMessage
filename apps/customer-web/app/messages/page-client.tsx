@@ -14,6 +14,7 @@ import {
   AppShell,
   Field,
   InfoCard,
+  LoadingState,
   MetricCard,
   MetricGrid,
   NoticeBanner,
@@ -32,6 +33,7 @@ import {
   buildCustomerConversations,
   buildCustomerContacts,
   filterCustomerConversations,
+  getCustomerConversationEventDeliveryView,
   getCustomerContactInitial,
   type CustomerConversation,
   type CustomerConversationEvent,
@@ -655,9 +657,7 @@ export function CustomerMessagesPage() {
       footer={<Link href="/dashboard">{copy.backToDashboard}</Link>}
     >
       {pageState === 'loading' ? (
-        <InfoCard eyebrow={copy.conversations} title={copy.loading}>
-          <p style={{ margin: 0 }}>{copy.loadingMessage}</p>
-        </InfoCard>
+        <LoadingState title={copy.loading} description={copy.loadingMessage} />
       ) : null}
 
       {pageState === 'unauthenticated' ? (
@@ -932,44 +932,55 @@ export function CustomerMessagesPage() {
                   </header>
 
                   <div className="elite-customer-chat-thread">
-                    {activeConversation.events.map((event) => (
-                      <article
-                        key={event.id}
-                        className="elite-customer-chat-bubble"
-                        data-direction={event.direction}
-                        data-status={event.status ?? 'received'}
-                      >
-                        <p>{event.preview}</p>
-                        {event.errorMessage ? (
-                          <strong>
-                            {formatCustomerSafeRuntimeText(
-                              event.errorMessage,
-                              locale,
-                            )}
-                          </strong>
-                        ) : null}
-                        <div className="elite-customer-chat-bubble-meta">
-                          <StatusBadge
-                            tone={
-                              event.status
-                                ? messageTone(event.status)
-                                : directionTone(event.direction)
-                            }
-                          >
-                            {event.status
-                              ? translateCustomerEnum(locale, event.status)
-                              : event.direction === 'inbound'
-                                ? copy.inbound
-                                : copy.outbound}
-                          </StatusBadge>
-                          <span>{event.kind}</span>
-                          {event.ack ? <span>{event.ack}</span> : null}
-                          <time>
-                            {formatCustomerDate(locale, event.timestamp)}
-                          </time>
-                        </div>
-                      </article>
-                    ))}
+                    {activeConversation.events.map((event) => {
+                      const deliveryView =
+                        getCustomerConversationEventDeliveryView(event, locale);
+
+                      return (
+                        <article
+                          key={event.id}
+                          className="elite-customer-chat-bubble"
+                          data-direction={event.direction}
+                          data-status={event.status ?? 'received'}
+                        >
+                          <p>{event.preview}</p>
+                          {event.errorMessage ? (
+                            <strong>
+                              {formatCustomerSafeRuntimeText(
+                                event.errorMessage,
+                                locale,
+                              )}
+                            </strong>
+                          ) : null}
+                          <div className="elite-customer-chat-bubble-meta">
+                            <StatusBadge
+                              tone={
+                                deliveryView?.tone ??
+                                (event.status
+                                  ? messageTone(event.status)
+                                  : directionTone(event.direction))
+                              }
+                            >
+                              {deliveryView?.label ??
+                                (event.status
+                                  ? translateCustomerEnum(locale, event.status)
+                                  : event.direction === 'inbound'
+                                    ? copy.inbound
+                                    : copy.outbound)}
+                            </StatusBadge>
+                            <span>{event.kind}</span>
+                            {deliveryView?.showAck && event.ack ? (
+                              <span>
+                                {translateCustomerEnum(locale, event.ack)}
+                              </span>
+                            ) : null}
+                            <time>
+                              {formatCustomerDate(locale, event.timestamp)}
+                            </time>
+                          </div>
+                        </article>
+                      );
+                    })}
                   </div>
                 </>
               ) : (

@@ -20,6 +20,7 @@ import {
   AppShell,
   Field,
   InfoCard,
+  LoadingState,
   NoticeBanner,
   SectionGrid,
   SelectInput,
@@ -387,11 +388,10 @@ export function AdminSupportPage() {
       footer={<a href="/">Back to dashboard</a>}
     >
       {pageState === 'loading' ? (
-        <InfoCard eyebrow="Support" title="Loading support cases">
-          <p style={{ margin: 0 }}>
-            Refreshing the admin session and loading support case records.
-          </p>
-        </InfoCard>
+        <LoadingState
+          title="Loading support cases"
+          description="Refreshing the admin session and loading support case records."
+        />
       ) : null}
 
       {pageState === 'unauthenticated' ? (

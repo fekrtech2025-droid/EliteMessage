@@ -19,7 +19,14 @@ async function performAdminRequest(request: () => Promise<Response>) {
 
 export async function refreshAdminAccessToken(
   onToken?: (token: string | null) => void,
+  options: { forceRefresh?: boolean } = {},
 ) {
+  const storedToken = readStoredToken();
+  if (storedToken && !options.forceRefresh) {
+    onToken?.(storedToken);
+    return storedToken;
+  }
+
   const response = await performAdminRequest(() =>
     fetch(`${apiBaseUrl}/api/v1/auth/refresh`, {
       method: 'POST',
@@ -28,7 +35,6 @@ export async function refreshAdminAccessToken(
   );
 
   if (!response) {
-    const storedToken = readStoredToken();
     onToken?.(storedToken);
     return storedToken;
   }
@@ -52,7 +58,7 @@ export async function requestWithAdminRefresh(
 ) {
   let token = currentToken ?? readStoredToken();
   if (!token) {
-    token = await refreshAdminAccessToken(onToken);
+    token = await refreshAdminAccessToken(onToken, { forceRefresh: true });
   }
 
   if (!token) {

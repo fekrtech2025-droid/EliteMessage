@@ -13,6 +13,7 @@ import {
   AppShell,
   Field,
   InfoCard,
+  LoadingState,
   NoticeBanner,
   SelectInput,
   StatusBadge,
@@ -179,11 +180,10 @@ export function AdminAuditPage() {
       footer={<a href="/">Back to dashboard</a>}
     >
       {pageState === 'loading' ? (
-        <InfoCard eyebrow="Audit" title="Loading audit explorer">
-          <p style={{ margin: 0 }}>
-            Refreshing the admin session and loading recent audit records.
-          </p>
-        </InfoCard>
+        <LoadingState
+          title="Loading audit explorer"
+          description="Refreshing the admin session and loading recent audit records."
+        />
       ) : null}
 
       {pageState === 'unauthenticated' ? (

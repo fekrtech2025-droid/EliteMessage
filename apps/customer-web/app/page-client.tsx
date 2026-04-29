@@ -256,10 +256,15 @@ export function CustomerLandingPage() {
   if (checkingSession) {
     return (
       <main className={styles.page}>
-        <section className={styles.section}>
-          <NoticeBanner title={copy.loading.title} tone="info">
-            <p style={{ margin: 0 }}>{copy.loading.body}</p>
-          </NoticeBanner>
+        <section className={styles.loadingStage} aria-live="polite">
+          <span className={styles.srOnly}>
+            {copy.loading.title}. {copy.loading.body}
+          </span>
+          <div className={styles.loadingOrb} aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
         </section>
       </main>
     );

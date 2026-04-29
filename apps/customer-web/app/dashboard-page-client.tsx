@@ -27,6 +27,7 @@ import {
   DefinitionGrid,
   Field,
   InfoCard,
+  LoadingState,
   MetricCard,
   MetricGrid,
   NoticeBanner,
@@ -982,20 +983,16 @@ export function CustomerDashboardPage() {
       }
     >
       {pageState === 'loading' ? (
-        <InfoCard
-          eyebrow={text('Session', dashboardArabicCopy.sessionEyebrow)}
+        <LoadingState
           title={text(
             'Loading customer dashboard',
             dashboardArabicCopy.loadingTitle,
           )}
-        >
-          <p style={{ margin: 0 }}>
-            {text(
-              'Refreshing the customer session and loading the current workspace state.',
-              dashboardArabicCopy.loadingMessage,
-            )}
-          </p>
-        </InfoCard>
+          description={text(
+            'Refreshing the customer session and loading the current workspace state.',
+            dashboardArabicCopy.loadingMessage,
+          )}
+        />
       ) : null}
 
       {pageState === 'unauthenticated' ? (

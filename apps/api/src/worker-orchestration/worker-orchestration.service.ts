@@ -253,31 +253,62 @@ export class WorkerOrchestrationService {
           },
         });
 
-        if (!candidateOperation) {
+        const candidateQueuedMessage = candidateOperation
+          ? null
+          : await tx.outboundMessage.findFirst({
+              where: {
+                status: 'queue',
+                processingWorkerId: null,
+                scheduledFor: {
+                  lte: new Date(),
+                },
+                instance: {
+                  assignedWorkerId: null,
+                  status: 'authenticated',
+                },
+              },
+              orderBy: [
+                { priority: 'asc' },
+                { scheduledFor: 'asc' },
+                { createdAt: 'asc' },
+              ],
+              select: {
+                instanceId: true,
+              },
+            });
+
+        const candidateInstanceId =
+          candidateOperation?.instanceId ??
+          candidateQueuedMessage?.instanceId ??
+          null;
+
+        if (!candidateInstanceId) {
           return null;
         }
 
         await tx.instanceRuntimeState.upsert({
           where: {
-            instanceId: candidateOperation.instanceId,
+            instanceId: candidateInstanceId,
           },
           update: {},
           create: {
-            instanceId: candidateOperation.instanceId,
+            instanceId: candidateInstanceId,
           },
         });
 
         const now = new Date();
         const claimed = await tx.instance.updateMany({
           where: {
-            id: candidateOperation.instanceId,
+            id: candidateInstanceId,
             assignedWorkerId: null,
           },
           data: {
             assignedWorkerId: workerId,
             lastHeartbeatAt: now,
             lastLifecycleEventAt: now,
-            substatus: 'worker_claimed',
+            substatus: candidateOperation
+              ? 'worker_claimed'
+              : 'worker_claimed_for_messages',
           },
         });
 
@@ -287,18 +318,23 @@ export class WorkerOrchestrationService {
 
         await tx.instanceLifecycleEvent.create({
           data: {
-            instanceId: candidateOperation.instanceId,
+            instanceId: candidateInstanceId,
             eventType: 'worker_assigned',
             actorType: 'worker',
             actorId: workerId,
-            message: `Worker ${workerId} claimed the instance.`,
+            message: candidateOperation
+              ? `Worker ${workerId} claimed the instance.`
+              : `Worker ${workerId} claimed the instance to send queued messages.`,
             metadata: {
               workerId,
+              reason: candidateOperation
+                ? 'pending_operation'
+                : 'queued_outbound_message',
             },
           },
         });
 
-        return candidateOperation.instanceId;
+        return candidateInstanceId;
       });
 
       if (!claimedInstanceId) {

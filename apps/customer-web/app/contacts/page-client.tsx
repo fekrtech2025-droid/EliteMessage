@@ -12,6 +12,7 @@ import {
   AppShell,
   Field,
   InfoCard,
+  LoadingState,
   MetricCard,
   MetricGrid,
   NoticeBanner,
@@ -490,9 +491,7 @@ export function CustomerContactsPage() {
       footer={<Link href="/dashboard">{copy.backToDashboard}</Link>}
     >
       {pageState === 'loading' ? (
-        <InfoCard eyebrow={copy.contacts} title={copy.loading}>
-          <p style={{ margin: 0 }}>{copy.loadingMessage}</p>
-        </InfoCard>
+        <LoadingState title={copy.loading} description={copy.loadingMessage} />
       ) : null}
 
       {pageState === 'unauthenticated' ? (
