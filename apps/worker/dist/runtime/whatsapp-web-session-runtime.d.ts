@@ -31,6 +31,7 @@ export declare class WhatsAppWebSessionRuntime implements SessionRuntime {
     private ensureClient;
     private cleanupStaleBrowserProcesses;
     private bindClientEvents;
+    private getCurrentEntry;
     private handleQr;
     private handleLoading;
     private handleStateChange;

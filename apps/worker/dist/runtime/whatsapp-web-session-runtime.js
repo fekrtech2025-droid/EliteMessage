@@ -825,38 +825,45 @@ class WhatsAppWebSessionRuntime {
     }
     bindClientEvents(instanceId, client) {
         client.on('qr', (qr) => {
-            void this.handleQr(instanceId, qr);
+            void this.handleQr(instanceId, client, qr);
         });
         client.on('loading_screen', (percent, message) => {
-            void this.handleLoading(instanceId, percent, message);
+            void this.handleLoading(instanceId, client, percent, message);
         });
         client.on('change_state', (state) => {
-            void this.handleStateChange(instanceId, state);
+            void this.handleStateChange(instanceId, client, state);
         });
         client.on('authenticated', () => {
-            void this.handleAuthenticated(instanceId);
+            void this.handleAuthenticated(instanceId, client);
         });
         client.on('ready', () => {
-            void this.handleReady(instanceId);
+            void this.handleReady(instanceId, client);
         });
         client.on('disconnected', (reason) => {
-            void this.handleDisconnected(instanceId, reason);
+            void this.handleDisconnected(instanceId, client, reason);
         });
         client.on('message', (message) => {
             if (message.fromMe) {
                 return;
             }
-            void this.handleInboundMessage(instanceId, message);
+            void this.handleInboundMessage(instanceId, client, message);
         });
         client.on('message_ack', (message, ack) => {
             if (!message.fromMe) {
                 return;
             }
-            void this.handleOutboundAck(instanceId, message, ack);
+            void this.handleOutboundAck(instanceId, client, message, ack);
         });
     }
-    async handleQr(instanceId, qr) {
+    getCurrentEntry(instanceId, client) {
         const entry = this.managedInstances.get(instanceId);
+        if (!entry || entry.client !== client) {
+            return null;
+        }
+        return entry;
+    }
+    async handleQr(instanceId, client, qr) {
+        const entry = this.getCurrentEntry(instanceId, client);
         if (!entry) {
             return;
         }
@@ -878,8 +885,8 @@ class WhatsAppWebSessionRuntime {
         });
         await this.captureScreenshot(instanceId);
     }
-    async handleLoading(instanceId, percent, message) {
-        const entry = this.managedInstances.get(instanceId);
+    async handleLoading(instanceId, client, percent, message) {
+        const entry = this.getCurrentEntry(instanceId, client);
         if (!entry) {
             return;
         }
@@ -896,8 +903,8 @@ class WhatsAppWebSessionRuntime {
             }),
         });
     }
-    async handleStateChange(instanceId, state) {
-        const entry = this.managedInstances.get(instanceId);
+    async handleStateChange(instanceId, client, state) {
+        const entry = this.getCurrentEntry(instanceId, client);
         if (!entry) {
             return;
         }
@@ -929,8 +936,8 @@ class WhatsAppWebSessionRuntime {
         });
         await this.captureScreenshot(instanceId);
     }
-    async handleAuthenticated(instanceId) {
-        const entry = this.managedInstances.get(instanceId);
+    async handleAuthenticated(instanceId, client) {
+        const entry = this.getCurrentEntry(instanceId, client);
         if (!entry) {
             return;
         }
@@ -947,8 +954,8 @@ class WhatsAppWebSessionRuntime {
             }),
         });
     }
-    async handleReady(instanceId) {
-        const entry = this.managedInstances.get(instanceId);
+    async handleReady(instanceId, client) {
+        const entry = this.getCurrentEntry(instanceId, client);
         if (!entry) {
             return;
         }
@@ -960,7 +967,7 @@ class WhatsAppWebSessionRuntime {
         this.recordClientEvent(entry, 'ready');
         entry.startupSignal?.resolve('ready');
         entry.startupSignal = null;
-        const sessionLabel = this.resolveSessionLabel(entry.client, entry.snapshot.publicId);
+        const sessionLabel = this.resolveSessionLabel(client, entry.snapshot.publicId);
         await this.transitionStatus(instanceId, 'authenticated', 'connected', 'WhatsApp Web session is connected.');
         await this.options.internalApi.updateInstanceRuntime(instanceId, {
             workerId: this.options.workerId,
@@ -974,8 +981,8 @@ class WhatsAppWebSessionRuntime {
         });
         await this.captureScreenshot(instanceId);
     }
-    async handleDisconnected(instanceId, reason) {
-        const entry = this.managedInstances.get(instanceId);
+    async handleDisconnected(instanceId, client, reason) {
+        const entry = this.getCurrentEntry(instanceId, client);
         if (!entry) {
             return;
         }
@@ -1023,8 +1030,8 @@ class WhatsAppWebSessionRuntime {
             }),
         });
     }
-    async handleInboundMessage(instanceId, message) {
-        const entry = this.managedInstances.get(instanceId);
+    async handleInboundMessage(instanceId, client, message) {
+        const entry = this.getCurrentEntry(instanceId, client);
         if (!entry) {
             return;
         }
@@ -1073,8 +1080,8 @@ class WhatsAppWebSessionRuntime {
             }),
         });
     }
-    async handleOutboundAck(instanceId, message, ack) {
-        const entry = this.managedInstances.get(instanceId);
+    async handleOutboundAck(instanceId, client, message, ack) {
+        const entry = this.getCurrentEntry(instanceId, client);
         if (!entry) {
             return;
         }
@@ -1418,9 +1425,9 @@ class WhatsAppWebSessionRuntime {
     }
     resolveSessionLabel(client, publicId) {
         const info = client;
-        return (info.info?.wid?._serialized ??
-            info.info?.wid?.user ??
-            info.info?.pushname ??
+        return (info?.info?.wid?._serialized ??
+            info?.info?.wid?.user ??
+            info?.info?.pushname ??
             `session-${publicId}`);
     }
     readStringField(message, fieldPaths) {
